@@ -10,7 +10,8 @@
 #include <vector>
 #include <string>
 
-#include "WiFiClient.h"
+#include <WiFiClient.h>
+#include <WiFiUdp.h>
 
 //wMBus lib
 #include "rf_mbus.hpp"
@@ -26,10 +27,16 @@ enum Format : uint8_t {
   FORMAT_RTLWMBUS = 1,
 };
 
+enum Transport : uint8_t {
+  TRANSPORT_TCP = 0,
+  TRANSPORT_UDP = 1,
+};
+
 struct Client {
   std::string name;
   network::IPAddress ip;
   uint16_t port;
+  Transport transport;
   Format format;
 };
 
@@ -57,8 +64,12 @@ class WMBusGwComponent : public esphome::Component {
     void add_client(const std::string name,
                     const network::IPAddress ip,
                     const uint16_t port,
+                    const Transport transport,
                     const Format format) {
-      clients_.push_back({name, ip, port, format});
+      if (transport == TRANSPORT_TCP) {
+        this->only_udp_ = false;
+      }
+      clients_.push_back({name, ip, port, transport, format});
     }
 
     void add_cc1101(InternalGPIOPin *mosi, InternalGPIOPin *miso,
@@ -74,6 +85,7 @@ class WMBusGwComponent : public esphome::Component {
 
   private:
     const LogString *format_to_string(Format format);
+    const LogString *transport_to_string(Transport transport);
 
   protected:
     HighFrequencyLoopRequester high_freq_;
@@ -81,10 +93,12 @@ class WMBusGwComponent : public esphome::Component {
     std::vector<Client> clients_;
     Cc1101 spi_conf_;
     WiFiClient tcp_client_;
+    WiFiUDP udp_client_;
     uint8_t mb_packet_[291];
     time::RealTimeClock *time_;
     char telegram_time_[24];
     uint32_t last_connected_{0};
+    bool only_udp_{true};
 };
 
 }  // namespace wmbusgw

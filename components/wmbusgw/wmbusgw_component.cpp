@@ -25,28 +25,76 @@ void WMBusGwComponent::loop() {
   int rssi_ = 0;
   if (rf_mbus_task(this->mb_packet_, rssi_, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
     uint8_t len_without_crc = crcRemove(this->mb_packet_, packetSize(this->mb_packet_[0]));
+    if (this->only_udp_) {
+      this->last_connected_ = millis();
+    }
     ESP_LOGI(TAG, "T: %s", format_hex_pretty(this->mb_packet_, len_without_crc).c_str());
 
     for (auto & client : this->clients_) {
-      if (client.format == Format::FORMAT_HEX) {
-        if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
-          this->tcp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
-          this->tcp_client_.stop();
-          this->last_connected_ = millis();
-        }
-      }
-      else if ((client.format == Format::FORMAT_RTLWMBUS)) {
-        if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
-          time_t current_time = this->time_->now().timestamp;
-          strftime(telegram_time_, sizeof(telegram_time_), "%Y-%m-%d %H:%M:%S.000", localtime(&current_time));
-          this->tcp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time_, rssi_);
-          for (int i = 0; i < len_without_crc; i++){
-            this->tcp_client_.printf("%02X", this->mb_packet_[i]);
+      switch (client.format) {
+        case FORMAT_HEX:
+          {
+            switch (client.transport) {
+              case TRANSPORT_TCP:
+                {
+                  if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                    this->tcp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
+                    this->tcp_client_.stop();
+                    this->last_connected_ = millis();
+                  }
+                }
+                break;
+              case TRANSPORT_UDP:
+                {
+                  this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                  this->udp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
+                  this->udp_client_.endPacket();
+                }
+                break;
+              default:
+                ESP_LOGE(TAG, "Unknown transport!");
+                break;
+            }
           }
-          this->tcp_client_.print("\n");
-          this->tcp_client_.stop();
-          this->last_connected_ = millis();
-        }
+          break;
+        case FORMAT_RTLWMBUS:
+          {
+            time_t current_time = this->time_->now().timestamp;
+            strftime(telegram_time_, sizeof(telegram_time_), "%Y-%m-%d %H:%M:%S.000", localtime(&current_time));
+            switch (client.transport) {
+              case TRANSPORT_TCP:
+                {
+                  if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                    this->tcp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time_, rssi_);
+                    for (int i = 0; i < len_without_crc; i++){
+                      this->tcp_client_.printf("%02X", this->mb_packet_[i]);
+                    }
+                    this->tcp_client_.print("\n");
+                    this->tcp_client_.stop();
+                    this->last_connected_ = millis();
+                  }
+                }
+                break;
+              case TRANSPORT_UDP:
+                {
+                  this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                  this->udp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time_, rssi_);
+                  for (int i = 0; i < len_without_crc; i++){
+                    this->udp_client_.printf("%02X", this->mb_packet_[i]);
+                  }
+                  this->udp_client_.print("\n");
+                  this->udp_client_.endPacket();
+                }
+                break;
+              default:
+                ESP_LOGE(TAG, "Unknown transport!");
+                break;
+            }
+          }
+          break;
+        default:
+          ESP_LOGE(TAG, "Unknown format!");
+          break;
       }
     }
     memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
@@ -64,13 +112,25 @@ const LogString *WMBusGwComponent::format_to_string(Format format) {
   }
 }
 
+const LogString *WMBusGwComponent::transport_to_string(Transport transport) {
+  switch (transport) {
+    case TRANSPORT_TCP:
+      return LOG_STR("TCP");
+    case TRANSPORT_UDP:
+      return LOG_STR("UDP");
+    default:
+      return LOG_STR("unknown");
+  }
+}
+
 void WMBusGwComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "Clients [%d]:", this->clients_.size());
   for (auto & client : this->clients_) {
-    ESP_LOGCONFIG(TAG, "  %s: %s:%d [%s]",
+    ESP_LOGCONFIG(TAG, "  %s: %s:%d %s [%s]",
                   client.name.c_str(),
                   client.ip.str().c_str(),
                   client.port,
+                  LOG_STR_ARG(transport_to_string(client.transport)),
                   LOG_STR_ARG(format_to_string(client.format)));
   }
   ESP_LOGCONFIG(TAG, "CC1101 SPI bus:");
