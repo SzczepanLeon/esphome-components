@@ -10,7 +10,7 @@ with external components and add this to your `.yaml` definition:
 
 ```yaml
 external_components:
-  - source: github://SzczepanLeon/esphome-components
+  - source: github://SzczepanLeon/esphome-components@main
 ```
 
 ## 2. Components
@@ -27,7 +27,7 @@ time:
     id: time_sntp
 
 external_components:
-  - source: github://SzczepanLeon/esphome-components
+  - source: github://SzczepanLeon/esphome-components@main
     components: [ wmbusgw ]
 
 wmbusgw:
