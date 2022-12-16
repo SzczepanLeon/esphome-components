@@ -53,7 +53,7 @@ device=rtlwmbus:CMD(/usr/bin/nc -lku 9011)
 
 TCP case:
 ```yaml
-device=rtlwmbus:CMD(/usr/bin/nc -lku 9022)
+device=rtlwmbus:CMD(/usr/bin/nc -lk 9022)
 ```
 
 Add meters:
