@@ -81,6 +81,7 @@ Configuration variables:
   - **format** (*Optional*): Telegram format to send. HEX or RTLWMBUS. Defaults to ``HEX``.
   - **transport** (*Optional*): TCP or UDP. Defaults to ``TCP``.
 
+#### 2.1.2. wmbusmeters HA addon 
 You can also use this component with wmbusmeters HA addon:
 https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbusgw.md
 
