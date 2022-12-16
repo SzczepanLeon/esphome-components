@@ -88,8 +88,8 @@ Now you can add meter in HA:
 mqtt:
   sensor:
   - name: "Main water meter"
-    unique_id: main_waterMeter_total_m3
-    object_id: main_waterMeter_total_m3
+    unique_id: main_water_meter_total_m3
+    object_id: main_water_meter_total_m3
     state_topic: "wmbusmeters/water_from_izar"
     value_template: "{{ value_json['total_m3']|default(0.000) }}"
     unit_of_measurement: m³
