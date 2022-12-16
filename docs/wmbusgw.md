@@ -67,7 +67,7 @@ meters:
   - |-  
     name=water_from_apator  
     driver=apator162  
-    id=04175054  
+    id=9876543  
     key=00000000000000000000000000000000
 ```
 
