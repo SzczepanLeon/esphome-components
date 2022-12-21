@@ -18,9 +18,11 @@ void WMBusGwComponent::setup() {
 }
 
 void WMBusGwComponent::loop() {
-  if ((millis() - this->last_connected_) > this->reboot_timeout_) {
-    ESP_LOGE(TAG, "Can't send to clients... Restarting...");
-    App.reboot();
+  if (this->reboot_timeout_ != 0) {
+    if ((millis() - this->last_connected_) > this->reboot_timeout_) {
+      ESP_LOGE(TAG, "Can't send to clients... Restarting...");
+      App.reboot();
+    }
   }
   int rssi_ = 0;
   if (rf_mbus_task(this->mb_packet_, rssi_, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
