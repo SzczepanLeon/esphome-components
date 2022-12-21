@@ -73,7 +73,7 @@ Configuration variables:
 - **cs_pin** (*Required*): CC1101 CS pin connection.
 - **gdo0_pin** (*Required*): CC1101 GDO0 pin connection.
 - **gdo2_pin** (*Required*): CC1101 GDO2 pin connection.
-- **reboot_timeout** (*Optional*): The amount of time to wait before rebooting when no data from CC1101 is received or no packets are transmited over TCP to clients. Defaults to ``3min``.
+- **reboot_timeout** (*Optional*): The amount of time to wait before rebooting when no data from CC1101 is received or no packets are transmited over TCP to clients. Can be disabled by setting this to ``0s``. Defaults to ``3min``.
 - **clients** (*Optional*):
   - **name** (*Required*): The name for this client.
   - **ip_address** (*Required*): IP address.
