@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include <WiFiClient.h>
 #include <WiFiUdp.h>

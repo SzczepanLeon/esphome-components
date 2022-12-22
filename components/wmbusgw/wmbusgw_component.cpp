@@ -30,7 +30,10 @@ void WMBusGwComponent::loop() {
     if (this->only_udp_) {
       this->last_connected_ = millis();
     }
-    ESP_LOGI(TAG, "T: %s", format_hex_pretty(this->mb_packet_, len_without_crc).c_str());
+
+    std::string telegram = format_hex_pretty(this->mb_packet_, len_without_crc);
+    telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
+    ESP_LOGI(TAG, "Telegram: %s", telegram.c_str());
 
     for (auto & client : this->clients_) {
       switch (client.format) {
