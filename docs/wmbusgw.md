@@ -35,9 +35,6 @@ wmbusgw:
 
 
 ## 2. `wmbusmeters` addon configuration
-
-> **_NOTE:_**  [Pull request](https://github.com/weetmuts/wmbusmeters/pull/752) for wmbusmeters is under review. Until its acceptance/merge you have to install HA addon from [unofficial repo](https://github.com/SzczepanLeon/wmbusmeters): 
-
 After instalation please go to addon configuration and enable port forwarding by clicking `Show disabled ports`:
 ![](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/disabled_ports.png)
 On right side please write port number from `wmbusgw` configuration (in this example *7011*).
