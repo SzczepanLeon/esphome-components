@@ -85,6 +85,57 @@ Configuration variables:
 You can also use this component with wmbusmeters HA addon:
 https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbusgw.md
 
+### 2.2. `wmbus`
+
+Component to receive wMBus frame (via CC1101), create HA sensor and send decoded value.
+
+#### 2.2.1. Example
+
+```yaml
+external_components:
+  - source: github://SzczepanLeon/esphome-components@main
+    components: [ wmbus ]
+
+wmbus:
+  mosi_pin: GPIO13
+  miso_pin: GPIO5
+  clk_pin:  GPIO2
+  cs_pin:   GPIO14
+  gdo0_pin: GPIO15
+  gdo2_pin: GPIO16
+
+sensor:
+  - platform: wmbus
+    name: "My water from Apator"
+    meter_id: 0x24202020
+    type: apator162
+  - platform: wmbus
+    name: "My Water from Izar"
+    meter_id: 306029916
+    type: izar
+    accuracy_decimals: 5
+
+```
+
+Configuration variables:
+------------------------
+
+In wmbus platform:
+
+- **mosi_pin** (*Optional*): CC1101 MOSI pin connection. Defaults to ``GPIO13``.
+- **miso_pin** (*Optional*): CC1101 MISO pin connection. Defaults to ``GPIO12``.
+- **clk_pin** (*Optional*): CC1101 CLK pin connection. Defaults to ``GPIO14``.
+- **cs_pin** (*Optional*): CC1101 CS pin connection. Defaults to ``GPIO2``.
+- **gdo0_pin** (*Optional*): CC1101 GDO0 pin connection. Defaults to ``GPIO5``.
+- **gdo2_pin** (*Optional*): CC1101 GDO2 pin connection. Defaults to ``GPIO4``.
+
+Sensor
+******
+
+- **meter_id** (**Required**, int): Meter ID (usually from sticker). Can be specified as decimal or hex.
+- **type** (**Required**, string):  Meter type. Currently only `izar` and `apator162` are supported.
+- All other options from :ref:`Sensor <config-sensor>`.
+
 ## 3. Author & License
 
 Szczepan, MIT, 2022
