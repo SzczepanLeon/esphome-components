@@ -134,7 +134,7 @@ Sensor
 
 - **meter_id** (**Required**, int): Meter ID (usually from sticker). Can be specified as decimal or hex.
 - **type** (**Required**, string):  Meter type. Currently only `izar` and `apator162` are supported.
-- All other options from :ref:`Sensor <config-sensor>`.
+- All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
 ## 3. Author & License
 
