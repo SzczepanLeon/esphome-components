@@ -3,6 +3,9 @@
 This repository contains a collection of my custom components
 for [ESPHome](https://esphome.io/).
 
+[coffe](https://www.buymeacoffee.com/szczepan)  or  [coffe](buycoffee.to/szczepanleon)
+
+
 ## 1. Usage
 
 Use latest [ESPHome](https://esphome.io/)
