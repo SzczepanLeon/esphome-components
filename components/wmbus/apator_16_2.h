@@ -55,6 +55,7 @@ struct Apator162: Driver
                   ((uint32_t)telegram[i+1] << 8)  | ((uint32_t)telegram[i+0]);
           water_usage = usage / 1000.0;
           ret_val = true;
+          break;
         }
         i += size;
       }

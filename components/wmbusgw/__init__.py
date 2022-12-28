@@ -24,6 +24,8 @@ CONF_TRANSPORT = "transport"
 
 DEPENDENCIES = ["time"]
 
+CODEOWNERS = ["@SzczepanLeon"]
+
 wmbusgw_ns = cg.esphome_ns.namespace('wmbusgw')
 WMBusGwComponent = wmbusgw_ns.class_('WMBusGwComponent', cg.Component)
 Client = wmbusgw_ns.struct('Client')

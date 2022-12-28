@@ -20,6 +20,8 @@ from .. import (
     wmbus_ns,
 )
 
+CODEOWNERS = ["@SzczepanLeon"]
+
 WMBusSensor= wmbus_ns.class_('WMBusSensor', sensor.Sensor, cg.Component)
 
 CONFIG_SCHEMA = sensor.sensor_schema(

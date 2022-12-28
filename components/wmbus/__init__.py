@@ -30,6 +30,14 @@ METER_LISTENER_SCHEMA = cv.Schema(
     }
 )
 
+TEXT_LISTENER_SCHEMA = cv.Schema(
+    {
+        cv.GenerateID(CONF_WMBUS_ID): cv.use_id(WMBusComponent),
+        cv.Optional(CONF_METER_ID, default=0xAFFFFFF5): cv.hex_int,
+        cv.Optional(CONF_TYPE, default="text"): cv.string_strict,
+    }
+)
+
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(WMBusComponent),
     cv.Optional(CONF_MOSI_PIN, default=13): pins.internal_gpio_output_pin_schema,

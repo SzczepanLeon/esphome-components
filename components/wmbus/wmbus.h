@@ -5,7 +5,6 @@
 #include "esphome/core/component.h"
 
 #include <map>
-#include <vector>
 #include <string>
 
 //wMBus lib
@@ -24,6 +23,7 @@ class WMBusListener {
     uint32_t id;
     std::string type;
     virtual void publish_value(const float value) {};
+    virtual void publish_value(const std::string &value) {};
 };
 
 struct Cc1101 {
@@ -63,7 +63,7 @@ class WMBusComponent : public Component {
     HighFrequencyLoopRequester high_freq_;
     Cc1101 spi_conf_;
     uint8_t mb_packet_[291];
-    std::vector<WMBusListener *> wmbus_listeners_{};
+    std::map<uint32_t, WMBusListener *> wmbus_listeners_{};
     std::map<std::string, std::shared_ptr<Driver>> drivers_;
 };
 
