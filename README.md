@@ -138,4 +138,4 @@ Sensor
 
 ## 3. Author & License
 
-Szczepan, MIT, 2022
+Szczepan, GPL, 2022-2023
