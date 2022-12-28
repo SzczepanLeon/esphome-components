@@ -17,6 +17,7 @@ void WMBusComponent::setup() {
                 this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin());
 
   drivers_["izar"] = std::make_shared<Izar>();
+  drivers_["unismart"] = std::make_shared<Unismart>();
   drivers_["apator08"] = std::make_shared<Apator08>();
   drivers_["apator162"] = std::make_shared<Apator162>();
 }
