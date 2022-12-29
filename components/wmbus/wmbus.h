@@ -64,7 +64,7 @@ class WMBusComponent : public Component {
     Cc1101 spi_conf_;
     uint8_t mb_packet_[291];
     std::map<uint32_t, WMBusListener *> wmbus_listeners_{};
-    std::map<std::string, std::shared_ptr<Driver>> drivers_;
+    std::map<std::string, std::shared_ptr<Driver>> drivers_{};
 };
 
 }  // namespace wmbus

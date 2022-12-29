@@ -1,6 +1,8 @@
 #include "wmbus.h"
 #include "esphome/core/log.h"
 
+#include "version.h"
+
 namespace esphome {
 namespace wmbus {
 
@@ -17,14 +19,15 @@ void WMBusComponent::setup() {
                 this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin());
 
   drivers_["izar"] = std::make_shared<Izar>();
+  // drivers_["evo868"] = std::make_shared<Evo868>();
   drivers_["unismart"] = std::make_shared<Unismart>();
   drivers_["apator08"] = std::make_shared<Apator08>();
   drivers_["apator162"] = std::make_shared<Apator162>();
 }
 
 void WMBusComponent::loop() {
-  int rssi_ = 0;
-  if (rf_mbus_task(this->mb_packet_, rssi_, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
+  int rssi{0};
+  if (rf_mbus_task(this->mb_packet_, rssi, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
 
     uint8_t len_without_crc = crcRemove(this->mb_packet_, packetSize(this->mb_packet_[0]));
     std::vector<unsigned char> frame(this->mb_packet_, this->mb_packet_ + len_without_crc);
@@ -34,12 +37,10 @@ void WMBusComponent::loop() {
     uint32_t meter_id = ((uint32_t)frame[7] << 24) | ((uint32_t)frame[6] << 16) |
                         ((uint32_t)frame[5] << 8)  | ((uint32_t)frame[4]);
 
-    ESP_LOGI(TAG, "Telegram from ID [0x%08X]: %s", meter_id, telegram.c_str());
-
     if (this->wmbus_listeners_.count(meter_id) > 0) {
       auto *sensor = this->wmbus_listeners_[meter_id];
       auto selected_driver = this->drivers_[sensor->type];
-      ESP_LOGD(TAG, "Using driver '%s' for ID [0x%08X]", selected_driver->get_name().c_str(), meter_id);
+      ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] T: %s", selected_driver->get_name().c_str(), meter_id, telegram.c_str());
       float value{0};
       if (selected_driver->get_value(frame, value)) {
         sensor->publish_value(value);
@@ -47,12 +48,13 @@ void WMBusComponent::loop() {
       else {
         std::string decoded_telegram = format_hex_pretty(frame);
         decoded_telegram.erase(std::remove(decoded_telegram.begin(), decoded_telegram.end(), '.'), decoded_telegram.end());
-        ESP_LOGE(TAG, "Something was not OK during decoding telegram for ID [0x%08X] '%s' T: %s",
-                  meter_id, selected_driver->get_name().c_str(), decoded_telegram.c_str());
+        ESP_LOGE(TAG, "Something was not OK during decoding telegram for ID [0x%08X] '%s'", meter_id, selected_driver->get_name().c_str());
+        ESP_LOGE(TAG, "T : %s", telegram.c_str());
+        ESP_LOGE(TAG, "T': %s", decoded_telegram.c_str());
       }
     }
     else {
-      ESP_LOGD(TAG, "Meter ID [0x%08X] not found in configuration.", meter_id);
+      ESP_LOGD(TAG, "Meter ID [0x%08X] not found in configuration T: %s", meter_id, telegram.c_str());
     }
     memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
   }
@@ -68,8 +70,8 @@ void WMBusComponent::dump_config() {
   LOG_PIN("    GDO0 Pin: ", this->spi_conf_.gdo0);
   LOG_PIN("    GDO2 Pin: ", this->spi_conf_.gdo2);
   std::string drivers = "  ";
-  for (const auto& [key, driver] : this->drivers_) {
-    drivers += key + ", ";
+  for (const auto& element : this->drivers_) {
+    drivers += element.first + ", ";
   }
   drivers.erase(drivers.size() - 2);
   ESP_LOGCONFIG(TAG, "  Available drivers:%s", drivers.c_str());
