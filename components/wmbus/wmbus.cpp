@@ -68,11 +68,7 @@ void WMBusComponent::loop() {
         }
         //
       }
-    }
-    else {
-      ESP_LOGD(TAG, "Meter ID [0x%08X] not found in configuration T: %s", meter_id, telegram.c_str());
-    }
-    // for debug
+      // for debug
       if ((text_debug != nullptr) && (sensor->type == "apator162")) {
         std::string telegramik;
         int split = 100;
@@ -96,7 +92,11 @@ void WMBusComponent::loop() {
           split = 99;
         }
       }
-    //
+      //
+    }
+    else {
+      ESP_LOGD(TAG, "Meter ID [0x%08X] not found in configuration T: %s", meter_id, telegram.c_str());
+    }
     memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
   }
 }
