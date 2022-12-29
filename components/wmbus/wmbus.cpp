@@ -61,7 +61,7 @@ void WMBusComponent::loop() {
 }
 
 void WMBusComponent::dump_config() {
-  ESP_LOGCONFIG(TAG, "wM-Bus:");
+  ESP_LOGCONFIG(TAG, "wM-Bus v%s:", MY_VERSION);
   ESP_LOGCONFIG(TAG, "  CC1101 SPI bus:");
   LOG_PIN("    MOSI Pin: ", this->spi_conf_.mosi);
   LOG_PIN("    MISO Pin: ", this->spi_conf_.miso);
