@@ -60,11 +60,12 @@ class WMBusComponent : public Component {
 
   protected:
     void publish_value_(const uint32_t id, const float val);
+    void add_driver(Driver *driver);
     HighFrequencyLoopRequester high_freq_;
-    Cc1101 spi_conf_;
+    Cc1101 spi_conf_{};
     uint8_t mb_packet_[291];
     std::map<uint32_t, WMBusListener *> wmbus_listeners_{};
-    std::map<std::string, std::shared_ptr<Driver>> drivers_{};
+    std::map<std::string, Driver *> drivers_{};
 };
 
 }  // namespace wmbus

@@ -17,7 +17,21 @@ struct Evo868: Driver
     bool ret_val = false;
     uint32_t usage = 0;
     
-    // ToDo
+    size_t i = 17;
+    uint32_t total_register = 0x0413;
+    while (i < telegram.size())
+    {
+      uint32_t c = (((uint32_t)telegram[i+0] << 8) | ((uint32_t)telegram[i+1]));
+      if (c == total_register) {
+        i += 2;
+        usage = ((uint32_t)telegram[i+3] << 24) | ((uint32_t)telegram[i+2] << 16) |
+                ((uint32_t)telegram[i+1] << 8)  | ((uint32_t)telegram[i+0]);
+        water_usage = usage / 1000.0;
+        ret_val = true;
+        break;
+      }
+      i++;
+    }
     return ret_val;
   };
 
