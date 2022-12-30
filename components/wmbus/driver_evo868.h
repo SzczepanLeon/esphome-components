@@ -16,7 +16,7 @@ struct Evo868: Driver
   bool get_value(std::vector<unsigned char> &telegram, float &water_usage) override {
     bool ret_val = false;
     uint32_t usage = 0;
-    
+
     size_t i = 17;
     uint32_t total_register = 0x0413;
     while (i < telegram.size())

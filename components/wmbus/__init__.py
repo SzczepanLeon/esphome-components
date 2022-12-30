@@ -64,11 +64,5 @@ async def to_code(config):
     cg.add_library(
         None,
         None,
-        "https://github.com/SzczepanLeon/wMbus-lib@0.9.8",
-    )
-
-    cg.add_library(
-        None,
-        None,
-        "https://github.com/SzczepanLeon/Apator-meter-reader-core",
+        "https://github.com/SzczepanLeon/wMbus-lib@0.9.10",
     )
