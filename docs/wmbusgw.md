@@ -1,7 +1,6 @@
 # How to use `wmbusgw` with `wmbusmeters` HA addon
 
-You can find wmbusmeters Home Assistant addon here:
-https://github.com/weetmuts/wmbusmeters
+You need at least [wmbusmeters 1.11.0](https://github.com/weetmuts/wmbusmeters/releases/tag/1.11.0) version.
 
 ## 1. `wmbusgw` configuration
 You can use UDP or TCP as transport layer.
