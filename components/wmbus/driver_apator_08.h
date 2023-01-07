@@ -10,8 +10,6 @@
 #include <vector>
 #include <string>
 
-#include "wmbus_utils.hpp"
-
 struct Apator08: Driver
 {
   Apator08() : Driver(std::string("apator08")) {};

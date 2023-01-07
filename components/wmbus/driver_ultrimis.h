@@ -1,5 +1,5 @@
 /*
-  Based on: https://github.com/weetmuts/wmbusmeters/blob/master/src/driver_evo868.cc
+  Based on: https://github.com/weetmuts/wmbusmeters/blob/master/src/driver_ultrimis.cc
   Copyright (C) 2017-2022 Fredrik Öhrström (gpl-3.0-or-later)
 */
 
@@ -10,9 +10,9 @@
 #include <vector>
 #include <string>
 
-struct Evo868: Driver
+struct Ultrimis: Driver
 {
-  Evo868() : Driver(std::string("evo868")) {};
+  Ultrimis() : Driver(std::string("ultrimis")) {};
   bool get_value(std::vector<unsigned char> &telegram, float &water_usage) override {
     bool ret_val = false;
     uint32_t usage = 0;

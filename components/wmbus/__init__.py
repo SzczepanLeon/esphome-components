@@ -4,6 +4,7 @@ from esphome import pins
 from esphome.const import (
     CONF_ID,
     CONF_TYPE,
+    CONF_KEY,
     CONF_MOSI_PIN,
     CONF_MISO_PIN,
     CONF_CLK_PIN,
@@ -22,11 +23,28 @@ wmbus_ns = cg.esphome_ns.namespace('wmbus')
 WMBusComponent = wmbus_ns.class_('WMBusComponent', cg.Component)
 WMBusListener = wmbus_ns.class_('WMBusListener', cg.Component)
 
+def my_key(value):
+    value = cv.string_strict(value)
+    parts = [value[i : i + 2] for i in range(0, len(value), 2)]
+    if (len(parts) != 16) and (len(parts) != 0):
+        raise cv.Invalid("Key must consist of 16 hexadecimal numbers")
+    parts_int = []
+    if any(len(part) != 2 for part in parts):
+        raise cv.Invalid("Key must be format XX")
+    for part in parts:
+        try:
+            parts_int.append(int(part, 16))
+        except ValueError:
+            # pylint: disable=raise-missing-from
+            raise Invalid("Key must be hex values from 00 to FF")
+    return "".join(f"{part:02X}" for part in parts_int)
+
 METER_LISTENER_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_WMBUS_ID): cv.use_id(WMBusComponent),
         cv.Required(CONF_METER_ID): cv.hex_int,
         cv.Optional(CONF_TYPE, default="unknown"): cv.string_strict,
+        cv.Optional(CONF_KEY, default=""): my_key,
     }
 )
 
@@ -47,6 +65,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_GDO0_PIN, default=5):  pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_GDO2_PIN, default=4):  pins.internal_gpio_input_pin_schema,
 })
+
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])

@@ -10,54 +10,31 @@
 #include <vector>
 #include <string>
 
-#include "wmbus_utils.hpp"
-
 struct Apator162: Driver
 {
   Apator162() : Driver(std::string("apator162")) {};
   bool get_value(std::vector<unsigned char> &telegram, float &water_usage) override {
     bool ret_val = false;
     uint32_t usage = 0;
-    std::vector<unsigned char> key(16,0);
-    std::vector<unsigned char>::iterator pos;
-    pos = telegram.begin();
-    unsigned char iv[16];
-    int i=0;
-    for (int j=0; j<8; ++j) {
-      iv[i++] = telegram[2+j];
-    }
-    for (int j=0; j<8; ++j) {
-      iv[i++] = telegram[11];
-    }
-    pos = telegram.begin() + 15;
-    int num_encrypted_bytes = 0;
-    int num_not_encrypted_at_end = 0;
-
-    if (decrypt_TPL_AES_CBC_IV(telegram, pos, key, iv,
-                              &num_encrypted_bytes, &num_not_encrypted_at_end)) {
-      size_t i = 25;
-      while (i < telegram.size())
-      {
-        int c = telegram[i];
-        int size = this->registerSize(c);
-        if (c == 0xff) break; // An FF signals end of telegram padded to encryption boundary,
-        // FFFFFFF623A where 4 last are perhaps crc or counter?
-        i++;
-        if (size == -1 || i+size >= telegram.size())
-        {
-          break;
-        }
-        if (c == 0x10 && size == 4 && i+size < telegram.size())
-        {
-          // We found the register representing the total
-          usage = ((uint32_t)telegram[i+3] << 24) | ((uint32_t)telegram[i+2] << 16) |
-                  ((uint32_t)telegram[i+1] << 8)  | ((uint32_t)telegram[i+0]);
-          water_usage = usage / 1000.0;
-          ret_val = true;
-          break;
-        }
-        i += size;
+    size_t i = 25;
+    while (i < telegram.size()) {
+      int c = telegram[i];
+      int size = this->registerSize(c);
+      if (c == 0xff) break; // An FF signals end of telegram padded to encryption boundary,
+      // FFFFFFF623A where 4 last are perhaps crc or counter?
+      i++;
+      if (size == -1 || i+size >= telegram.size()) {
+        break;
       }
+      if (c == 0x10 && size == 4 && i+size < telegram.size()) {
+        // We found the register representing the total
+        usage = ((uint32_t)telegram[i+3] << 24) | ((uint32_t)telegram[i+2] << 16) |
+                ((uint32_t)telegram[i+1] << 8)  | ((uint32_t)telegram[i+0]);
+        water_usage = usage / 1000.0;
+        ret_val = true;
+        break;
+      }
+      i += size;
     }
     return ret_val;
   };

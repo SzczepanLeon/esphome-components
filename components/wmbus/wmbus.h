@@ -12,8 +12,11 @@
 #include "crc.hpp"
 #include "mbus_packet.hpp"
 #include "utils.hpp"
+#include "wmbus_utils.hpp"
 
 #include "drivers.h"
+
+#include <WiFiClient.h>
 
 namespace esphome {
 namespace wmbus {
@@ -22,6 +25,7 @@ class WMBusListener {
   public:
     uint32_t id;
     std::string type;
+    std::vector<unsigned char> key{};
     virtual void publish_value(const float value) {};
     virtual void publish_value(const std::string &value) {};
 };
@@ -61,6 +65,7 @@ class WMBusComponent : public Component {
   protected:
     void publish_value_(const uint32_t id, const float val);
     void add_driver(Driver *driver);
+    bool decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key);
     HighFrequencyLoopRequester high_freq_;
     Cc1101 spi_conf_{};
     uint8_t mb_packet_[291];
