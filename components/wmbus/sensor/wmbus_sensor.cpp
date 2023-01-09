@@ -21,7 +21,7 @@ void WMBusSensor::dump_config() {
   }
   ESP_LOGCONFIG(TAG, "  Key: '%s'", key.c_str());
   ESP_LOGCONFIG(TAG, "  Type: %s", this->type.c_str());
-  ESP_LOGCONFIG(TAG, "  ID: %lu [0x%08X]", this->id, this->id);
+  ESP_LOGCONFIG(TAG, "  ID: %zu [0x%08X]", this->id, this->id);
 }
 
 void WMBusSensor::publish_value(const float value) {

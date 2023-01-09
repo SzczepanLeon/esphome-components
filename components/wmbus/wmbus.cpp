@@ -20,6 +20,7 @@ void WMBusComponent::setup() {
 
   this->add_driver(new Izar());
   this->add_driver(new Evo868());
+  this->add_driver(new Bmeters());
   this->add_driver(new Unismart());
   this->add_driver(new Ultrimis());
   this->add_driver(new Apator08());
@@ -56,7 +57,7 @@ void WMBusComponent::loop() {
           if (key.size()) {
             key.erase(key.size() - 5);
           }
-          ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '$s'", meter_id, selected_driver->get_name().c_str(), key.c_str());
+          ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '%s'", meter_id, selected_driver->get_name().c_str(), key.c_str());
           ESP_LOGE(TAG, "T : %s", telegram.c_str());
           ESP_LOGE(TAG, "T': %s", decrypted_telegram.c_str());
         }
