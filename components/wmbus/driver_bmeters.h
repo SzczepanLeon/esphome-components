@@ -18,7 +18,7 @@ struct Bmeters: Driver
       if (c == total_register) {
         i += 2;
         usage = bcd_2_int(telegram, i, 4);
-        total_usage = usage / 100.0;
+        total_usage = usage / 1000.0;
         ret_val = true;
         break;
       }
