@@ -41,7 +41,7 @@ void WMBusComponent::loop() {
     if (this->wmbus_listeners_.count(meter_id) > 0) {
       auto *sensor = this->wmbus_listeners_[meter_id];
       auto selected_driver = this->drivers_[sensor->type];
-      ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] T: %s", selected_driver->get_name().c_str(), meter_id, telegram.c_str());
+      ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm T: %s", selected_driver->get_name().c_str(), meter_id, rssi, telegram.c_str());
       float value{0};
       if (sensor->key.size()) {
         if (this->decrypt_telegram(frame, sensor->key)) {
@@ -73,7 +73,7 @@ void WMBusComponent::loop() {
       }
     }
     else {
-      ESP_LOGD(TAG, "Meter ID [0x%08X] not found in configuration T: %s", meter_id, telegram.c_str());
+      ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm not found in configuration T: %s", meter_id, rssi, telegram.c_str());
     }
     memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
   }
