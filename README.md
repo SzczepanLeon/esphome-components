@@ -138,7 +138,7 @@ Sensor
 
 - **meter_id** (**Required**, int): Meter ID (usually from sticker). Can be specified as decimal or hex.
 - **type** (**Required**, string):  Meter type. Currently `izar`, `unismart`, `apator08`, `apator162` are supported.
-- **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ````.
+- **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
 ## 3. Author & License
