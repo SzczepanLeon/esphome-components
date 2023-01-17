@@ -24,6 +24,7 @@ void WMBusComponent::setup() {
   this->add_driver(new Unismart());
   this->add_driver(new Ultrimis());
   this->add_driver(new Apator08());
+  this->add_driver(new Mkradio3());
   this->add_driver(new Apator162());
 }
 
