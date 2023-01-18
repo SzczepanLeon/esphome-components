@@ -13,6 +13,10 @@ WMBusComponent::~WMBusComponent() {}
 
 void WMBusComponent::setup() {
   this->high_freq_.start();
+  if (this->led_pin_ != nullptr) {
+    this->led_pin_->setup();
+    this->led_pin_->digital_write(true);
+  }
   memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
   rf_mbus_init(this->spi_conf_.mosi->get_pin(), this->spi_conf_.miso->get_pin(),
                this->spi_conf_.clk->get_pin(), this->spi_conf_.cs->get_pin(),
@@ -66,6 +70,7 @@ void WMBusComponent::loop() {
       }
       if (selected_driver->get_value(frame, value)) {
         sensor->publish_value(value);
+        blink_led();
       }
       else {
         std::string not_ok_telegram = format_hex_pretty(frame);
@@ -113,8 +118,20 @@ void WMBusComponent::add_driver(Driver *driver) {
   this->drivers_[driver->get_name()] = driver;
 }
 
+void WMBusComponent::blink_led() {
+  if (this->led_pin_ != nullptr) {
+    this->led_pin_->digital_write(false);
+    delay(50);
+    this->led_pin_->digital_write(true);
+    delay(50);
+  }
+}
+
 void WMBusComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "wM-Bus v%s:", MY_VERSION);
+  if (this->led_pin_ != nullptr) {
+    LOG_PIN("  LED Pin: ", this->led_pin_);
+  }
   ESP_LOGCONFIG(TAG, "  CC1101 SPI bus:");
   LOG_PIN("    MOSI Pin: ", this->spi_conf_.mosi);
   LOG_PIN("    MISO Pin: ", this->spi_conf_.miso);

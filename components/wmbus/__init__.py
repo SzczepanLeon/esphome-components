@@ -14,6 +14,8 @@ from esphome.const import (
 CONF_GDO0_PIN = "gdo0_pin"
 CONF_GDO2_PIN = "gdo2_pin"
 
+CONF_LED_PIN = "led_pin"
+
 CONF_WMBUS_ID = "wmbus_id"
 CONF_METER_ID = "meter_id"
 
@@ -64,6 +66,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_CS_PIN,   default=2):  pins.internal_gpio_output_pin_schema,
     cv.Optional(CONF_GDO0_PIN, default=5):  pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_GDO2_PIN, default=4):  pins.internal_gpio_input_pin_schema,
+    cv.Optional(CONF_LED_PIN): pins.gpio_output_pin_schema,
 })
 
 
@@ -79,6 +82,10 @@ async def to_code(config):
     gdo2 = await cg.gpio_pin_expression(config[CONF_GDO2_PIN])
 
     cg.add(var.add_cc1101(mosi, miso, clk, cs, gdo0, gdo2))
+
+    if CONF_LED_PIN in config:
+        led_pin = await cg.gpio_pin_expression(config[CONF_LED_PIN])
+        cg.add(var.set_led_pin(led_pin))
 
     cg.add_library(
         None,

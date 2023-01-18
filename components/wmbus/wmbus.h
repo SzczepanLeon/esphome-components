@@ -48,6 +48,7 @@ class WMBusComponent : public Component {
     void loop() override;
     void dump_config() override;
     float get_setup_priority() const override { return setup_priority::LATE; }
+    void set_led_pin(GPIOPin *led) { this->led_pin_ = led; }
     void register_wmbus_listener(WMBusListener *listener);
     void add_cc1101(InternalGPIOPin *mosi, InternalGPIOPin *miso,
                     InternalGPIOPin *clk, InternalGPIOPin *cs,
@@ -66,7 +67,9 @@ class WMBusComponent : public Component {
     void publish_value_(const uint32_t id, const float val);
     void add_driver(Driver *driver);
     bool decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key);
+    void blink_led();
     HighFrequencyLoopRequester high_freq_;
+    GPIOPin *led_pin_{nullptr};
     Cc1101 spi_conf_{};
     uint8_t mb_packet_[291];
     std::map<uint32_t, WMBusListener *> wmbus_listeners_{};
