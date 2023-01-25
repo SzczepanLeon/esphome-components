@@ -1,8 +1,11 @@
 #pragma once
 
+#include "esphome/core/log.h"
 #include "esphome/core/gpio.h"
 #include "esphome/core/helpers.h"
 #include "esphome/core/component.h"
+#include "esphome/components/network/ip_address.h"
+#include "esphome/components/time/real_time_clock.h"
 
 #include <map>
 #include <string>
@@ -17,9 +20,28 @@
 #include "drivers.h"
 
 #include <WiFiClient.h>
+#include <WiFiUdp.h>
 
 namespace esphome {
 namespace wmbus {
+
+enum Format : uint8_t {
+  FORMAT_HEX      = 0,
+  FORMAT_RTLWMBUS = 1,
+};
+
+enum Transport : uint8_t {
+  TRANSPORT_TCP = 0,
+  TRANSPORT_UDP = 1,
+};
+
+struct Client {
+  std::string name;
+  network::IPAddress ip;
+  uint16_t port;
+  Transport transport;
+  Format format;
+};
 
 class WMBusListener {
   public:
@@ -60,11 +82,20 @@ class WMBusComponent : public Component {
       this->spi_conf_.gdo0 = gdo0;
       this->spi_conf_.gdo2 = gdo2;
     }
+    void set_time(time::RealTimeClock *time) { this->time_ = time; }
+    void add_client(const std::string name,
+                    const network::IPAddress ip,
+                    const uint16_t port,
+                    const Transport transport,
+                    const Format format) {
+      clients_.push_back({name, ip, port, transport, format});
+    }
 
   private:
 
   protected:
-    void publish_value_(const uint32_t id, const float val);
+    const LogString *format_to_string(Format format);
+    const LogString *transport_to_string(Transport transport);
     void add_driver(Driver *driver);
     bool decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key);
     void blink_led();
@@ -74,6 +105,10 @@ class WMBusComponent : public Component {
     uint8_t mb_packet_[291];
     std::map<uint32_t, WMBusListener *> wmbus_listeners_{};
     std::map<std::string, Driver *> drivers_{};
+    std::vector<Client> clients_{};
+    WiFiClient tcp_client_;
+    WiFiUDP udp_client_;
+    time::RealTimeClock *time_;
 };
 
 }  // namespace wmbus

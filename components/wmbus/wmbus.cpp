@@ -1,6 +1,4 @@
 #include "wmbus.h"
-#include "esphome/core/log.h"
-
 #include "version.h"
 
 namespace esphome {
@@ -82,6 +80,72 @@ void WMBusComponent::loop() {
     else {
       ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm not found in configuration T: %s", meter_id, rssi, telegram.c_str());
     }
+    for (auto & client : this->clients_) {
+      switch (client.format) {
+        case FORMAT_HEX:
+          {
+            switch (client.transport) {
+              case TRANSPORT_TCP:
+                {
+                  if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                    this->tcp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
+                    this->tcp_client_.stop();
+                  }
+                }
+                break;
+              case TRANSPORT_UDP:
+                {
+                  this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                  this->udp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
+                  this->udp_client_.endPacket();
+                }
+                break;
+              default:
+                ESP_LOGE(TAG, "Unknown transport!");
+                break;
+            }
+          }
+          break;
+        case FORMAT_RTLWMBUS:
+          {
+            time_t current_time = this->time_->now().timestamp;
+            char telegram_time[24];
+            strftime(telegram_time, sizeof(telegram_time), "%Y-%m-%d %H:%M:%S.00Z", gmtime(&current_time));
+            switch (client.transport) {
+              case TRANSPORT_TCP:
+                {
+                  if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                    this->tcp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time, rssi);
+                    for (int i = 0; i < len_without_crc; i++){
+                      this->tcp_client_.printf("%02X", this->mb_packet_[i]);
+                    }
+                    this->tcp_client_.print("\n");
+                    this->tcp_client_.stop();
+                  }
+                }
+                break;
+              case TRANSPORT_UDP:
+                {
+                  this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                  this->udp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time, rssi);
+                  for (int i = 0; i < len_without_crc; i++){
+                    this->udp_client_.printf("%02X", this->mb_packet_[i]);
+                  }
+                  this->udp_client_.print("\n");
+                  this->udp_client_.endPacket();
+                }
+                break;
+              default:
+                ESP_LOGE(TAG, "Unknown transport!");
+                break;
+            }
+          }
+          break;
+        default:
+          ESP_LOGE(TAG, "Unknown format!");
+          break;
+      }
+    }
     memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
   }
 }
@@ -119,6 +183,7 @@ void WMBusComponent::add_driver(Driver *driver) {
 }
 
 void WMBusComponent::blink_led() {
+  // ToDo: Refactor to "no delay" version
   if (this->led_pin_ != nullptr) {
     this->led_pin_->digital_write(false);
     delay(50);
@@ -127,8 +192,41 @@ void WMBusComponent::blink_led() {
   }
 }
 
+const LogString *WMBusComponent::format_to_string(Format format) {
+  switch (format) {
+    case FORMAT_HEX:
+      return LOG_STR("hex");
+    case FORMAT_RTLWMBUS:
+      return LOG_STR("rtl-wmbus");
+    default:
+      return LOG_STR("unknown");
+  }
+}
+
+const LogString *WMBusComponent::transport_to_string(Transport transport) {
+  switch (transport) {
+    case TRANSPORT_TCP:
+      return LOG_STR("TCP");
+    case TRANSPORT_UDP:
+      return LOG_STR("UDP");
+    default:
+      return LOG_STR("unknown");
+  }
+}
+
 void WMBusComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "wM-Bus v%s:", MY_VERSION);
+  if (this->clients_.size() > 0) {
+    ESP_LOGCONFIG(TAG, "  Clients:");
+    for (auto & client : this->clients_) {
+      ESP_LOGCONFIG(TAG, "    %s: %s:%d %s [%s]",
+                    client.name.c_str(),
+                    client.ip.str().c_str(),
+                    client.port,
+                    LOG_STR_ARG(transport_to_string(client.transport)),
+                    LOG_STR_ARG(format_to_string(client.format)));
+    }
+  }
   if (this->led_pin_ != nullptr) {
     LOG_PIN("  LED Pin: ", this->led_pin_);
   }

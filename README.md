@@ -117,7 +117,7 @@ sensor:
     name: "My Water from Izar"
     meter_id: 306029916
     type: izar
-    accuracy_decimals: 5
+    accuracy_decimals: 3
 
 ```
 
@@ -132,12 +132,18 @@ In wmbus platform:
 - **cs_pin** (*Optional*): CC1101 CS pin connection. Defaults to ``GPIO2``.
 - **gdo0_pin** (*Optional*): CC1101 GDO0 pin connection. Defaults to ``GPIO5``.
 - **gdo2_pin** (*Optional*): CC1101 GDO2 pin connection. Defaults to ``GPIO4``.
+- **clients** (*Optional*):
+  - **name** (*Required*): The name for this client.
+  - **ip_address** (*Required*): IP address.
+  - **port** (*Required*): Port number.
+  - **format** (*Optional*): Telegram format to send. HEX or RTLWMBUS. Defaults to ``RTLWMBUS``.
+  - **transport** (*Optional*): TCP or UDP. Defaults to ``TCP``.
 
 Sensor
 ******
 
 - **meter_id** (**Required**, int): Meter ID (usually from sticker). Can be specified as decimal or hex.
-- **type** (**Required**, string):  Meter type. Currently `izar`, `unismart`, `apator08`, `apator162` are supported.
+- **type** (**Required**, string):  Meter type.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
