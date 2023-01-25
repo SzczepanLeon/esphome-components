@@ -16,9 +16,9 @@ void WMBusComponent::setup() {
     this->led_pin_->digital_write(true);
   }
   memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
-  rf_mbus_init(this->spi_conf_.mosi->get_pin(), this->spi_conf_.miso->get_pin(),
-               this->spi_conf_.clk->get_pin(), this->spi_conf_.cs->get_pin(),
-               this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin());
+  this->init_ok_ = rf_mbus_init(this->spi_conf_.mosi->get_pin(), this->spi_conf_.miso->get_pin(),
+                                this->spi_conf_.clk->get_pin(), this->spi_conf_.cs->get_pin(),
+                                this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin());
 
   this->add_driver(new Izar());
   this->add_driver(new Evo868());
@@ -32,121 +32,126 @@ void WMBusComponent::setup() {
 }
 
 void WMBusComponent::loop() {
-  int rssi{0};
-  if (rf_mbus_task(this->mb_packet_, rssi, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
-    uint8_t len_without_crc = crcRemove(this->mb_packet_, packetSize(this->mb_packet_[0]));
-    std::vector<unsigned char> frame(this->mb_packet_, this->mb_packet_ + len_without_crc);
-    std::string telegram = format_hex_pretty(frame);
-    telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
+  if (this->init_ok_) {
+    int rssi{0};
+    if (rf_mbus_task(this->mb_packet_, rssi, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
+      uint8_t len_without_crc = crcRemove(this->mb_packet_, packetSize(this->mb_packet_[0]));
+      std::vector<unsigned char> frame(this->mb_packet_, this->mb_packet_ + len_without_crc);
+      std::string telegram = format_hex_pretty(frame);
+      telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
 
-    uint32_t meter_id = ((uint32_t)frame[7] << 24) | ((uint32_t)frame[6] << 16) |
-                        ((uint32_t)frame[5] << 8)  | ((uint32_t)frame[4]);
+      uint32_t meter_id = ((uint32_t)frame[7] << 24) | ((uint32_t)frame[6] << 16) |
+                          ((uint32_t)frame[5] << 8)  | ((uint32_t)frame[4]);
 
-    if (this->wmbus_listeners_.count(meter_id) > 0) {
-      auto *sensor = this->wmbus_listeners_[meter_id];
-      auto selected_driver = this->drivers_[sensor->type];
-      ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm T: %s", selected_driver->get_name().c_str(), meter_id, rssi, telegram.c_str());
-      float value{0};
-      if (sensor->key.size()) {
-        if (this->decrypt_telegram(frame, sensor->key)) {
-          std::string decrypted_telegram = format_hex_pretty(frame);
-          decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'), decrypted_telegram.end());
-          ESP_LOGD(TAG, "Decrypted T : %s", decrypted_telegram.c_str());
+      if (this->wmbus_listeners_.count(meter_id) > 0) {
+        auto *sensor = this->wmbus_listeners_[meter_id];
+        auto selected_driver = this->drivers_[sensor->type];
+        ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm T: %s", selected_driver->get_name().c_str(), meter_id, rssi, telegram.c_str());
+        float value{0};
+        if (sensor->key.size()) {
+          if (this->decrypt_telegram(frame, sensor->key)) {
+            std::string decrypted_telegram = format_hex_pretty(frame);
+            decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'), decrypted_telegram.end());
+            ESP_LOGD(TAG, "Decrypted T : %s", decrypted_telegram.c_str());
+          }
+          else {
+            std::string decrypted_telegram = format_hex_pretty(frame);
+            decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'), decrypted_telegram.end());
+            std::string key = format_hex_pretty(sensor->key);
+            key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
+            if (key.size()) {
+              key.erase(key.size() - 5);
+            }
+            ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '%s'", meter_id, selected_driver->get_name().c_str(), key.c_str());
+            ESP_LOGE(TAG, "T : %s", telegram.c_str());
+            ESP_LOGE(TAG, "T': %s", decrypted_telegram.c_str());
+          }
+        }
+        if (selected_driver->get_value(frame, value)) {
+          sensor->publish_value(value);
+          blink_led();
         }
         else {
-          std::string decrypted_telegram = format_hex_pretty(frame);
-          decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'), decrypted_telegram.end());
-          std::string key = format_hex_pretty(sensor->key);
-          key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
-          if (key.size()) {
-            key.erase(key.size() - 5);
-          }
-          ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '%s'", meter_id, selected_driver->get_name().c_str(), key.c_str());
-          ESP_LOGE(TAG, "T : %s", telegram.c_str());
-          ESP_LOGE(TAG, "T': %s", decrypted_telegram.c_str());
+          std::string not_ok_telegram = format_hex_pretty(frame);
+          not_ok_telegram.erase(std::remove(not_ok_telegram.begin(), not_ok_telegram.end(), '.'), not_ok_telegram.end());
+          ESP_LOGE(TAG, "Can't get value from telegram for ID [0x%08X] '%s'", meter_id, selected_driver->get_name().c_str());
+          ESP_LOGE(TAG, "T : %s", not_ok_telegram.c_str());
         }
       }
-      if (selected_driver->get_value(frame, value)) {
-        sensor->publish_value(value);
-        blink_led();
-      }
       else {
-        std::string not_ok_telegram = format_hex_pretty(frame);
-        not_ok_telegram.erase(std::remove(not_ok_telegram.begin(), not_ok_telegram.end(), '.'), not_ok_telegram.end());
-        ESP_LOGE(TAG, "Can't get value from telegram for ID [0x%08X] '%s'", meter_id, selected_driver->get_name().c_str());
-        ESP_LOGE(TAG, "T : %s", not_ok_telegram.c_str());
+        ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm not found in configuration T: %s", meter_id, rssi, telegram.c_str());
       }
-    }
-    else {
-      ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm not found in configuration T: %s", meter_id, rssi, telegram.c_str());
-    }
-    for (auto & client : this->clients_) {
-      switch (client.format) {
-        case FORMAT_HEX:
-          {
-            switch (client.transport) {
-              case TRANSPORT_TCP:
-                {
-                  if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
-                    this->tcp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
-                    this->tcp_client_.stop();
-                  }
-                }
-                break;
-              case TRANSPORT_UDP:
-                {
-                  this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
-                  this->udp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
-                  this->udp_client_.endPacket();
-                }
-                break;
-              default:
-                ESP_LOGE(TAG, "Unknown transport!");
-                break;
-            }
-          }
-          break;
-        case FORMAT_RTLWMBUS:
-          {
-            time_t current_time = this->time_->now().timestamp;
-            char telegram_time[24];
-            strftime(telegram_time, sizeof(telegram_time), "%Y-%m-%d %H:%M:%S.00Z", gmtime(&current_time));
-            switch (client.transport) {
-              case TRANSPORT_TCP:
-                {
-                  if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
-                    this->tcp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time, rssi);
-                    for (int i = 0; i < len_without_crc; i++){
-                      this->tcp_client_.printf("%02X", this->mb_packet_[i]);
+      for (auto & client : this->clients_) {
+        switch (client.format) {
+          case FORMAT_HEX:
+            {
+              switch (client.transport) {
+                case TRANSPORT_TCP:
+                  {
+                    if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                      this->tcp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
+                      this->tcp_client_.stop();
                     }
-                    this->tcp_client_.print("\n");
-                    this->tcp_client_.stop();
                   }
-                }
-                break;
-              case TRANSPORT_UDP:
-                {
-                  this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
-                  this->udp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time, rssi);
-                  for (int i = 0; i < len_without_crc; i++){
-                    this->udp_client_.printf("%02X", this->mb_packet_[i]);
+                  break;
+                case TRANSPORT_UDP:
+                  {
+                    this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                    this->udp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
+                    this->udp_client_.endPacket();
                   }
-                  this->udp_client_.print("\n");
-                  this->udp_client_.endPacket();
-                }
-                break;
-              default:
-                ESP_LOGE(TAG, "Unknown transport!");
-                break;
+                  break;
+                default:
+                  ESP_LOGE(TAG, "Unknown transport!");
+                  break;
+              }
             }
-          }
-          break;
-        default:
-          ESP_LOGE(TAG, "Unknown format!");
-          break;
+            break;
+          case FORMAT_RTLWMBUS:
+            {
+              time_t current_time = this->time_->now().timestamp;
+              char telegram_time[24];
+              strftime(telegram_time, sizeof(telegram_time), "%Y-%m-%d %H:%M:%S.00Z", gmtime(&current_time));
+              switch (client.transport) {
+                case TRANSPORT_TCP:
+                  {
+                    if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                      this->tcp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time, rssi);
+                      for (int i = 0; i < len_without_crc; i++){
+                        this->tcp_client_.printf("%02X", this->mb_packet_[i]);
+                      }
+                      this->tcp_client_.print("\n");
+                      this->tcp_client_.stop();
+                    }
+                  }
+                  break;
+                case TRANSPORT_UDP:
+                  {
+                    this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                    this->udp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time, rssi);
+                    for (int i = 0; i < len_without_crc; i++){
+                      this->udp_client_.printf("%02X", this->mb_packet_[i]);
+                    }
+                    this->udp_client_.print("\n");
+                    this->udp_client_.endPacket();
+                  }
+                  break;
+                default:
+                  ESP_LOGE(TAG, "Unknown transport!");
+                  break;
+              }
+            }
+            break;
+          default:
+            ESP_LOGE(TAG, "Unknown format!");
+            break;
+        }
       }
+      memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
     }
-    memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
+  }
+  else {
+    ESP_LOGE(TAG, "CC1101 NOT initialized.");
   }
 }
 

@@ -99,6 +99,7 @@ class WMBusComponent : public Component {
     void add_driver(Driver *driver);
     bool decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key);
     void blink_led();
+    bool init_ok_{false};
     HighFrequencyLoopRequester high_freq_;
     GPIOPin *led_pin_{nullptr};
     Cc1101 spi_conf_{};
