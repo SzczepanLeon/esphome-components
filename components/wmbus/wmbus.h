@@ -71,6 +71,7 @@ class WMBusComponent : public Component {
     void dump_config() override;
     float get_setup_priority() const override { return setup_priority::LATE; }
     void set_led_pin(GPIOPin *led) { this->led_pin_ = led; }
+    void set_led_blink_time(uint32_t led_blink_time) { this->led_blink_time_ = led_blink_time; }
     void register_wmbus_listener(WMBusListener *listener);
     void add_cc1101(InternalGPIOPin *mosi, InternalGPIOPin *miso,
                     InternalGPIOPin *clk, InternalGPIOPin *cs,
@@ -98,8 +99,8 @@ class WMBusComponent : public Component {
     const LogString *transport_to_string(Transport transport);
     void add_driver(Driver *driver);
     bool decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key);
-    void blink_led();
-    bool init_ok_{false};
+    void led_blink();
+    void led_handler();
     HighFrequencyLoopRequester high_freq_;
     GPIOPin *led_pin_{nullptr};
     Cc1101 spi_conf_{};
@@ -110,6 +111,9 @@ class WMBusComponent : public Component {
     WiFiClient tcp_client_;
     WiFiUDP udp_client_;
     time::RealTimeClock *time_;
+    uint32_t led_blink_time_{0};
+    uint32_t led_on_millis_{0};
+    bool led_on_{false};
 };
 
 }  // namespace wmbus

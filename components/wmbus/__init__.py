@@ -24,6 +24,7 @@ CONF_GDO0_PIN = "gdo0_pin"
 CONF_GDO2_PIN = "gdo2_pin"
 
 CONF_LED_PIN = "led_pin"
+CONF_LED_BLINK_TIME = "led_blink_time"
 
 CONF_WMBUS_ID = "wmbus_id"
 CONF_METER_ID = "meter_id"
@@ -105,6 +106,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_GDO0_PIN, default=5):  pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_GDO2_PIN, default=4):  pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_LED_PIN): pins.gpio_output_pin_schema,
+    cv.Optional(CONF_LED_BLINK_TIME, default="800ms"): cv.positive_time_period,
     cv.Optional(CONF_CLIENTS):  cv.ensure_list(CLIENT_SCHEMA),
 })
 
@@ -137,6 +139,7 @@ async def to_code(config):
     if CONF_LED_PIN in config:
         led_pin = await cg.gpio_pin_expression(config[CONF_LED_PIN])
         cg.add(var.set_led_pin(led_pin))
+        cg.add(var.set_led_blink_time(config[CONF_LED_BLINK_TIME].total_milliseconds))
 
     cg.add_library(
         None,

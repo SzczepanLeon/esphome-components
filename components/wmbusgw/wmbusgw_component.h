@@ -100,7 +100,6 @@ class WMBusGwComponent : public esphome::Component {
     char telegram_time_[24];
     uint32_t last_connected_{0};
     bool only_udp_{true};
-    bool init_ok_{false};
 };
 
 }  // namespace wmbusgw

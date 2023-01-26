@@ -92,6 +92,8 @@ https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbusgw.md
 
 Component to receive wMBus frame (via CC1101), create HA sensor and send decoded value.
 
+> **_NOTE:_**  From version 1.3 features from `wmbusgw` are included in this component. It means that you need *time* component in yaml.
+
 #### 2.2.1. Example
 
 ```yaml
@@ -106,6 +108,14 @@ wmbus:
   cs_pin:   GPIO14
   gdo0_pin: GPIO15
   gdo2_pin: GPIO16
+
+  led_pin: GPIO0
+  led_blink_time: "1s"
+
+  clients:
+    - name: "wmbusmeters"
+      ip_address: "10.0.0.1"
+      port: 7227
 
 sensor:
   - platform: wmbus
@@ -132,6 +142,8 @@ In wmbus platform:
 - **cs_pin** (*Optional*): CC1101 CS pin connection. Defaults to ``GPIO2``.
 - **gdo0_pin** (*Optional*): CC1101 GDO0 pin connection. Defaults to ``GPIO5``.
 - **gdo2_pin** (*Optional*): CC1101 GDO2 pin connection. Defaults to ``GPIO4``.
+- **led_pin** (*Optional*): Pin where LED is connected. It will blink on each telegram. You can use all options from [Pin Schema](https://esphome.io/guides/configuration-types.html#config-pin-schema).
+- **led_blink_time** (*Optional*): How long LED will stay ON. Defaults to ``800 ms``.
 - **clients** (*Optional*):
   - **name** (*Required*): The name for this client.
   - **ip_address** (*Required*): IP address.
