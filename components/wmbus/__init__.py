@@ -106,7 +106,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_GDO0_PIN, default=5):  pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_GDO2_PIN, default=4):  pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_LED_PIN): pins.gpio_output_pin_schema,
-    cv.Optional(CONF_LED_BLINK_TIME, default="800ms"): cv.positive_time_period,
+    cv.Optional(CONF_LED_BLINK_TIME, default="300ms"): cv.positive_time_period,
     cv.Optional(CONF_CLIENTS):  cv.ensure_list(CLIENT_SCHEMA),
 })
 
@@ -144,5 +144,5 @@ async def to_code(config):
     cg.add_library(
         None,
         None,
-        "https://github.com/SzczepanLeon/wMbus-lib@0.9.13",
+        "https://github.com/SzczepanLeon/wMbus-lib@0.9.14",
     )

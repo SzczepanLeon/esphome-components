@@ -86,7 +86,9 @@ void WMBusComponent::loop() {
     else {
       ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm not found in configuration T: %s", meter_id, rssi, telegram.c_str());
     }
-    this->led_blink();
+    if (!(this->clients_.empty())) {
+      this->led_blink();
+    }
     for (auto & client : this->clients_) {
       switch (client.format) {
         case FORMAT_HEX:
