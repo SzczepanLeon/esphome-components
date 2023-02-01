@@ -25,8 +25,10 @@ void WMBusComponent::setup() {
     return;
   }
 
+  this->add_driver(new Elf());
   this->add_driver(new Izar());
   this->add_driver(new Evo868());
+  this->add_driver(new Amiplus());
   this->add_driver(new Bmeters());
   this->add_driver(new Unismart());
   this->add_driver(new Ultrimis());
