@@ -23,7 +23,8 @@ struct Elf: Driver
       if (c == total_register) {
         i += 2;
         usage = bcd_2_int(telegram, i, 6);
-        total_usage = usage / 100.0;
+        // in kWh
+        total_usage = usage / 36000.0;
         ret_val = true;
         break;
       }

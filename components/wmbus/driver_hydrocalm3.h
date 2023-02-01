@@ -23,7 +23,8 @@ struct Hydrocalm3: Driver
       if (c == total_register) {
         i += 2;
         usage = bcd_2_int(telegram, i, 4);
-        total_usage = usage / 1000.0;
+        // in kWh
+        total_usage = usage / 3.6;
         ret_val = true;
         break;
       }
