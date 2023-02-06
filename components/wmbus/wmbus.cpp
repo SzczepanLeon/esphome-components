@@ -34,8 +34,10 @@ void WMBusComponent::setup() {
   this->add_driver(new Ultrimis());
   this->add_driver(new Apator08());
   this->add_driver(new Mkradio3());
+  this->add_driver(new Mkradio4());
   this->add_driver(new Apator162());
   this->add_driver(new Hydrocalm3());
+  this->add_driver(new FhkvdataIII());
 }
 
 void WMBusComponent::loop() {
@@ -261,12 +263,17 @@ void WMBusComponent::dump_config() {
   LOG_PIN("    CS Pin:   ", this->spi_conf_.cs);
   LOG_PIN("    GDO0 Pin: ", this->spi_conf_.gdo0);
   LOG_PIN("    GDO2 Pin: ", this->spi_conf_.gdo2);
-  std::string drivers = "  ";
-  for (const auto& element : this->drivers_) {
-    drivers += element.first + ", ";
+  if (this->drivers_.size() > 0) {
+    std::string drivers = "  ";
+    for (const auto& element : this->drivers_) {
+      drivers += element.first + ", ";
+    }
+    drivers.erase(drivers.size() - 2);
+    ESP_LOGCONFIG(TAG, "  Available drivers:%s", drivers.c_str());
   }
-  drivers.erase(drivers.size() - 2);
-  ESP_LOGCONFIG(TAG, "  Available drivers:%s", drivers.c_str());
+  else {
+    ESP_LOGCONFIG(TAG, "  Check connection to CC1101!");
+  }
 }
 
 }  // namespace wmbus
