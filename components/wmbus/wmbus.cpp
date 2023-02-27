@@ -27,7 +27,9 @@ void WMBusComponent::setup() {
 
   this->add_driver(new Elf());
   this->add_driver(new Izar());
+  this->add_driver(new Itron());
   this->add_driver(new Evo868());
+  this->add_driver(new Vario451));
   this->add_driver(new Amiplus());
   this->add_driver(new Bmeters());
   this->add_driver(new Unismart());
@@ -49,6 +51,7 @@ void WMBusComponent::loop() {
     std::string telegram = format_hex_pretty(frame);
     telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
 
+    // ToDo: add check for manufactures
     uint32_t meter_id = ((uint32_t)frame[7] << 24) | ((uint32_t)frame[6] << 16) |
                         ((uint32_t)frame[5] << 8)  | ((uint32_t)frame[4]);
 
