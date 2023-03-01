@@ -44,7 +44,7 @@ void WMBusComponent::setup() {
 
 void WMBusComponent::loop() {
   this->led_handler();
-  uint8_t rssi{0};
+  int rssi{0};
   if (rf_mbus_task(this->mb_packet_, rssi, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
     int8_t rssi_dbm = this->rssi_to_dbm(rssi);
     uint8_t len_without_crc = crcRemove(this->mb_packet_, packetSize(this->mb_packet_[0]));
@@ -280,7 +280,7 @@ void WMBusComponent::led_handler() {
   }
 }
 
-int8_t WMBusComponent::rssi_to_dbm(uint8_t rssi) {
+int8_t WMBusComponent::rssi_to_dbm(int rssi) {
   int8_t rssi_dbm;
   if (rssi >= 128) {
     rssi_dbm = ((rssi - 256) / 2) - 74;

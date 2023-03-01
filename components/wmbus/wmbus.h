@@ -101,7 +101,7 @@ class WMBusComponent : public Component {
     bool decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key);
     void led_blink();
     void led_handler();
-    int8_t rssi_to_dbm(uint8_t rssi);
+    int8_t rssi_to_dbm(int rssi);
     HighFrequencyLoopRequester high_freq_;
     GPIOPin *led_pin_{nullptr};
     Cc1101 spi_conf_{};
