@@ -16,7 +16,7 @@ struct Itron: Driver
   bool get_value(std::vector<unsigned char> &telegram, float &water_usage) override {
     bool ret_val = false;
     uint32_t usage = 0;
-    size_t i = 17;
+    size_t i = 15;
     uint32_t total_register = 0x0413;
     while (i < telegram.size()) {
       uint32_t c = (((uint32_t)telegram[i+0] << 8) | ((uint32_t)telegram[i+1]));
