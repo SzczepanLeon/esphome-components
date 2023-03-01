@@ -44,9 +44,8 @@ void WMBusComponent::setup() {
 
 void WMBusComponent::loop() {
   this->led_handler();
-  int rssi{0};
-  if (rf_mbus_task(this->mb_packet_, rssi, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
-    int8_t rssi_dbm = this->rssi_to_dbm(rssi);
+  int rssi_dbm{0};
+  if (rf_mbus_task(this->mb_packet_, rssi_dbm, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
     uint8_t len_without_crc = crcRemove(this->mb_packet_, packetSize(this->mb_packet_[0]));
     std::vector<unsigned char> frame(this->mb_packet_, this->mb_packet_ + len_without_crc);
     std::string telegram = format_hex_pretty(frame);
@@ -278,17 +277,6 @@ void WMBusComponent::led_handler() {
       }
     }
   }
-}
-
-int8_t WMBusComponent::rssi_to_dbm(int rssi) {
-  int8_t rssi_dbm;
-  if (rssi >= 128) {
-    rssi_dbm = ((rssi - 256) / 2) - 74;
-  }
-  else {
-    rssi_dbm = ((rssi) / 2) - 74;
-  }
-  return rssi_dbm;
 }
 
 const LogString *WMBusComponent::format_to_string(Format format) {
