@@ -44,8 +44,9 @@ void WMBusComponent::setup() {
 
 void WMBusComponent::loop() {
   this->led_handler();
-  int rssi_dbm{0};
-  if (rf_mbus_task(this->mb_packet_, rssi_dbm, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
+  int8_t rssi_dbm{0};
+  uint8_t lqi{0};
+  if (rf_mbus_task(this->mb_packet_, rssi_dbm, lqi, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
     uint8_t len_without_crc = crcRemove(this->mb_packet_, packetSize(this->mb_packet_[0]));
     std::vector<unsigned char> frame(this->mb_packet_, this->mb_packet_ + len_without_crc);
     std::string telegram = format_hex_pretty(frame);
@@ -64,7 +65,7 @@ void WMBusComponent::loop() {
       //
       auto *sensor = this->wmbus_listeners_[meter_id];
       auto selected_driver = this->drivers_[sensor->type];
-      ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm T: %s", selected_driver->get_name().c_str(), meter_id, rssi_dbm, telegram.c_str());
+      ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d T: %s", selected_driver->get_name().c_str(), meter_id, rssi_dbm, lqi, telegram.c_str());
       float value{0};
       if (sensor->key.size()) {
         if (this->decrypt_telegram(frame, sensor->key)) {
@@ -151,7 +152,7 @@ void WMBusComponent::loop() {
       }
     }
     else {
-      ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm not found in configuration T: %s", meter_id, rssi_dbm, telegram.c_str());
+      ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm LQI: %d not found in configuration T: %s", meter_id, rssi_dbm, lqi, telegram.c_str());
     }
     if (!(this->clients_.empty())) {
       this->led_blink();
