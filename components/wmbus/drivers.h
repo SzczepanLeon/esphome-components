@@ -17,5 +17,6 @@
 #include "driver_evo868.h"
 #include "driver_qwater.h"
 #include "driver_itron.h"
+#include "driver_qheat.h"
 #include "driver_izar.h"
 #include "driver_elf.h"

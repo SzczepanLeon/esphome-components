@@ -27,6 +27,7 @@ void WMBusComponent::setup() {
 
   this->add_driver(new Elf());
   this->add_driver(new Izar());
+  this->add_driver(new Qheat());
   this->add_driver(new Itron());
   this->add_driver(new Evo868());
   this->add_driver(new Qwater());
