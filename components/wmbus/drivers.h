@@ -15,6 +15,7 @@
 #include "driver_bmeters.h"
 #include "driver_amiplus.h"
 #include "driver_evo868.h"
+#include "driver_qwater.h"
 #include "driver_itron.h"
 #include "driver_izar.h"
 #include "driver_elf.h"

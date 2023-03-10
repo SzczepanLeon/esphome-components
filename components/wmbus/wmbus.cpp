@@ -29,9 +29,10 @@ void WMBusComponent::setup() {
   this->add_driver(new Izar());
   this->add_driver(new Itron());
   this->add_driver(new Evo868());
-  this->add_driver(new Vario451());
+  this->add_driver(new Qwater());
   this->add_driver(new Amiplus());
   this->add_driver(new Bmeters());
+  this->add_driver(new Vario451());
   this->add_driver(new Unismart());
   this->add_driver(new Ultrimis());
   this->add_driver(new Apator08());
