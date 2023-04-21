@@ -25,24 +25,24 @@ void WMBusComponent::setup() {
     return;
   }
 
-  this->add_driver(new Elf());
-  this->add_driver(new Izar());
-  this->add_driver(new Qheat());
-  this->add_driver(new Itron());
-  this->add_driver(new Evo868());
-  this->add_driver(new Qwater());
   this->add_driver(new Amiplus());
-  this->add_driver(new Bmeters());
-  this->add_driver(new Vario451());
-  this->add_driver(new Unismart());
-  this->add_driver(new Ultrimis());
   this->add_driver(new Apator08());
-  this->add_driver(new Mkradio3());
-  this->add_driver(new Mkradio4());
   this->add_driver(new Apator162());
   this->add_driver(new ApatorEITN());
-  this->add_driver(new Hydrocalm3());
+  this->add_driver(new Bmeters());
+  this->add_driver(new Elf());
+  this->add_driver(new Evo868());
   this->add_driver(new FhkvdataIII());
+  this->add_driver(new Hydrocalm3());
+  this->add_driver(new Itron());
+  this->add_driver(new Izar());
+  this->add_driver(new Mkradio3());
+  this->add_driver(new Mkradio4());
+  this->add_driver(new Qheat());
+  this->add_driver(new Qwater());
+  this->add_driver(new Ultrimis());
+  this->add_driver(new Unismart());
+  this->add_driver(new Vario451());
 }
 
 void WMBusComponent::loop() {
