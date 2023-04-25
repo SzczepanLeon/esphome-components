@@ -3,10 +3,11 @@
 This repository contains a collection of my custom components
 for [ESPHome](https://esphome.io/).
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/szczepan){:target="_blank"}
+<p align="center">
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/szczepan)
 
-[!["Kup mi kawę"](https://buycoffee.to/logo/buycoffee.svg)](https://buycoffee.to/szczepanleon){:target="_blank"}
-
+[!["Kup mi kawę"](https://buycoffee.to/logo/buycoffee.svg)](https://buycoffee.to/szczepanleon)
+</p>
 
 ## 1. Usage
 
