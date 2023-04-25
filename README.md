@@ -5,7 +5,9 @@ for [ESPHome](https://esphome.io/).
 
 <p align="center">
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/szczepan)
-
+</p>
+</br>
+<p align="center">
 [!["Kup mi kawę"](https://buycoffee.to/logo/buycoffee.svg)](https://buycoffee.to/szczepanleon)
 </p>
 
