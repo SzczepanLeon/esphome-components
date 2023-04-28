@@ -29,6 +29,7 @@ CONF_WMBUS_ID = "wmbus_id"
 CODEOWNERS = ["@SzczepanLeon"]
 
 DEPENDENCIES = ["time"]
+AUTO_LOAD = ["sensor"]
 
 wmbus_ns = cg.esphome_ns.namespace('wmbus')
 WMBusComponent = wmbus_ns.class_('WMBusComponent', cg.Component)
