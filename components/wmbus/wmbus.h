@@ -6,6 +6,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/network/ip_address.h"
 #include "esphome/components/time/real_time_clock.h"
+#include "esphome/components/sensor/sensor.h"
 
 #include <map>
 #include <string>
@@ -15,7 +16,6 @@
 #include "crc.hpp"
 #include "mbus_packet.hpp"
 #include "utils.hpp"
-#include "wmbus_utils.hpp"
 
 #include "drivers.h"
 
@@ -45,11 +45,19 @@ struct Client {
 
 class WMBusListener {
   public:
+    WMBusListener(const uint32_t id, const std::string type, const std::string key);
     uint32_t id;
     std::string type;
     std::vector<unsigned char> key{};
-    virtual void publish_value(const float value) {};
-    virtual void publish_value(const std::string &value) {};
+    std::map<std::string, sensor::Sensor *> sensors_{};
+    void add_sensor(std::string type, sensor::Sensor *sensor) {
+      this->sensors_[type] = sensor;
+    };
+
+    void dump_config();
+    int char_to_int(char input);
+    bool hex_to_bin(const std::string &src, std::vector<unsigned char> *target) { return hex_to_bin(src.c_str(), target); };
+    bool hex_to_bin(const char* src, std::vector<unsigned char> *target);
 };
 
 struct Cc1101 {
@@ -63,9 +71,6 @@ struct Cc1101 {
 
 class WMBusComponent : public Component {
   public:
-    WMBusComponent();
-    ~WMBusComponent();
-
     void setup() override;
     void loop() override;
     void dump_config() override;
@@ -104,16 +109,16 @@ class WMBusComponent : public Component {
     HighFrequencyLoopRequester high_freq_;
     GPIOPin *led_pin_{nullptr};
     Cc1101 spi_conf_{};
-    uint8_t mb_packet_[291];
     std::map<uint32_t, WMBusListener *> wmbus_listeners_{};
     std::map<std::string, Driver *> drivers_{};
     std::vector<Client> clients_{};
     WiFiClient tcp_client_;
     WiFiUDP udp_client_;
-    time::RealTimeClock *time_;
+    time::RealTimeClock *time_{nullptr};
     uint32_t led_blink_time_{0};
     uint32_t led_on_millis_{0};
     bool led_on_{false};
+    rf_mbus rf_mbus_;
 };
 
 }  // namespace wmbus

@@ -13,18 +13,30 @@
 struct Vario451: Driver
 {
   Vario451() : Driver(std::string("vario451")) {};
-  bool get_value(std::vector<unsigned char> &telegram, float &total_usage) override {
-    bool ret_val = true;
-    size_t i = 11;
+  virtual esphome::optional<std::map<std::string, float>> get_values(std::vector<unsigned char> &telegram) override {
+    std::map<std::string, float> ret_val{};
 
-    total_usage = ((((uint32_t)telegram[i+4] << 8) + (uint32_t)telegram[i+3]) / 1000.0) + 
-                  ((((uint32_t)telegram[i+8] << 8) + (uint32_t)telegram[i+7]) / 1000.0);
-    // in kWh
-    total_usage = total_usage * 277.777 ;
+    add_to_map(ret_val, "total_heating_kwh", this->total_heating_kwh(telegram));
 
-    return ret_val;
+    if (ret_val.size() > 0) {
+      return ret_val;
+    }
+    else {
+      return {};
+    }
   };
 
 private:
+  esphome::optional<float> total_heating_kwh(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
+    float usage = 0;
+    size_t i = 11;
 
+    usage = ((((uint32_t)telegram[i+4] << 8) + (uint32_t)telegram[i+3]) / 1000.0) + 
+            ((((uint32_t)telegram[i+8] << 8) + (uint32_t)telegram[i+7]) / 1000.0);
+    // in kWh
+    ret_val = usage * 277.777 ;
+
+    return ret_val;
+  };
 };

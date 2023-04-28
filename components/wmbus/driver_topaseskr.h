@@ -1,5 +1,5 @@
 /*
-  Based on: https://github.com/weetmuts/wmbusmeters/blob/master/src/driver_itron.cc
+  Based on: https://github.com/wmbusmeters/wmbusmeters/blob/master/src/driver_topaseskr.cc
   Copyright (C) 2017-2022 Fredrik Öhrström (gpl-3.0-or-later)
 */
 
@@ -10,9 +10,9 @@
 #include <vector>
 #include <string>
 
-struct Itron: Driver
+struct TopasESKR: Driver
 {
-  Itron() : Driver(std::string("itron")) {};
+  TopasESKR() : Driver(std::string("topaseskr")) {};
   virtual esphome::optional<std::map<std::string, float>> get_values(std::vector<unsigned char> &telegram) override {
     std::map<std::string, float> ret_val{};
 

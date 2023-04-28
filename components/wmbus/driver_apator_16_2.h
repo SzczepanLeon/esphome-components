@@ -13,8 +13,22 @@
 struct Apator162: Driver
 {
   Apator162() : Driver(std::string("apator162")) {};
-  bool get_value(std::vector<unsigned char> &telegram, float &water_usage) override {
-    bool ret_val = false;
+  virtual esphome::optional<std::map<std::string, float>> get_values(std::vector<unsigned char> &telegram) override {
+    std::map<std::string, float> ret_val{};
+
+    add_to_map(ret_val, "total_water_m3", this->get_total_water_m3(telegram));
+
+    if (ret_val.size() > 0) {
+      return ret_val;
+    }
+    else {
+      return {};
+    }
+  };
+
+private:
+  esphome::optional<float> get_total_water_m3(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
     uint32_t usage = 0;
     size_t i = 25;
     while (i < telegram.size()) {
@@ -30,8 +44,7 @@ struct Apator162: Driver
         // We found the register representing the total
         usage = ((uint32_t)telegram[i+3] << 24) | ((uint32_t)telegram[i+2] << 16) |
                 ((uint32_t)telegram[i+1] << 8)  | ((uint32_t)telegram[i+0]);
-        water_usage = usage / 1000.0;
-        ret_val = true;
+        ret_val = usage / 1000.0;
         break;
       }
       i += size;
@@ -39,7 +52,6 @@ struct Apator162: Driver
     return ret_val;
   };
 
-private:
   int registerSize(int c)
   {
     switch (c)

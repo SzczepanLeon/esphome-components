@@ -13,26 +13,18 @@
 struct Ultrimis: Driver
 {
   Ultrimis() : Driver(std::string("ultrimis")) {};
-  bool get_value(std::vector<unsigned char> &telegram, float &water_usage) override {
-    bool ret_val = false;
-    uint32_t usage = 0;
-    size_t i = 17;
-    uint32_t total_register = 0x0413;
-    while (i < telegram.size()) {
-      uint32_t c = (((uint32_t)telegram[i+0] << 8) | ((uint32_t)telegram[i+1]));
-      if (c == total_register) {
-        i += 2;
-        usage = ((uint32_t)telegram[i+3] << 24) | ((uint32_t)telegram[i+2] << 16) |
-                ((uint32_t)telegram[i+1] << 8)  | ((uint32_t)telegram[i+0]);
-        water_usage = usage / 1000.0;
-        ret_val = true;
-        break;
-      }
-      i++;
+  virtual esphome::optional<std::map<std::string, float>> get_values(std::vector<unsigned char> &telegram) override {
+    std::map<std::string, float> ret_val{};
+
+    add_to_map(ret_val, "total_water_m3", this->get_0413(telegram));
+
+    if (ret_val.size() > 0) {
+      return ret_val;
     }
-    return ret_val;
+    else {
+      return {};
+    }
   };
 
 private:
-
 };

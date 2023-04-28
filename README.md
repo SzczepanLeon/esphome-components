@@ -25,9 +25,82 @@ Component to receive wMBus frame (via CC1101), create HA sensor and send decoded
 You can also use this component with wmbusmeters HA addon:
 https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbusgw.md
 
+> **_NOTE:_**  From version 2.0 YAML configuration is changed. You can define multiple sensors for one meter.
+
 > **_NOTE:_**  From version 1.3 features from `wmbusgw` are included in this component. It means that you need *time* component in yaml.
 
-#### 2.1.1. Example
+#### 2.1.1. Example for version 2.x
+
+```yaml
+time:
+  - platform: sntp
+    id: time_sntp
+
+external_components:
+  - source: github://SzczepanLeon/esphome-components@main
+    components: [ wmbus ]
+
+wmbus:
+  mosi_pin: GPIO13
+  miso_pin: GPIO5
+  clk_pin:  GPIO2
+  cs_pin:   GPIO14
+  gdo0_pin: GPIO15
+  gdo2_pin: GPIO16
+
+  led_pin: GPIO0
+  led_blink_time: "1s"
+
+  clients:
+    - name: "wmbusmeters"
+      ip_address: "10.0.0.1"
+      port: 7227
+
+sensor:
+  - platform: wmbus
+    meter_id: 0x24202020
+    type: apator162
+    key: "00000000000000000000000000000000"
+    lqi:
+      name: "My lqi"
+    rssi:
+      name: "My RSSI"
+    total_water_m3:
+      name: "My cold water"
+
+  - platform: wmbus
+    meter_id: 0x12345678
+    type: unismart
+    lqi:
+      name: "My LQI"
+    rssi:
+      name: "My RSSI"
+    total_gas_m3:
+      name: "My gas"
+```
+
+Supported sensors:
+ - rssi
+ - lqi
+ - total_water_m3
+ - total_energy_consumption_kwh
+ - current_power_consumption_kw
+ - total_energy_production_kwh
+ - current_power_production_kw
+ - current_hca
+ - previous_hca
+ - temp_room_avg_c
+ - total_heating_kwh
+ - total_gas_m3
+ - flow_temperature_c
+ - return_temperature_c
+ - voltage_at_phase_1_v
+ - voltage_at_phase_2_v
+ - voltage_at_phase_3_v
+
+ Detailed documentation is ongoing ...
+
+#### 2.1.2. Example for version 1.x
 
 ```yaml
 time:
@@ -92,7 +165,7 @@ Sensor
 ******
 
 - **meter_id** (**Required**, int): Meter ID (usually from sticker). Can be specified as decimal or hex.
-- **type** (**Required**, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `ultrimis`, `unismart`, `vario451` are supported.
+- **type** (**Required**, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 

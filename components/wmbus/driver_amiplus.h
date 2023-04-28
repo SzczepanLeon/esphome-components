@@ -13,18 +13,58 @@
 struct Amiplus: Driver
 {
   Amiplus() : Driver(std::string("amiplus")) {};
-  bool get_value(std::vector<unsigned char> &telegram, float &total_usage) override {
-    bool ret_val = false;
+  virtual esphome::optional<std::map<std::string, float>> get_values(std::vector<unsigned char> &telegram) override {
+    std::map<std::string, float> ret_val{};
+
+    add_to_map(ret_val, "total_energy_consumption_kwh", this->get_total_energy_consumption_kwh(telegram));
+    add_to_map(ret_val, "current_power_consumption_kw", this->get_current_power_consumption_kw(telegram));
+    add_to_map(ret_val, "total_energy_production_kwh", this->get_total_energy_production_kwh(telegram));
+    add_to_map(ret_val, "current_power_production_kw", this->get_current_power_production_kw(telegram));
+    add_to_map(ret_val, "voltage_at_phase_1_v", this->get_voltage_at_phase_v(1, telegram));
+    add_to_map(ret_val, "voltage_at_phase_2_v", this->get_voltage_at_phase_v(2, telegram));
+    add_to_map(ret_val, "voltage_at_phase_3_v", this->get_voltage_at_phase_v(3, telegram));
+
+    if (ret_val.size() > 0) {
+      return ret_val;
+    }
+    else {
+      return {};
+    }
+  };
+
+private:
+  esphome::optional<float> get_voltage_at_phase_v(uint8_t phase, std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
     uint32_t usage = 0;
-    size_t i = 17;
+    size_t i = 11;
+    uint32_t total_register = 0x0AFDC9FC;
+    while (i < telegram.size()) {
+      uint32_t c = (((uint32_t)telegram[i+0] << 24) | ((uint32_t)telegram[i+1] << 16) |
+                    ((uint32_t)telegram[i+2] << 8) | ((uint32_t)telegram[i+3]));
+      if (c == total_register) {
+        i += 5;
+        if ((uint8_t)telegram[i-1] == phase) {
+          usage = bcd_2_int(telegram, i, 2);
+          ret_val = usage / 1.0;
+          break;
+        }
+      }
+      i++;
+    }
+    return ret_val;
+  };
+
+  esphome::optional<float> get_total_energy_consumption_kwh(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
+    uint32_t usage = 0;
+    size_t i = 11;
     uint32_t total_register = 0x0E03;
     while (i < telegram.size()) {
       uint32_t c = (((uint32_t)telegram[i+0] << 8) | ((uint32_t)telegram[i+1]));
       if (c == total_register) {
         i += 2;
         usage = bcd_2_int(telegram, i, 6);
-        total_usage = usage / 1000.0;
-        ret_val = true;
+        ret_val = usage / 1000.0;
         break;
       }
       i++;
@@ -32,20 +72,57 @@ struct Amiplus: Driver
     return ret_val;
   };
 
-private:
-  uint32_t bcd_2_int(const std::vector<unsigned char> &telegram, size_t start, size_t length) {
-    uint32_t result{0};
-    uint16_t l_half{0};
-    uint16_t h_half{0};
-    uint32_t factor{1};
-    uint8_t i{0};
-    while (i < length) {
-      h_half = (telegram[start + i] & 0xF0) >> 4;
-      l_half = telegram[start + i] & 0x0F;
-      result += ((h_half * 10) + l_half) * factor;
-      factor *= 100;
+  esphome::optional<float> get_current_power_consumption_kw(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
+    uint32_t usage = 0;
+    size_t i = 11;
+    uint32_t total_register = 0x0B2B;
+    while (i < telegram.size()) {
+      uint32_t c = (((uint32_t)telegram[i+0] << 8) | ((uint32_t)telegram[i+1]));
+      if (c == total_register) {
+        i += 2;
+        usage = bcd_2_int(telegram, i, 3);
+        ret_val = usage / 1000.0;
+        break;
+      }
       i++;
     }
-    return result;
-  }
+    return ret_val;
+  };
+
+  esphome::optional<float> get_total_energy_production_kwh(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
+    uint32_t usage = 0;
+    size_t i = 11;
+    uint32_t total_register = 0x0E833C;
+    while (i < telegram.size()) {
+      uint32_t c = (((uint32_t)telegram[i+0] << 16) | ((uint32_t)telegram[i+1] << 8) | ((uint32_t)telegram[i+2]));
+      if (c == total_register) {
+        i += 3;
+        usage = bcd_2_int(telegram, i, 6);
+        ret_val = usage / 1000.0;
+        break;
+      }
+      i++;
+    }
+    return ret_val;
+  };
+
+  esphome::optional<float> get_current_power_production_kw(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
+    uint32_t usage = 0;
+    size_t i = 11;
+    uint32_t total_register = 0x0BAB3C;
+    while (i < telegram.size()) {
+      uint32_t c = (((uint32_t)telegram[i+0] << 16) | ((uint32_t)telegram[i+1] << 8) | ((uint32_t)telegram[i+2]));
+      if (c == total_register) {
+        i += 3;
+        usage = bcd_2_int(telegram, i, 3);
+        ret_val = usage / 1000.0;
+        break;
+      }
+      i++;
+    }
+    return ret_val;
+  };
 };

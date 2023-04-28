@@ -14,20 +14,31 @@
 struct Izar: Driver
 {
   Izar() : Driver(std::string("izar")) {};
-  bool get_value(std::vector<unsigned char> &telegram, float &water_usage) override {
-    //====DECRYPT====
-    bool ret_val = false;
+  virtual esphome::optional<std::map<std::string, float>> get_values(std::vector<unsigned char> &telegram) override {
+    std::map<std::string, float> ret_val{};
+
+    add_to_map(ret_val, "total_water_m3", this->get_total_water_m3(telegram));
+
+    if (ret_val.size() > 0) {
+      return ret_val;
+    }
+    else {
+      return {};
+    }
+  };
+
+private:
+  esphome::optional<float> get_total_water_m3(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
     uint8_t *decoded = reinterpret_cast<uint8_t*>(telegram.data());
     uint8_t decoded_len = telegram.size();
     uint8_t decrypted[64] = {0};
     if ((this->decrypt(decoded, decoded_len, decrypted)) > 0) {
-      water_usage = (this->uintFromBytesLittleEndian(decrypted + 1)) / 1000.0;
-      ret_val = true;
+      ret_val = (this->uintFromBytesLittleEndian(decrypted + 1)) / 1000.0;
     }
     return ret_val;
   };
 
-private:
   const uint8_t decoder[64] = {
     0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
     0xFF,0xFF,0xFF,0x03,0xFF,0x01,0x02,0xFF,

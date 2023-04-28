@@ -13,16 +13,27 @@
 struct Mkradio3: Driver
 {
   Mkradio3() : Driver(std::string("mkradio3")) {};
-  bool get_value(std::vector<unsigned char> &telegram, float &water_usage) override {
-    bool ret_val = true;
-    size_t i = 11;
+  virtual esphome::optional<std::map<std::string, float>> get_values(std::vector<unsigned char> &telegram) override {
+    std::map<std::string, float> ret_val{};
 
-    water_usage = ((((uint32_t)telegram[i+4] << 8) + (uint32_t)telegram[i+3]) / 10.0) + 
-                  ((((uint32_t)telegram[i+8] << 8) + (uint32_t)telegram[i+7]) / 10.0);
+    add_to_map(ret_val, "total_water_m3", this->get_total_water_m3(telegram));
 
-    return ret_val;
+    if (ret_val.size() > 0) {
+      return ret_val;
+    }
+    else {
+      return {};
+    }
   };
 
 private:
+  esphome::optional<float> get_total_water_m3(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
+    size_t i = 11;
 
+    ret_val = ((((uint32_t)telegram[i+4] << 8) + (uint32_t)telegram[i+3]) / 10.0) + 
+              ((((uint32_t)telegram[i+8] << 8) + (uint32_t)telegram[i+7]) / 10.0);
+
+    return ret_val;
+  };
 };

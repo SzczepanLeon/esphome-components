@@ -6,20 +6,16 @@ namespace wmbus {
 
 static const char *TAG = "wmbus";
 
-WMBusComponent::WMBusComponent() {}
-WMBusComponent::~WMBusComponent() {}
-
 void WMBusComponent::setup() {
   this->high_freq_.start();
   if (this->led_pin_ != nullptr) {
     this->led_pin_->setup();
     this->led_pin_->digital_write(false);
-    led_on_ = false;
+    this->led_on_ = false;
   }
-  memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
-  if (!rf_mbus_init(this->spi_conf_.mosi->get_pin(), this->spi_conf_.miso->get_pin(),
-                    this->spi_conf_.clk->get_pin(), this->spi_conf_.cs->get_pin(),
-                    this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
+  if (!rf_mbus_.init(this->spi_conf_.mosi->get_pin(), this->spi_conf_.miso->get_pin(),
+                     this->spi_conf_.clk->get_pin(), this->spi_conf_.cs->get_pin(),
+                     this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
     this->mark_failed();
     ESP_LOGE(TAG, "CC1101 initialization failed.");
     return;
@@ -40,6 +36,7 @@ void WMBusComponent::setup() {
   this->add_driver(new Mkradio4());
   this->add_driver(new Qheat());
   this->add_driver(new Qwater());
+  this->add_driver(new TopasESKR());
   this->add_driver(new Ultrimis());
   this->add_driver(new Unismart());
   this->add_driver(new Vario451());
@@ -47,115 +44,84 @@ void WMBusComponent::setup() {
 
 void WMBusComponent::loop() {
   this->led_handler();
-  int8_t rssi_dbm{0};
-  uint8_t lqi{0};
-  if (rf_mbus_task(this->mb_packet_, rssi_dbm, lqi, this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
-    uint8_t len_without_crc = crcRemove(this->mb_packet_, packetSize(this->mb_packet_[0]));
-    std::vector<unsigned char> frame(this->mb_packet_, this->mb_packet_ + len_without_crc);
+  if (rf_mbus_.task()) {
+    WMbusFrame mbus_data = rf_mbus_.get_frame();
+    std::vector<unsigned char> frame = mbus_data.frame;
     std::string telegram = format_hex_pretty(frame);
     telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
 
-    // ToDo: add check for manufactures
+    // ToDo: add manufactures check
     uint32_t meter_id = ((uint32_t)frame[7] << 24) | ((uint32_t)frame[6] << 16) |
                         ((uint32_t)frame[5] << 8)  | ((uint32_t)frame[4]);
 
     if (this->wmbus_listeners_.count(meter_id) > 0) {
-      // for debug
-      WMBusListener *text_debug{nullptr};
-      if (this->wmbus_listeners_.count(0xAFFFFFF5) > 0) {
-        text_debug = this->wmbus_listeners_[0xAFFFFFF5];
-      }
-      //
       auto *sensor = this->wmbus_listeners_[meter_id];
       auto selected_driver = this->drivers_[sensor->type];
-      ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d T: %s", selected_driver->get_name().c_str(), meter_id, rssi_dbm, lqi, telegram.c_str());
-      float value{0};
+      ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s T: %s",
+               selected_driver->get_name().c_str(),
+               meter_id,
+               mbus_data.rssi,
+               mbus_data.lqi,
+               mode_to_string(mbus_data.mode).c_str(),
+               telegram.c_str());
       if (sensor->key.size()) {
         if (this->decrypt_telegram(frame, sensor->key)) {
           std::string decrypted_telegram = format_hex_pretty(frame);
-          decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'), decrypted_telegram.end());
+          decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
+                                   decrypted_telegram.end());
           ESP_LOGD(TAG, "Decrypted T : %s", decrypted_telegram.c_str());
         }
         else {
           std::string decrypted_telegram = format_hex_pretty(frame);
-          decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'), decrypted_telegram.end());
+          decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
+                                   decrypted_telegram.end());
           std::string key = format_hex_pretty(sensor->key);
           key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
           if (key.size()) {
             key.erase(key.size() - 5);
           }
-          ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '%s'", meter_id, selected_driver->get_name().c_str(), key.c_str());
+          ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '%s'",
+                   meter_id,
+                   selected_driver->get_name().c_str(),
+                   key.c_str());
           ESP_LOGE(TAG, "T : %s", telegram.c_str());
           ESP_LOGE(TAG, "T': %s", decrypted_telegram.c_str());
         }
       }
-      if (selected_driver->get_value(frame, value)) {
-        sensor->publish_value(value);
-        // for debug
-        if (text_debug != nullptr) {
-          if (text_debug->type == "all") {
-            std::string prefix = "telegram for ";
-            prefix += sensor->type;
-            text_debug->publish_value(prefix);
-            std::string telegramik;
-            int split = 100;
-            int start = 0;
-            int part = 1;
-            while (start < telegram.size()) {
-              telegramik = std::to_string(part++) + "  | ";
-              telegramik += telegram.substr(start, split);
-              text_debug->publish_value(telegramik);
-              start += split;
-            }
-            std::string decoded_telegramik = format_hex_pretty(frame);
-            split = 75;
-            start = 0;
-            part = 1;
-            while (start < decoded_telegramik.size()) {
-              telegramik = std::to_string(part++) + "' | ";
-              telegramik += decoded_telegramik.substr(start, split);
-              text_debug->publish_value(telegramik);
-              start += split;
-              split = 99;
-            }
-          }
-          else if ((value > 500000) && (sensor->type == "apator162")) {
-            text_debug->publish_value("apator162 strange value");
-            std::string telegramik;
-            int split = 100;
-            int start = 0;
-            int part = 1;
-            while (start < telegram.size()) {
-              telegramik = std::to_string(part++) + "  | ";
-              telegramik += telegram.substr(start, split);
-              text_debug->publish_value(telegramik);
-              start += split;
-            }
-            std::string decoded_telegramik = format_hex_pretty(frame);
-            split = 75;
-            start = 0;
-            part = 1;
-            while (start < decoded_telegramik.size()) {
-              telegramik = std::to_string(part++) + "' | ";
-              telegramik += decoded_telegramik.substr(start, split);
-              text_debug->publish_value(telegramik);
-              start += split;
-              split = 99;
-            }
+      auto mapValues = selected_driver->get_values(frame);
+      if (mapValues.has_value()) {
+        if (this->wmbus_listeners_[meter_id]->sensors_.count("lqi") > 0) {
+          this->wmbus_listeners_[meter_id]->sensors_["lqi"]->publish_state(mbus_data.lqi);
+        }
+        if (this->wmbus_listeners_[meter_id]->sensors_.count("rssi") > 0) {
+          this->wmbus_listeners_[meter_id]->sensors_["rssi"]->publish_state(mbus_data.rssi);
+        }
+        for (const auto &ele : mapValues.value()) {
+        }
+        for (const auto &ele : mapValues.value()) {
+          if (this->wmbus_listeners_[meter_id]->sensors_.count(ele.first) > 0) {
+            this->wmbus_listeners_[meter_id]->sensors_[ele.first]->publish_state(ele.second);
           }
         }
-        //
         this->led_blink();
       }
       else {
         std::string not_ok_telegram = format_hex_pretty(frame);
-        not_ok_telegram.erase(std::remove(not_ok_telegram.begin(), not_ok_telegram.end(), '.'), not_ok_telegram.end());
-        ESP_LOGE(TAG, "Can't get value from telegram for ID [0x%08X] '%s'", meter_id, selected_driver->get_name().c_str());
+        not_ok_telegram.erase(std::remove(not_ok_telegram.begin(), not_ok_telegram.end(), '.'),
+                              not_ok_telegram.end());
+        ESP_LOGE(TAG, "Can't get value from telegram for ID [0x%08X] '%s'",
+                 meter_id, 
+                 selected_driver->get_name().c_str());
         ESP_LOGE(TAG, "T : %s", not_ok_telegram.c_str());
       }
     }
     else {
-      ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm LQI: %d not found in configuration T: %s", meter_id, rssi_dbm, lqi, telegram.c_str());
+      ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s not found in configuration T: %s",
+               meter_id,
+               mbus_data.rssi,
+               mbus_data.lqi,
+               mode_to_string(mbus_data.mode).c_str(),
+               telegram.c_str());
     }
     if (!(this->clients_.empty())) {
       this->led_blink();
@@ -168,7 +134,7 @@ void WMBusComponent::loop() {
               case TRANSPORT_TCP:
                 {
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
-                    this->tcp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
+                    // this->tcp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
                     this->tcp_client_.stop();
                   }
                 }
@@ -176,7 +142,7 @@ void WMBusComponent::loop() {
               case TRANSPORT_UDP:
                 {
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
-                  this->udp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
+                  // this->udp_client_.write((const uint8_t *) this->mb_packet_, len_without_crc);
                   this->udp_client_.endPacket();
                 }
                 break;
@@ -195,9 +161,12 @@ void WMBusComponent::loop() {
               case TRANSPORT_TCP:
                 {
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
-                    this->tcp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time, rssi_dbm);
-                    for (int i = 0; i < len_without_crc; i++){
-                      this->tcp_client_.printf("%02X", this->mb_packet_[i]);
+                    this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
+                                             mode_to_string(mbus_data.mode).c_str(),
+                                             telegram_time,
+                                             mbus_data.rssi);
+                    for (int i = 0; i < frame.size(); i++) {
+                      this->tcp_client_.printf("%02X", frame[i]);
                     }
                     this->tcp_client_.print("\n");
                     this->tcp_client_.stop();
@@ -207,9 +176,12 @@ void WMBusComponent::loop() {
               case TRANSPORT_UDP:
                 {
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
-                  this->udp_client_.printf("T1;1;1;%s;%d;;;0x", telegram_time, rssi_dbm);
-                  for (int i = 0; i < len_without_crc; i++){
-                    this->udp_client_.printf("%02X", this->mb_packet_[i]);
+                  this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
+                                           mode_to_string(mbus_data.mode).c_str(),
+                                           telegram_time,
+                                           mbus_data.rssi);
+                  for (int i = 0; i < frame.size(); i++) {
+                    this->tcp_client_.printf("%02X", frame[i]);
                   }
                   this->udp_client_.print("\n");
                   this->udp_client_.endPacket();
@@ -226,7 +198,6 @@ void WMBusComponent::loop() {
           break;
       }
     }
-    memset(this->mb_packet_, 0, sizeof(this->mb_packet_));
   }
 }
 
@@ -267,20 +238,20 @@ void WMBusComponent::add_driver(Driver *driver) {
 
 void WMBusComponent::led_blink() {
   if (this->led_pin_ != nullptr) {
-    if (!led_on_) {
+    if (!this->led_on_) {
       this->led_on_millis_ = millis();
       this->led_pin_->digital_write(true);
-      led_on_ = true;
+      this->led_on_ = true;
     }
   }
 }
 
 void WMBusComponent::led_handler() {
   if (this->led_pin_ != nullptr) {
-    if (led_on_) {
+    if (this->led_on_) {
       if ((millis() - this->led_on_millis_) >= this->led_blink_time_) {
         this->led_pin_->digital_write(false);
-        led_on_ = false;
+        this->led_on_ = false;
       }
     }
   }
@@ -340,10 +311,69 @@ void WMBusComponent::dump_config() {
     }
     drivers.erase(drivers.size() - 2);
     ESP_LOGCONFIG(TAG, "  Available drivers:%s", drivers.c_str());
+    for (const auto &ele : this->wmbus_listeners_) {
+      ele.second->dump_config();
+    }
   }
   else {
-    ESP_LOGCONFIG(TAG, "  Check connection to CC1101!");
+    ESP_LOGE(TAG, "  Check connection to CC1101!");
   }
+}
+
+///////////////////////////////////////
+
+void WMBusListener::dump_config() {
+  std::string key = format_hex_pretty(this->key);
+  key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
+  if (key.size()) {
+    key.erase(key.size() - 5);
+  }
+  ESP_LOGCONFIG(TAG, "  Meter:");
+  ESP_LOGCONFIG(TAG, "    ID: %zu [0x%08X]", this->id, this->id);
+  ESP_LOGCONFIG(TAG, "    Type: %s", this->type.c_str());
+  ESP_LOGCONFIG(TAG, "    Key: '%s'", key.c_str());
+  for (const auto &ele : this->sensors_) {
+    LOG_SENSOR("    ", "Sensor", ele.second);
+  }
+}
+
+WMBusListener::WMBusListener(const uint32_t id, const std::string type, const std::string key) {
+  this->id = id;
+  this->type = type;
+  hex_to_bin(key, &(this->key));
+}
+
+int WMBusListener::char_to_int(char input)
+{
+  if(input >= '0' && input <= '9') {
+    return input - '0';
+  }
+  if(input >= 'A' && input <= 'F') {
+    return input - 'A' + 10;
+  }
+  if(input >= 'a' && input <= 'f') {
+    return input - 'a' + 10;
+  }
+  return -1;
+}
+
+bool WMBusListener::hex_to_bin(const char* src, std::vector<unsigned char> *target)
+{
+  if (!src) return false;
+  while(*src && src[1]) {
+    if (*src == ' ' || *src == '#' || *src == '|' || *src == '_') {
+      // Ignore space and hashes and pipes and underlines.
+      src++;
+    } 
+    else {
+      int hi = char_to_int(*src);
+      int lo = char_to_int(src[1]);
+      if (hi<0 || lo<0) return false;
+      target->push_back(hi*16 + lo);
+      src += 2;
+    }
+  }
+  return true;
 }
 
 }  // namespace wmbus
