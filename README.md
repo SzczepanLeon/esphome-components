@@ -165,7 +165,7 @@ Sensor
 ******
 
 - **meter_id** (**Required**, int): Meter ID (usually from sticker). Can be specified as decimal or hex.
-- **type** (**Required**, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported.
+- **type** (**Required**, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
