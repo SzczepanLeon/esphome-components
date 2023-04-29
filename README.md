@@ -108,7 +108,7 @@ time:
     id: time_sntp
 
 external_components:
-  - source: github://SzczepanLeon/esphome-components@main
+  - source: github://SzczepanLeon/esphome-components@1.5.1
     components: [ wmbus ]
 
 wmbus:
