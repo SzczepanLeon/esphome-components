@@ -32,7 +32,7 @@ AUTO_LOAD = ["wmbus"]
 
 CONF_METER_ID = "meter_id"
 CONF_LISTENER_ID = "listener_id"
-CONF_USE_PREFIX = "use_prefix"
+CONF_ADD_PREFIX = "add_prefix"
 
 from .. import (
     WMBusComponent,
@@ -67,7 +67,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Required(CONF_METER_ID): cv.hex_int,
         cv.Optional(CONF_TYPE, default="unknown"): cv.string_strict,
         cv.Optional(CONF_KEY, default=""): my_key,
-        cv.Optional(CONF_USE_PREFIX, default=True): cv.boolean,
+        cv.Optional(CONF_ADD_PREFIX, default=True): cv.boolean,
         cv.Optional("rssi"): sensor.sensor_schema(
             accuracy_decimals=0,
             unit_of_measurement=UNIT_DECIBEL_MILLIWATT,
@@ -195,10 +195,9 @@ async def to_code(config):
             continue
         id = conf[CONF_ID]
         if id and id.type == sensor.Sensor:
-            if config[CONF_USE_PREFIX]:
+            if config[CONF_ADD_PREFIX]:
                 conf['name'] = str(config[CONF_METER_ID]) + " " + conf['name']
             sens = await sensor.new_sensor(conf)
-            print(conf['name'])
             cg.add(var.add_sensor(key, sens))
     wmbus = await cg.get_variable(config[CONF_WMBUS_ID])
     cg.add(wmbus.register_wmbus_listener(var))
