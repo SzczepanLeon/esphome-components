@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <string>
+#include <map>
 #include "esphome/core/optional.h"
 
 struct Driver
