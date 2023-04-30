@@ -113,8 +113,8 @@ In wmbus platform:
   - **transport** (*Optional*): TCP or UDP. Defaults to ``TCP``.
 
 
-</br>
-Sensor
+
+Meter/sensor:
 ******
 
 - **meter_id** (**Required**, int): Meter ID. Can be specified as decimal or hex.
@@ -127,8 +127,9 @@ Sensor
   - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
 
-</br>
+
 Supported sensors (sensor_type) for meters:
+******
 - amiplus
   - total_energy_consumption_kwh
   - current_power_consumption_kw
