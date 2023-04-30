@@ -23,7 +23,7 @@ external_components:
 
 Component to receive wMBus frame (via CC1101), create HA sensor and send decoded value.
 You can also use this component with wmbusmeters HA addon:
-https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbusgw.md
+https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
 > **_NOTE:_**  From version 2.0 YAML configuration is changed. You can define multiple sensors for one meter.
 
