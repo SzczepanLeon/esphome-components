@@ -70,17 +70,62 @@ sensor:
 
   - platform: wmbus
     meter_id: 0x12345678
-    type: unismart
-    lqi:
-      name: "My LQI"
+    type: amiplus
     rssi:
       name: "My RSSI"
-    total_gas_m3:
-      name: "My gas"
+    total_energy_consumption_kwh:
+      name: "My consumption in kWh"
+      icon: "mdi:power-plug"
+    voltage_at_phase_1_v:
+      name: "My V1"
+
+  - platform: wmbus
+    meter_id: 0xAB125432
+    type: bmeters
+    key: "00004000000300000500001000000600"
+    lqi:
+      name: "My lqi"
+    total_water_m3:
+      id: "my_hot_water"
+      filters:
+        - offset: 325.0
 ```
 
 
-Supported sensors for meters:
+Configuration variables:
+------------------------
+
+In wmbus platform:
+
+- **mosi_pin** (*Optional*): CC1101 MOSI pin connection. Defaults to ``GPIO13``.
+- **miso_pin** (*Optional*): CC1101 MISO pin connection. Defaults to ``GPIO12``.
+- **clk_pin** (*Optional*): CC1101 CLK pin connection. Defaults to ``GPIO14``.
+- **cs_pin** (*Optional*): CC1101 CS pin connection. Defaults to ``GPIO2``.
+- **gdo0_pin** (*Optional*): CC1101 GDO0 pin connection. Defaults to ``GPIO5``.
+- **gdo2_pin** (*Optional*): CC1101 GDO2 pin connection. Defaults to ``GPIO4``.
+- **led_pin** (*Optional*): Pin where LED is connected. It will blink on each telegram. You can use all options from [Pin Schema](https://esphome.io/guides/configuration-types.html#config-pin-schema).
+- **led_blink_time** (*Optional*): How long LED will stay ON. Defaults to ``300 ms``.
+- **clients** (*Optional*):
+  - **name** (**Required**): The name for this client.
+  - **ip_address** (**Required**): IP address.
+  - **port** (**Required**): Port number.
+  - **format** (*Optional*): Telegram format to send. HEX or RTLWMBUS. Defaults to ``RTLWMBUS``.
+  - **transport** (*Optional*): TCP or UDP. Defaults to ``TCP``.
+
+Sensor
+******
+
+- **meter_id** (**Required**, int): Meter ID. Can be specified as decimal or hex.
+- **type** (**Required**, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported.
+- **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
+- **add_prefix** (*Optional*): Add prefix (mater_id) to sensor name. Defaults to ``True``.
+- **sensor_type** (*Optional*):Sensor type from list below. For example ``total_water_m3``
+  - **id** (*Optional*, string): Manually specify the ID for code generation. At least one of **id** and **name** must be specified.
+  - **name** (*Optional*, string): The name for the sensor. At least one of **id** and **name** must be specified.
+  - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
+
+
+Supported sensors (sensor_type) for meters:
 - amiplus
   - total_energy_consumption_kwh
   - current_power_consumption_kw
@@ -133,10 +178,6 @@ Supported sensors for meters:
 - vario451
   - total_heating_kwh
 
-
-
-
- Detailed documentation is ongoing ...
 
 #### 2.1.2. Example for version 1.x
 
