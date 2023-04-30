@@ -81,59 +81,59 @@ sensor:
 
 Supported sensors for meters:
 - amiplus
-  total_energy_consumption_kwh
-  current_power_consumption_kw
-  total_energy_production_kwh
-  current_power_production_kw
-  voltage_at_phase_1_v
-  voltage_at_phase_2_v
-  voltage_at_phase_3_v
+  - total_energy_consumption_kwh
+  - current_power_consumption_kw
+  - total_energy_production_kwh
+  - current_power_production_kw
+  - voltage_at_phase_1_v
+  - voltage_at_phase_2_v
+  - voltage_at_phase_3_v
 - apatoreitn
-  current_hca
-  previous_hca
-  temp_room_avg_c
+  - current_hca
+  - previous_hca
+  - temp_room_avg_c
 - apator_08
-  total_water_m3
+  - total_water_m3
 - apator_16_2
-  total_water_m3
+  - total_water_m3
 - bmeters
-  total_water_m3
+  - total_water_m3
 - elf
-  total_energy_consumption_kwh
-  total_energy_consumption_kwh
-  current_power_consumption_kw
-  total_water_m3
+  - total_energy_consumption_kwh
+  - total_energy_consumption_kwh
+  - current_power_consumption_kw
+  - total_water_m3
 - evo868
-  total_water_m3
+  - total_water_m3
 - fhkvdataiii
-  current_hca
-  previous_hca
+  - current_hca
+  - previous_hca
 - hydrocalm3
-  total_heating_kwh
-  total_heating_kwh
+  - total_heating_kwh
+  - total_heating_kwh
 - itron
-  total_water_m3
+  - total_water_m3
 - izar
-  total_water_m3
+  - total_water_m3
 - mkradio3
-  total_water_m3
+  - total_water_m3
 - mkradio4
-  total_water_m3
+  - total_water_m3
 - qheat
-  total_energy_consumption_kwh
-  total_energy_consumption_kwh
+  - total_energy_consumption_kwh
+  - total_energy_consumption_kwh
 - qwater
-  total_water_m3
+  - total_water_m3
 - sharky774
-  total_energy_consumption_kwh
+  - total_energy_consumption_kwh
 - topaseskr
-  total_water_m3
+  - total_water_m3
 - ultrimis
-  total_water_m3
+  - total_water_m3
 - unismart
-  total_gas_m3
+  - total_gas_m3
 - vario451
-  total_heating_kwh
+
 
 
  Detailed documentation is ongoing ...
