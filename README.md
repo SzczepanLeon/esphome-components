@@ -112,6 +112,8 @@ In wmbus platform:
   - **format** (*Optional*): Telegram format to send. HEX or RTLWMBUS. Defaults to ``RTLWMBUS``.
   - **transport** (*Optional*): TCP or UDP. Defaults to ``TCP``.
 
+
+</br>
 Sensor
 ******
 
@@ -119,12 +121,13 @@ Sensor
 - **type** (**Required**, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - **add_prefix** (*Optional*): Add prefix (mater_id) to sensor name. Defaults to ``True``.
-- **sensor_type** (*Optional*):Sensor type from list below. For example ``total_water_m3``
+- **sensor_type** (*Optional*): Sensor type from list below. For example ``total_water_m3``
   - **id** (*Optional*, string): Manually specify the ID for code generation. At least one of **id** and **name** must be specified.
   - **name** (*Optional*, string): The name for the sensor. At least one of **id** and **name** must be specified.
   - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
 
+</br>
 Supported sensors (sensor_type) for meters:
 - amiplus
   - total_energy_consumption_kwh
