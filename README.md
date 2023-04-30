@@ -101,7 +101,6 @@ Supported sensors for meters:
   - total_water_m3
 - elf
   - total_energy_consumption_kwh
-  - total_energy_consumption_kwh
   - current_power_consumption_kw
   - total_water_m3
 - evo868
@@ -110,7 +109,6 @@ Supported sensors for meters:
   - current_hca
   - previous_hca
 - hydrocalm3
-  - total_heating_kwh
   - total_heating_kwh
 - itron
   - total_water_m3
@@ -121,7 +119,6 @@ Supported sensors for meters:
 - mkradio4
   - total_water_m3
 - qheat
-  - total_energy_consumption_kwh
   - total_energy_consumption_kwh
 - qwater
   - total_water_m3
