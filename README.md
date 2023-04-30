@@ -93,9 +93,9 @@ Supported sensors for meters:
   - current_hca
   - previous_hca
   - temp_room_avg_c
-- apator_08
+- apator08
   - total_water_m3
-- apator_16_2
+- apator162
   - total_water_m3
 - bmeters
   - total_water_m3
