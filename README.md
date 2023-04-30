@@ -79,6 +79,7 @@ sensor:
       name: "My gas"
 ```
 
+
 Supported sensors for meters:
 - amiplus
   - total_energy_consumption_kwh
@@ -133,6 +134,8 @@ Supported sensors for meters:
 - unismart
   - total_gas_m3
 - vario451
+  - total_heating_kwh
+
 
 
 
