@@ -120,7 +120,7 @@ Meter/sensor:
 - **meter_id** (**Required**, int): Meter ID. Can be specified as decimal or hex.
 - **type** (**Required**, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
-- **add_prefix** (*Optional*): Add prefix (mater_id) to sensor name. Defaults to ``True``.
+- **add_prefix** (*Optional*): Add prefix (meter_id) to sensor name. Defaults to ``True``.
 - **sensor_type** (*Optional*): Sensor type from list below. For example ``total_water_m3``
   - **id** (*Optional*, string): Manually specify the ID for code generation. At least one of **id** and **name** must be specified.
   - **name** (*Optional*, string): The name for the sensor. At least one of **id** and **name** must be specified.
@@ -130,7 +130,7 @@ Meter/sensor:
 
 Supported sensors (sensor_type) for meters:
 ******
-- amiplus
+- `amiplus`
   - total_energy_consumption_kwh
   - current_power_consumption_kw
   - total_energy_production_kwh
@@ -138,48 +138,48 @@ Supported sensors (sensor_type) for meters:
   - voltage_at_phase_1_v
   - voltage_at_phase_2_v
   - voltage_at_phase_3_v
-- apatoreitn
+- `apatoreitn`
   - current_hca
   - previous_hca
   - temp_room_avg_c
-- apator08
+- `apator08`
   - total_water_m3
-- apator162
+- `apator162`
   - total_water_m3
-- bmeters
+- `bmeters`
   - total_water_m3
-- elf
+- `elf`
   - total_energy_consumption_kwh
   - current_power_consumption_kw
   - total_water_m3
-- evo868
+- `evo868`
   - total_water_m3
-- fhkvdataiii
+- `fhkvdataiii`
   - current_hca
   - previous_hca
-- hydrocalm3
+- `hydrocalm3`
   - total_heating_kwh
-- itron
+- `itron`
   - total_water_m3
-- izar
+- `izar`
   - total_water_m3
-- mkradio3
+- `mkradio3`
   - total_water_m3
-- mkradio4
+- `mkradio4`
   - total_water_m3
-- qheat
+- `qheat`
   - total_energy_consumption_kwh
-- qwater
+- `qwater`
   - total_water_m3
-- sharky774
+- `sharky774`
   - total_energy_consumption_kwh
-- topaseskr
+- `topaseskr`
   - total_water_m3
-- ultrimis
+- `ultrimis`
   - total_water_m3
-- unismart
+- `unismart`
   - total_gas_m3
-- vario451
+- `vario451`
   - total_heating_kwh
 
 
