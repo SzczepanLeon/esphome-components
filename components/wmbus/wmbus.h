@@ -89,6 +89,7 @@ class WMBusComponent : public Component {
       this->spi_conf_.gdo2 = gdo2;
     }
     void set_time(time::RealTimeClock *time) { this->time_ = time; }
+    void set_log_unknown() { this->log_unknown_ = true; }
     void add_client(const std::string name,
                     const network::IPAddress ip,
                     const uint16_t port,
@@ -118,6 +119,7 @@ class WMBusComponent : public Component {
     uint32_t led_blink_time_{0};
     uint32_t led_on_millis_{0};
     bool led_on_{false};
+    bool log_unknown_{false};
     rf_mbus rf_mbus_;
 };
 

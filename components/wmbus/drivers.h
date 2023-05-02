@@ -1,16 +1,16 @@
 #pragma once
 
-// ToDo: refactor drivers
-
 #include "driver_amiplus.h"
 #include "driver_apator_08.h"
 #include "driver_apator_16_2.h"
 #include "driver_apatoreitn.h"
 #include "driver_bmeters.h"
+#include "driver_compact5.h"
 #include "driver_elf.h"
 #include "driver_evo868.h"
 #include "driver_fhkvdataiii.h"
 #include "driver_hydrocalm3.h"
+#include "driver_hydrus.h"
 #include "driver_itron.h"
 #include "driver_izar.h"
 #include "driver_mkradio3.h"
