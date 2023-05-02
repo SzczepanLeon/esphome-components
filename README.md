@@ -8,7 +8,6 @@ for [ESPHome](https://esphome.io/).
 [!["Kup mi kawę"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/postaw_kawe.png)](https://buycoffee.to/szczepanleon)
 
 ----
-----
 ## 1. Usage
 
 Use latest [ESPHome](https://esphome.io/)
@@ -19,7 +18,6 @@ external_components:
   - source: github://SzczepanLeon/esphome-components@main
 ```
 
-----
 ----
 ## 2. Components
 
@@ -33,7 +31,6 @@ https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
 > **_NOTE:_**  From version 1.3 features from `wmbusgw` are included in this component. It means that you need *time* component in yaml.
 
-----
 ----
 #### 2.1.1. Example for version 2.x
 
@@ -195,7 +192,6 @@ Supported sensors (sensor_type) for meters:
   - total_heating_kwh
 
 ----
-----
 #### 2.1.2. Example for version 1.x
 
 ```yaml
@@ -258,7 +254,7 @@ In wmbus platform:
   - **transport** (*Optional*): TCP or UDP. Defaults to ``TCP``.
 
 Sensor
-******
+------------------------
 
 - **meter_id** (**Required**, int): Meter ID (usually from sticker). Can be specified as decimal or hex.
 - **type** (**Required**, string):  Meter type.
@@ -266,12 +262,10 @@ Sensor
 - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
 ----
-----
 ### 2.2. `wmbusgw`
 
 > **_NOTE:_**  Please switch to `wmbus`
 
-----
 ----
 ## 3. Author & License
 
