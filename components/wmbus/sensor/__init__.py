@@ -24,6 +24,7 @@ from esphome.const import (
     DEVICE_CLASS_GAS,
     UNIT_VOLT,
     DEVICE_CLASS_VOLTAGE,
+    ENTITY_CATEGORY_DIAGNOSTIC,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -73,12 +74,14 @@ CONFIG_SCHEMA = cv.Schema(
             unit_of_measurement=UNIT_DECIBEL_MILLIWATT,
             device_class=DEVICE_CLASS_SIGNAL_STRENGTH,
             state_class=STATE_CLASS_MEASUREMENT,
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
         ),
         cv.Optional("lqi"): sensor.sensor_schema(
             accuracy_decimals=0,
             unit_of_measurement=UNIT_EMPTY,
             device_class=DEVICE_CLASS_SIGNAL_STRENGTH,
             state_class=STATE_CLASS_MEASUREMENT,
+            entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
         ),
         cv.Optional("total_water_m3"): sensor.sensor_schema(
             accuracy_decimals=3,
