@@ -100,8 +100,6 @@ void WMBusComponent::loop() {
           this->wmbus_listeners_[meter_id]->sensors_["rssi"]->publish_state(mbus_data.rssi);
         }
         for (const auto &ele : mapValues.value()) {
-        }
-        for (const auto &ele : mapValues.value()) {
           if (this->wmbus_listeners_[meter_id]->sensors_.count(ele.first) > 0) {
             this->wmbus_listeners_[meter_id]->sensors_[ele.first]->publish_state(ele.second);
           }

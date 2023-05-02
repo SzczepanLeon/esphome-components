@@ -4,9 +4,11 @@ This repository contains a collection of my custom components
 for [ESPHome](https://esphome.io/).
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/szczepan)
-</br>
-[!["Kup mi kawę"](https://buycoffee.to/logo/buycoffee.svg)](https://buycoffee.to/szczepanleon)
+\
+[!["Kup mi kawę"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/postaw_kawe.png)](https://buycoffee.to/szczepanleon)
 
+----
+----
 ## 1. Usage
 
 Use latest [ESPHome](https://esphome.io/)
@@ -17,6 +19,8 @@ external_components:
   - source: github://SzczepanLeon/esphome-components@main
 ```
 
+----
+----
 ## 2. Components
 
 ### 2.1. `wmbus`
@@ -29,6 +33,8 @@ https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
 > **_NOTE:_**  From version 1.3 features from `wmbusgw` are included in this component. It means that you need *time* component in yaml.
 
+----
+----
 #### 2.1.1. Example for version 2.x
 
 ```yaml
@@ -116,7 +122,6 @@ In wmbus platform:
 
 
 Meter/sensor:
-******
 
 - **meter_id** (**Required**, int): Meter ID. Can be specified as decimal or hex.
 - **type** (**Required**, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `compact5`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `hydrus`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported.
@@ -128,9 +133,10 @@ Meter/sensor:
   - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
 
+******
 
 Supported sensors (sensor_type) for meters:
-******
+
 - `amiplus`
   - total_energy_consumption_kwh
   - current_power_consumption_kw
@@ -188,7 +194,8 @@ Supported sensors (sensor_type) for meters:
 - `vario451`
   - total_heating_kwh
 
-
+----
+----
 #### 2.1.2. Example for version 1.x
 
 ```yaml
@@ -258,12 +265,14 @@ Sensor
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
-
+----
+----
 ### 2.2. `wmbusgw`
 
 > **_NOTE:_**  Please switch to `wmbus`
 
-
+----
+----
 ## 3. Author & License
 
 Szczepan, GPL, 2022-2023
