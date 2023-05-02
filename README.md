@@ -7,7 +7,7 @@ for [ESPHome](https://esphome.io/).
 \
 [!["Kup mi kawę"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/postaw_kawe.png)](https://buycoffee.to/szczepanleon)
 
-----
+
 ## 1. Usage
 
 Use latest [ESPHome](https://esphome.io/)
@@ -18,7 +18,7 @@ external_components:
   - source: github://SzczepanLeon/esphome-components@main
 ```
 
-----
+
 ## 2. Components
 
 ### 2.1. `wmbus`
@@ -31,7 +31,7 @@ https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
 > **_NOTE:_**  From version 1.3 features from `wmbusgw` are included in this component. It means that you need *time* component in yaml.
 
-----
+
 #### 2.1.1. Example for version 2.x
 
 ```yaml
@@ -130,7 +130,7 @@ Meter/sensor:
   - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
 
-******
+------------------------
 
 Supported sensors (sensor_type) for meters:
 
@@ -191,7 +191,7 @@ Supported sensors (sensor_type) for meters:
 - `vario451`
   - total_heating_kwh
 
-----
+
 #### 2.1.2. Example for version 1.x
 
 ```yaml
@@ -261,12 +261,12 @@ Sensor
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
-----
+
 ### 2.2. `wmbusgw`
 
 > **_NOTE:_**  Please switch to `wmbus`
 
-----
+
 ## 3. Author & License
 
 Szczepan, GPL, 2022-2023
