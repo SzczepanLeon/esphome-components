@@ -18,6 +18,7 @@ struct Izar: Driver
     std::map<std::string, float> ret_val{};
 
     add_to_map(ret_val, "total_water_m3", this->get_total_water_m3(telegram));
+    add_to_map(ret_val, "last_month_total_water_m3", this->get_last_month_total_water_m3(telegram));
 
     if (ret_val.size() > 0) {
       return ret_val;
@@ -35,6 +36,17 @@ private:
     uint8_t decrypted[64] = {0};
     if ((this->decrypt(decoded, decoded_len, decrypted)) > 0) {
       ret_val = (this->uintFromBytesLittleEndian(decrypted + 1)) / 1000.0;
+    }
+    return ret_val;
+  };
+
+  esphome::optional<float> get_last_month_total_water_m3(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
+    uint8_t *decoded = reinterpret_cast<uint8_t*>(telegram.data());
+    uint8_t decoded_len = telegram.size();
+    uint8_t decrypted[64] = {0};
+    if ((this->decrypt(decoded, decoded_len, decrypted)) > 0) {
+      ret_val = (this->uintFromBytesLittleEndian(decrypted + 5)) / 1000.0;
     }
     return ret_val;
   };

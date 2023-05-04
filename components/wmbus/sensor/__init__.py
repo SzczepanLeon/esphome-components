@@ -65,7 +65,7 @@ CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_LISTENER_ID): cv.declare_id(WMBusListener),
         cv.GenerateID(CONF_WMBUS_ID): cv.use_id(WMBusComponent),
-        cv.Required(CONF_METER_ID): cv.hex_int,
+        cv.Optional(CONF_METER_ID, default=0): cv.hex_int,
         cv.Optional(CONF_TYPE, default="unknown"): cv.string_strict,
         cv.Optional(CONF_KEY, default=""): my_key,
         cv.Optional(CONF_ADD_PREFIX, default=True): cv.boolean,
@@ -84,6 +84,13 @@ CONFIG_SCHEMA = cv.Schema(
             entity_category=ENTITY_CATEGORY_DIAGNOSTIC,
         ),
         cv.Optional("total_water_m3"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement=UNIT_CUBIC_METER,
+            device_class=DEVICE_CLASS_WATER,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:water",
+        ),
+        cv.Optional("last_month_total_water_m3"): sensor.sensor_schema(
             accuracy_decimals=3,
             unit_of_measurement=UNIT_CUBIC_METER,
             device_class=DEVICE_CLASS_WATER,
