@@ -173,6 +173,8 @@ Supported sensors (sensor_type) for meters:
 - `izar`
   - total_water_m3
   - last_month_total_water_m3
+  - transmit_period_s
+  - remaining_battery_life_y
 - `mkradio3`
   - total_water_m3
 - `mkradio4`

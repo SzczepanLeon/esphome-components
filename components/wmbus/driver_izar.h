@@ -19,6 +19,8 @@ struct Izar: Driver
 
     add_to_map(ret_val, "total_water_m3", this->get_total_water_m3(telegram));
     add_to_map(ret_val, "last_month_total_water_m3", this->get_last_month_total_water_m3(telegram));
+    add_to_map(ret_val, "transmit_period_s", this->get_transmit_period_s(telegram));
+    add_to_map(ret_val, "remaining_battery_life_y", this->get_remaining_battery_life_y(telegram));
 
     if (ret_val.size() > 0) {
       return ret_val;
@@ -29,6 +31,18 @@ struct Izar: Driver
   };
 
 private:
+  esphome::optional<float> get_remaining_battery_life_y(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
+    ret_val = (telegram[12] & 0x1F) / 2.0;
+    return ret_val;
+  };
+
+  esphome::optional<float> get_transmit_period_s(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val{};
+    ret_val = 1 << ((telegram[11] & 0x0F) + 2);
+    return ret_val;
+  };
+
   esphome::optional<float> get_total_water_m3(std::vector<unsigned char> &telegram) {
     esphome::optional<float> ret_val{};
     uint8_t *decoded = reinterpret_cast<uint8_t*>(telegram.data());

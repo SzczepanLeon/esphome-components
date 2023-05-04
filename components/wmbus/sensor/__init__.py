@@ -25,6 +25,8 @@ from esphome.const import (
     UNIT_VOLT,
     DEVICE_CLASS_VOLTAGE,
     ENTITY_CATEGORY_DIAGNOSTIC,
+    UNIT_SECOND,
+    DEVICE_CLASS_TIMESTAMP,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -208,6 +210,15 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_VOLTAGE,
             state_class=STATE_CLASS_MEASUREMENT,
             icon="mdi:sine-wave",
+        ),
+        cv.Optional("transmit_period_s"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            unit_of_measurement=UNIT_SECOND,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional("remaining_battery_life_y"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            state_class=STATE_CLASS_MEASUREMENT,
         ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
