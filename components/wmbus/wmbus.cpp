@@ -32,6 +32,7 @@ void WMBusComponent::setup() {
   this->add_driver(new FhkvdataIII());
   this->add_driver(new Hydrocalm3());
   this->add_driver(new Hydrus());
+  this->add_driver(new Iperl());
   this->add_driver(new Itron());
   this->add_driver(new Izar());
   this->add_driver(new Mkradio3());

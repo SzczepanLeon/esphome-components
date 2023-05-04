@@ -11,6 +11,7 @@
 #include "driver_fhkvdataiii.h"
 #include "driver_hydrocalm3.h"
 #include "driver_hydrus.h"
+#include "driver_iperl.h"
 #include "driver_itron.h"
 #include "driver_izar.h"
 #include "driver_mkradio3.h"
