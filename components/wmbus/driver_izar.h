@@ -52,9 +52,9 @@ private:
   esphome::optional<float> get_previous_alarms(std::vector<unsigned char> &telegram) {
     esphome::optional<float> ret_val{};
     uint16_t alarms = 0;
-    ret_val |= (telegram[12] >> 6 & 0x1) << 2; // leakage_previously
-    ret_val |= (telegram[13] >> 2 & 0x1) << 8; // sensor_fraud_previously
-    ret_val |= (telegram[13] & 0x1)      << 9; // mechanical_fraud_previously
+    alarms |= (telegram[12] >> 6 & 0x1) << 2; // leakage_previously
+    alarms |= (telegram[13] >> 2 & 0x1) << 8; // sensor_fraud_previously
+    alarms |= (telegram[13] & 0x1)      << 9; // mechanical_fraud_previously
     alarms = (float)alarms;
     return ret_val;
   };
