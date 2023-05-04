@@ -175,6 +175,8 @@ Supported sensors (sensor_type) for meters:
   - last_month_total_water_m3
   - transmit_period_s
   - remaining_battery_life_y
+  - current_alarms
+  - previous_alarms
 - `mkradio3`
   - total_water_m3
 - `mkradio4`

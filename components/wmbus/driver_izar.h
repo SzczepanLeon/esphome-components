@@ -21,6 +21,8 @@ struct Izar: Driver
     add_to_map(ret_val, "last_month_total_water_m3", this->get_last_month_total_water_m3(telegram));
     add_to_map(ret_val, "transmit_period_s", this->get_transmit_period_s(telegram));
     add_to_map(ret_val, "remaining_battery_life_y", this->get_remaining_battery_life_y(telegram));
+    add_to_map(ret_val, "current_alarms", this->get_current_alarms(telegram));
+    add_to_map(ret_val, "previous_alarms", this->get_previous_alarms(telegram));
 
     if (ret_val.size() > 0) {
       return ret_val;
@@ -31,6 +33,28 @@ struct Izar: Driver
   };
 
 private:
+  esphome::optional<float> get_current_alarms(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val = 0;
+    ret_val |= (telegram[11] >> 7)       << 1; // general_alarm
+    ret_val |= (telegram[12] >> 7)       << 2; // leakage_currently
+    ret_val |= (telegram[12] >> 5 & 0x1) << 3; // meter_blocked
+    ret_val |= (telegram[13] >> 7)       << 4; // back_flow
+    ret_val |= (telegram[13] >> 6 & 0x1) << 5; // underflow
+    ret_val |= (telegram[13] >> 5 & 0x1) << 6; // overflow
+    ret_val |= (telegram[13] >> 4 & 0x1) << 7; // submarine
+    ret_val |= (telegram[13] >> 3 & 0x1) << 8; // sensor_fraud_currently
+    ret_val |= (telegram[13] >> 1 & 0x1) << 9; // mechanical_fraud_currently
+    return ret_val;
+  };
+
+  esphome::optional<float> get_previous_alarms(std::vector<unsigned char> &telegram) {
+    esphome::optional<float> ret_val = 0;
+    ret_val |= (telegram[12] >> 6 & 0x1) << 2; // leakage_previously
+    ret_val |= (telegram[13] >> 2 & 0x1) << 8; // sensor_fraud_previously
+    ret_val |= (telegram[13] & 0x1)      << 9; // mechanical_fraud_previously
+    return ret_val;
+  };
+
   esphome::optional<float> get_remaining_battery_life_y(std::vector<unsigned char> &telegram) {
     esphome::optional<float> ret_val{};
     ret_val = (telegram[12] & 0x1F) / 2.0;

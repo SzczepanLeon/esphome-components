@@ -220,6 +220,14 @@ CONFIG_SCHEMA = cv.Schema(
             accuracy_decimals=0,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
+        cv.Optional("current_alarms"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            icon="mdi:alarm-light-outline",
+        ),
+        cv.Optional("previous_alarms"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            icon="mdi:alarm-light-outline",
+        ),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
