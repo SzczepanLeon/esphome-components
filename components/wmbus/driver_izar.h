@@ -45,7 +45,7 @@ private:
     alarms |= (telegram[13] >> 4 & 0x1) << 7; // submarine
     alarms |= (telegram[13] >> 3 & 0x1) << 8; // sensor_fraud_currently
     alarms |= (telegram[13] >> 1 & 0x1) << 9; // mechanical_fraud_currently
-    alarms = (float)alarms;
+    ret_val = (float)alarms;
     return ret_val;
   };
 
@@ -55,7 +55,7 @@ private:
     alarms |= (telegram[12] >> 6 & 0x1) << 2; // leakage_previously
     alarms |= (telegram[13] >> 2 & 0x1) << 8; // sensor_fraud_previously
     alarms |= (telegram[13] & 0x1)      << 9; // mechanical_fraud_previously
-    alarms = (float)alarms;
+    ret_val = (float)alarms;
     return ret_val;
   };
 
