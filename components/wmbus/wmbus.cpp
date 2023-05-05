@@ -66,7 +66,7 @@ void WMBusComponent::loop() {
                meter_id,
                mbus_data.rssi,
                mbus_data.lqi,
-               mode_to_string(mbus_data.mode).c_str(),
+               mode_to_string(mbus_data.framemode).c_str(),
                telegram.c_str());
       if (sensor->key.size()) {
         if (this->decrypt_telegram(frame, sensor->key)) {
@@ -131,7 +131,7 @@ void WMBusComponent::loop() {
                 meter_id,
                 mbus_data.rssi,
                 mbus_data.lqi,
-                mode_to_string(mbus_data.mode).c_str(),
+                mode_to_string(mbus_data.framemode).c_str(),
                 telegram.c_str());
       }
     }
@@ -174,7 +174,7 @@ void WMBusComponent::loop() {
                 {
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                             mode_to_string(mbus_data.mode).c_str(),
+                                             mode_to_string(mbus_data.framemode).c_str(),
                                              telegram_time,
                                              mbus_data.rssi);
                     for (int i = 0; i < frame.size(); i++) {
@@ -189,7 +189,7 @@ void WMBusComponent::loop() {
                 {
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
                   this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                           mode_to_string(mbus_data.mode).c_str(),
+                                           mode_to_string(mbus_data.framemode).c_str(),
                                            telegram_time,
                                            mbus_data.rssi);
                   for (int i = 0; i < frame.size(); i++) {
