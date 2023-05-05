@@ -17,8 +17,14 @@ struct Izar: Driver
   virtual esphome::optional<std::map<std::string, float>> get_values(std::vector<unsigned char> &telegram) override {
     std::map<std::string, float> ret_val{};
 
-    add_to_map(ret_val, "total_water_m3", this->get_total_water_m3(telegram));
-    add_to_map(ret_val, "last_month_total_water_m3", this->get_last_month_total_water_m3(telegram));
+    uint8_t decrypted[64] = {0};
+
+    if ((this->decrypt(reinterpret_cast<uint8_t*>(telegram.data()), telegram.size(), decrypted)) > 0) {
+      add_to_map(ret_val, "total_water_m3", this->get_total_water_m3(decrypted));
+      add_to_map(ret_val, "last_month_total_water_m3", this->get_last_month_total_water_m3(decrypted));
+      add_to_map(ret_val, "current_month_total_water_l", this->get_current_month_total_water_l(decrypted));
+    }
+
     add_to_map(ret_val, "transmit_period_s", this->get_transmit_period_s(telegram));
     add_to_map(ret_val, "remaining_battery_life_y", this->get_remaining_battery_life_y(telegram));
     add_to_map(ret_val, "current_alarms", this->get_current_alarms(telegram));
@@ -71,25 +77,21 @@ private:
     return ret_val;
   };
 
-  esphome::optional<float> get_total_water_m3(std::vector<unsigned char> &telegram) {
+  esphome::optional<float> get_total_water_m3(uint8_t *decrypted) {
     esphome::optional<float> ret_val{};
-    uint8_t *decoded = reinterpret_cast<uint8_t*>(telegram.data());
-    uint8_t decoded_len = telegram.size();
-    uint8_t decrypted[64] = {0};
-    if ((this->decrypt(decoded, decoded_len, decrypted)) > 0) {
-      ret_val = (this->uintFromBytesLittleEndian(decrypted + 1)) / 1000.0;
-    }
+    ret_val = (this->uintFromBytesLittleEndian(decrypted + 1)) / 1000.0;
     return ret_val;
   };
 
-  esphome::optional<float> get_last_month_total_water_m3(std::vector<unsigned char> &telegram) {
+  esphome::optional<float> get_last_month_total_water_m3(uint8_t *decrypted) {
     esphome::optional<float> ret_val{};
-    uint8_t *decoded = reinterpret_cast<uint8_t*>(telegram.data());
-    uint8_t decoded_len = telegram.size();
-    uint8_t decrypted[64] = {0};
-    if ((this->decrypt(decoded, decoded_len, decrypted)) > 0) {
-      ret_val = (this->uintFromBytesLittleEndian(decrypted + 5)) / 1000.0;
-    }
+    ret_val = (this->uintFromBytesLittleEndian(decrypted + 5)) / 1000.0;
+    return ret_val;
+  };
+
+  esphome::optional<float> get_current_month_total_water_l(uint8_t *decrypted) {
+    esphome::optional<float> ret_val{};
+    ret_val = this->uintFromBytesLittleEndian(decrypted + 1) - this->uintFromBytesLittleEndian(decrypted + 5);
     return ret_val;
   };
 

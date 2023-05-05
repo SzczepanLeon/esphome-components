@@ -37,6 +37,8 @@ CONF_METER_ID = "meter_id"
 CONF_LISTENER_ID = "listener_id"
 CONF_ADD_PREFIX = "add_prefix"
 
+UNIT_LITER = "l"
+
 from .. import (
     WMBusComponent,
     CONF_WMBUS_ID,
@@ -95,6 +97,13 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional("last_month_total_water_m3"): sensor.sensor_schema(
             accuracy_decimals=3,
             unit_of_measurement=UNIT_CUBIC_METER,
+            device_class=DEVICE_CLASS_WATER,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:water",
+        ),
+        cv.Optional("current_month_total_water_l"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement=UNIT_LITER,
             device_class=DEVICE_CLASS_WATER,
             state_class=STATE_CLASS_TOTAL_INCREASING,
             icon="mdi:water",
