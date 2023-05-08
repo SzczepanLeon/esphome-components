@@ -5,6 +5,7 @@
 #include "driver_apator_16_2.h"
 #include "driver_apatoreitn.h"
 #include "driver_bmeters.h"
+#include "driver_c5isf.h"
 #include "driver_compact5.h"
 #include "driver_elf.h"
 #include "driver_evo868.h"

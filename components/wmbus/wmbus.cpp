@@ -26,6 +26,7 @@ void WMBusComponent::setup() {
   this->add_driver(new Apator162());
   this->add_driver(new ApatorEITN());
   this->add_driver(new Bmeters());
+  this->add_driver(new C5isf());
   this->add_driver(new Compact5());
   this->add_driver(new Elf());
   this->add_driver(new Evo868());
