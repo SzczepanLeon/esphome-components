@@ -73,7 +73,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_GDO2_PIN, default=4):  pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_LED_PIN): pins.gpio_output_pin_schema,
     cv.Optional(CONF_LED_BLINK_TIME, default="300ms"): cv.positive_time_period,
-    cv.Optional(CONF_LOG_UNKNOWN, default=False): cv.boolean,
+    cv.Optional(CONF_LOG_UNKNOWN, default=True): cv.boolean,
     cv.Optional(CONF_CLIENTS):  cv.ensure_list(CLIENT_SCHEMA),
 })
 
