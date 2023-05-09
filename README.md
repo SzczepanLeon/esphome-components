@@ -110,7 +110,7 @@ In wmbus platform:
 - **gdo2_pin** (*Optional*): CC1101 GDO2 pin connection. Defaults to ``GPIO4``.
 - **led_pin** (*Optional*): Pin where LED is connected. It will blink on each telegram. You can use all options from [Pin Schema](https://esphome.io/guides/configuration-types.html#config-pin-schema).
 - **led_blink_time** (*Optional*): How long LED will stay ON. Defaults to ``300 ms``.
-- **log_unknown** (*Optional*): Show telegrams from not configured meters in log. Defaults to ``False``.
+- **log_unknown** (*Optional*): Show telegrams from not configured meters in log. Defaults to ``True``.
 - **clients** (*Optional*):
   - **name** (**Required**): The name for this client.
   - **ip_address** (**Required**): IP address.
