@@ -103,6 +103,8 @@ void WMBusComponent::loop() {
         }
         for (const auto &ele : mapValues.value()) {
           if (this->wmbus_listeners_[meter_id]->sensors_.count(ele.first) > 0) {
+            VERY_VERBOSE
+            ESP_LOGVV(TAG, "Publishing '%s' = %.4f", ele.first.c_str(), ele.second);
             this->wmbus_listeners_[meter_id]->sensors_[ele.first]->publish_state(ele.second);
           }
         }
