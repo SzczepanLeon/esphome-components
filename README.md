@@ -31,6 +31,8 @@ https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
 > **_NOTE:_**  From version 1.3 features from `wmbusgw` are included in this component. It means that you need *time* component in yaml.
 
+[!["CC1101 to D1 mini PCB"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/pcb_v2.png)](https://www.pcbway.com/project/shareproject/CC1101_to_ESP_D1_mini_277f34e1.html)
+
 
 #### 2.1.1. Example for version 2.x
 
@@ -108,7 +110,7 @@ In wmbus platform:
 - **gdo2_pin** (*Optional*): CC1101 GDO2 pin connection. Defaults to ``GPIO4``.
 - **led_pin** (*Optional*): Pin where LED is connected. It will blink on each telegram. You can use all options from [Pin Schema](https://esphome.io/guides/configuration-types.html#config-pin-schema).
 - **led_blink_time** (*Optional*): How long LED will stay ON. Defaults to ``300 ms``.
-- **log_unknown** (*Optional*): Show telegrams from not configured meters in log. Defaults to ``False``.
+- **log_unknown** (*Optional*): Show telegrams from not configured meters in log. Defaults to ``True``.
 - **clients** (*Optional*):
   - **name** (**Required**): The name for this client.
   - **ip_address** (**Required**): IP address.
@@ -121,7 +123,7 @@ In wmbus platform:
 Meter/sensor:
 
 - **meter_id** (*Optional*, int): Meter ID. Can be specified as decimal or hex. Defaults to ``0``.
-- **type** (*Optional*, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `compact5`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `hydrus`, `iperl`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported. Defaults to ``unknown``.
+- **type** (*Optional*, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `c5isf`, `compact5`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `hydrus`, `iperl`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported. Defaults to ``unknown``.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - **add_prefix** (*Optional*): Add prefix (meter_id) to sensor name. Defaults to ``True``.
 - **sensor_type** (*Optional*): Sensor type from list below. For example ``total_water_m3``
@@ -152,6 +154,8 @@ Supported sensors (sensor_type) for meters:
   - total_water_m3
 - `bmeters`
   - total_water_m3
+- `c5isf`
+  - total_heating_kwh
 - `compact5`
   - current_heating_kwh
   - previous_heating_kwh
