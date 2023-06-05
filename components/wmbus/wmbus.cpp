@@ -195,7 +195,7 @@ void WMBusComponent::loop() {
                                            telegram_time,
                                            mbus_data.rssi);
                   for (int i = 0; i < frame.size(); i++) {
-                    this->tcp_client_.printf("%02X", frame[i]);
+                    this->udp_client_.printf("%02X", frame[i]);
                   }
                   this->udp_client_.print("\n");
                   this->udp_client_.endPacket();
