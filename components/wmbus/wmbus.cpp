@@ -118,7 +118,7 @@ void WMBusComponent::loop() {
             if ((this->wmbus_listeners_[meter_id]->type == "apator162") &&
                 (value > 500000) &&
                 (this->wmbus_listeners_[meter_id]->sensors_.count("total_water_m3") > 0)) {
-              text_debug->text_sensor_->publish_value("apator162 strange value");
+              text_debug->text_sensor_->publish_state("apator162 strange value");
               std::string telegramik;
               int split = 100;
               int start = 0;
@@ -126,7 +126,7 @@ void WMBusComponent::loop() {
               while (start < telegram.size()) {
                 telegramik = std::to_string(part++) + "  | ";
                 telegramik += telegram.substr(start, split);
-                text_debug->text_sensor_->publish_value(telegramik);
+                text_debug->text_sensor_->publish_state(telegramik);
                 start += split;
               }
               std::string decoded_telegramik = format_hex_pretty(frame);
@@ -136,7 +136,7 @@ void WMBusComponent::loop() {
               while (start < decoded_telegramik.size()) {
                 telegramik = std::to_string(part++) + "' | ";
                 telegramik += decoded_telegramik.substr(start, split);
-                text_debug->text_sensor_->publish_value(telegramik);
+                text_debug->text_sensor_->publish_state(telegramik);
                 start += split;
                 split = 99;
               }
