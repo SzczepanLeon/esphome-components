@@ -16,6 +16,8 @@ CODEOWNERS = ["@SzczepanLeon"]
 
 AUTO_LOAD = ["wmbus"]
 
+WMBusListener = wmbus_ns.class_('WMBusListener')
+
 CONF_METER_ID = "meter_id"
 CONF_LISTENER_ID = "listener_id"
 
