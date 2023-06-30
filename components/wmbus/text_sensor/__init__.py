@@ -31,19 +31,12 @@ TEXT_LISTENER_SCHEMA = cv.Schema(
 )
 
 CONFIG_SCHEMA = text_sensor.text_sensor_schema(
-    # WMBusTextSensor,
+    #
 ).extend(TEXT_LISTENER_SCHEMA)
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_LISTENER_ID], config[CONF_METER_ID], config[CONF_TYPE].lower(), "")
-    # await cg.register_component(var, config)
-    # sens = await text_sensor.register_text_sensor(var, config)
     sens = await text_sensor.new_text_sensor(config)
     cg.add(var.add_sensor(config[CONF_TYPE].lower(), sens))
     wmbus = await cg.get_variable(config[CONF_WMBUS_ID])
     cg.add(wmbus.register_wmbus_listener(var))
-#
-#    sens = await sensor.new_sensor(conf)
-#    cg.add(var.add_sensor(key, sens))
-#    wmbus = await cg.get_variable(config[CONF_WMBUS_ID])
-#    cg.add(wmbus.register_wmbus_listener(var))
