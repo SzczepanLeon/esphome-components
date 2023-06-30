@@ -96,6 +96,14 @@ sensor:
         - offset: 325.0
 ```
 
+> **_NOTE:_**  For Apator16-2 water meter please add also text sensor (for debug purposes):
+
+```
+text_sensor:
+  - platform: wmbus
+    name: "Text debug for Apator 16-2"
+```
+
 
 Configuration variables:
 ------------------------

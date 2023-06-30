@@ -7,6 +7,7 @@
 #include "esphome/components/network/ip_address.h"
 #include "esphome/components/time/real_time_clock.h"
 #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/text_sensor/text_sensor.h"
 
 #include <map>
 #include <string>
@@ -52,6 +53,10 @@ class WMBusListener {
     std::map<std::string, sensor::Sensor *> sensors_{};
     void add_sensor(std::string type, sensor::Sensor *sensor) {
       this->sensors_[type] = sensor;
+    };
+    text_sensor::TextSensor* text_sensor_{nullptr};
+    void add_sensor(text_sensor::TextSensor *text_sensor) {
+      this->text_sensor_ = text_sensor;
     };
 
     void dump_config();
