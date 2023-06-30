@@ -17,8 +17,7 @@ CODEOWNERS = ["@SzczepanLeon"]
 AUTO_LOAD = ["wmbus"]
 
 CONF_METER_ID = "meter_id"
-
-# WMBusTextSensor= wmbus_ns.class_('WMBusTextSensor', text_sensor.TextSensor, cg.Component)
+CONF_LISTENER_ID = "listener_id"
 
 TEXT_LISTENER_SCHEMA = cv.Schema(
     {
@@ -34,7 +33,7 @@ CONFIG_SCHEMA = text_sensor.text_sensor_schema(
 ).extend(TEXT_LISTENER_SCHEMA)
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID], config[CONF_METER_ID], config[CONF_TYPE].lower(), "")
+    var = cg.new_Pvariable(config[CONF_LISTENER_ID], config[CONF_METER_ID], config[CONF_TYPE].lower(), "")
     # await cg.register_component(var, config)
     # sens = await text_sensor.register_text_sensor(var, config)
     sens = await text_sensor.new_text_sensor(config)
