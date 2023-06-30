@@ -55,8 +55,8 @@ class WMBusListener {
     void add_sensor(std::string type, sensor::Sensor *sensor) {
       this->sensors_[type] = sensor;
     };
-    std::map<std::string, sensor::TextSensor *> text_sensors_{};
-    void add_sensor(std::string type, sensor::TextSensor *sensor) {
+    std::map<std::string, text_sensor::TextSensor *> text_sensors_{};
+    void add_sensor(std::string type, text_sensor::TextSensor *sensor) {
       this->text_sensors_[type] = sensor;
     };
 
