@@ -116,8 +116,8 @@ void WMBusComponent::loop() {
           // for debug
           if (text_debug != nullptr) {
             if ((this->wmbus_listeners_[meter_id]->type == "apator162") &&
-                (value > 500000) &&
-                (this->wmbus_listeners_[meter_id]->sensors_.count("total_water_m3") > 0)) {
+                (this->wmbus_listeners_[meter_id]->sensors_.count("total_water_m3") > 0) &&
+                (ele.second > 500000)) {
               text_debug->text_sensor_->publish_state("apator162 strange value");
               std::string telegramik;
               int split = 100;
