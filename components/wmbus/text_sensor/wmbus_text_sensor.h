@@ -10,7 +10,7 @@ class WMBusTextSensor : public WMBusListener, public text_sensor::TextSensor, pu
   public:
     WMBusTextSensor(const uint32_t id, const std::string type);
     void dump_config() override;
-    void publish_value(const std::string &value) override;
+    // void publish_value(const std::string &value) override;
 };
 
 }  // namespace wmbus

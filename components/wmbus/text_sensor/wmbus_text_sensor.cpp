@@ -15,9 +15,9 @@ void WMBusTextSensor::dump_config() {
   LOG_TEXT_SENSOR("", "wM-Bus Text Sensor", this);
 }
 
-void WMBusTextSensor::publish_value(const std::string &value) {
-  this->publish_state(value);
-}
+// void WMBusTextSensor::publish_value(const std::string &value) {
+//   this->publish_state(value);
+// }
 
 }  // namespace wmbus
 }  // namespace esphome
