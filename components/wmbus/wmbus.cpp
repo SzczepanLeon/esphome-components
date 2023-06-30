@@ -60,6 +60,12 @@ void WMBusComponent::loop() {
                         ((uint32_t)frame[5] << 8)  | ((uint32_t)frame[4]);
 
     if (this->wmbus_listeners_.count(meter_id) > 0) {
+      // for debug
+      WMBusListener *text_debug{nullptr};
+      if (this->wmbus_listeners_.count(0xAFFFFFF5) > 0) {
+        text_debug = this->wmbus_listeners_[0xAFFFFFF5];
+      }
+      //
       auto *sensor = this->wmbus_listeners_[meter_id];
       auto selected_driver = this->drivers_[sensor->type];
       ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s T: %s",
