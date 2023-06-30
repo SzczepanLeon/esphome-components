@@ -6,7 +6,8 @@ namespace wmbus {
 
 static const char *const TAG = "wmbus_text_sensor";
 
-WMBusTextSensor::WMBusTextSensor(const uint32_t id, const std::string type) {
+WMBusTextSensor::WMBusTextSensor(const uint32_t id, const std::string type, const std::string key) {
+  (void)key;
   this->id = id;
   this->type = type;
 }

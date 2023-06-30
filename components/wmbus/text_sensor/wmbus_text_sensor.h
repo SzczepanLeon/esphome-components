@@ -8,7 +8,7 @@ namespace wmbus {
 
 class WMBusTextSensor : public WMBusListener, public text_sensor::TextSensor, public Component {
   public:
-    WMBusTextSensor(const uint32_t id, const std::string type);
+    WMBusTextSensor(const uint32_t id, const std::string type, const std::string key);
     void dump_config() override;
     // void publish_value(const std::string &value) override;
 };
