@@ -50,14 +50,13 @@ class WMBusListener {
     uint32_t id;
     std::string type;
     std::vector<unsigned char> key{};
-    // EntityBase
     std::map<std::string, sensor::Sensor *> sensors_{};
     void add_sensor(std::string type, sensor::Sensor *sensor) {
       this->sensors_[type] = sensor;
     };
-    std::map<std::string, text_sensor::TextSensor *> text_sensors_{};
-    void add_sensor(std::string type, text_sensor::TextSensor *sensor) {
-      this->text_sensors_[type] = sensor;
+    text_sensor::TextSensor* text_sensor_{nullptr};
+    void add_sensor(text_sensor::TextSensor *text_sensor) {
+      this->text_sensor_ = text_sensor;
     };
 
     void dump_config();

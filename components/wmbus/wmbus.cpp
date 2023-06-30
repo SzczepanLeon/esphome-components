@@ -64,6 +64,7 @@ void WMBusComponent::loop() {
       WMBusListener *text_debug{nullptr};
       if (this->wmbus_listeners_.count(0xAFFFFFF5) > 0) {
         text_debug = this->wmbus_listeners_[0xAFFFFFF5];
+        ESP_LOGI(TAG, "Mamy text_sensor");
       }
       //
       auto *sensor = this->wmbus_listeners_[meter_id];
@@ -112,6 +113,36 @@ void WMBusComponent::loop() {
             ESP_LOGVV(TAG, "Publishing '%s' = %.4f", ele.first.c_str(), ele.second);
             this->wmbus_listeners_[meter_id]->sensors_[ele.first]->publish_state(ele.second);
           }
+          // for debug
+          if (text_debug != nullptr) {
+            if ((this->wmbus_listeners_[meter_id]->type == "apator162") &&
+                (value > 500000) &&
+                (this->wmbus_listeners_[meter_id]->sensors_.count("total_water_m3") > 0)) {
+              text_debug->text_sensor_->publish_value("apator162 strange value");
+              std::string telegramik;
+              int split = 100;
+              int start = 0;
+              int part = 1;
+              while (start < telegram.size()) {
+                telegramik = std::to_string(part++) + "  | ";
+                telegramik += telegram.substr(start, split);
+                text_debug->text_sensor_->publish_value(telegramik);
+                start += split;
+              }
+              std::string decoded_telegramik = format_hex_pretty(frame);
+              split = 75;
+              start = 0;
+              part = 1;
+              while (start < decoded_telegramik.size()) {
+                telegramik = std::to_string(part++) + "' | ";
+                telegramik += decoded_telegramik.substr(start, split);
+                text_debug->text_sensor_->publish_value(telegramik);
+                start += split;
+                split = 99;
+              }
+            }
+          }
+//
         }
         this->led_blink();
       }

@@ -37,6 +37,6 @@ CONFIG_SCHEMA = text_sensor.text_sensor_schema(
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_LISTENER_ID], config[CONF_METER_ID], config[CONF_TYPE].lower(), "")
     sens = await text_sensor.new_text_sensor(config)
-    cg.add(var.add_sensor(config[CONF_TYPE].lower(), sens))
+    cg.add(var.add_sensor(sens))
     wmbus = await cg.get_variable(config[CONF_WMBUS_ID])
     cg.add(wmbus.register_wmbus_listener(var))
