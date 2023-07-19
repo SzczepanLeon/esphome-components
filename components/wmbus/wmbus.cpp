@@ -217,7 +217,16 @@ void WMBusComponent::loop() {
 bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key) {
   bool ret_val = false;
   std::vector<unsigned char>::iterator pos;
-  pos = telegram.begin();
+  // CI
+  pos = telegram.begin() + 10;
+  // data offset
+  int offset = 0;
+  if ((offset == 0x67) || (offset == 0x6E) || (offset == 0x74) || (offset == 0x7A) || (offset == 0x7D) || (offset == 0x7F) || (offset == 0x9E)) {
+    offset = 15
+  }
+  else if ((offset == 0x68) || (offset == 0x6F) || (offset == 0x72) || (offset == 0x75) || (offset == 0x7C) || (offset == 0x7E) || (offset == 0x9F)) {
+    offset = 23;
+  }
   unsigned char iv[16];
   int i=0;
   for (int j=0; j<8; ++j) {
@@ -226,7 +235,7 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
   for (int j=0; j<8; ++j) {
     iv[i++] = telegram[11];
   }
-  pos = telegram.begin() + 15;
+  pos = telegram.begin() + offset;
   int num_encrypted_bytes = 0;
   int num_not_encrypted_at_end = 0;
 
