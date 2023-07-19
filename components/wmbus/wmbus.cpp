@@ -222,7 +222,7 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
   // data offset
   int offset = 0;
   if ((offset == 0x67) || (offset == 0x6E) || (offset == 0x74) || (offset == 0x7A) || (offset == 0x7D) || (offset == 0x7F) || (offset == 0x9E)) {
-    offset = 15
+    offset = 15;
   }
   else if ((offset == 0x68) || (offset == 0x6F) || (offset == 0x72) || (offset == 0x75) || (offset == 0x7C) || (offset == 0x7E) || (offset == 0x9F)) {
     offset = 23;
