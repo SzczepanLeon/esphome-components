@@ -242,7 +242,7 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
   if (decrypt_TPL_AES_CBC_IV(telegram, pos, key, iv,
                             &num_encrypted_bytes, &num_not_encrypted_at_end)) {
     uint32_t decrypt_check = 0x2F2F;
-    uint32_t dc = (((uint32_t)telegram[15] << 8) | ((uint32_t)telegram[16]));
+    uint32_t dc = (((uint32_t)telegram[offset] << 8) | ((uint32_t)telegram[offset+1]));
     if ( dc == decrypt_check) {
       ret_val = true;
     }
