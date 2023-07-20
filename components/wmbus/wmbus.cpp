@@ -220,21 +220,47 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
   // CI
   pos = telegram.begin() + 10;
   // data offset
-  int offset = 0;
-  if ((offset == 0x67) || (offset == 0x6E) || (offset == 0x74) || (offset == 0x7A) || (offset == 0x7D) || (offset == 0x7F) || (offset == 0x9E)) {
-    offset = 15;
-  }
-  else if ((offset == 0x68) || (offset == 0x6F) || (offset == 0x72) || (offset == 0x75) || (offset == 0x7C) || (offset == 0x7E) || (offset == 0x9F)) {
-    offset = 23;
-  }
+  int offset{0};
+
   unsigned char iv[16];
   int i=0;
-  for (int j=0; j<8; ++j) {
-    iv[i++] = telegram[2+j];
+  
+  if ((*pos == 0x67) || (*pos == 0x6E) || (*pos == 0x74) || (*pos == 0x7A) || (*pos == 0x7D) || (*pos == 0x7F) || (*pos == 0x9E)) {
+    offset = 15;
+
+    // dll-mfct + dll-id + dll-version + dll-type
+    for (int j=0; j<8; ++j) {
+      iv[i++] = telegram[2+j];
+    }
+    // tpl-acc
+    for (int j=0; j<8; ++j) {
+      iv[i++] = telegram[11];
+    }
   }
-  for (int j=0; j<8; ++j) {
-    iv[i++] = telegram[11];
+  else if ((*pos == 0x68) || (*pos == 0x6F) || (*pos == 0x72) || (*pos == 0x75) || (*pos == 0x7C) || (*pos == 0x7E) || (*pos == 0x9F)) {
+    offset = 23;
+
+    // tpl-mfct
+    for (int j=0; j<2; ++j) {
+      iv[i++] = telegram[15+j];
+    }
+    // tpl-id
+    for (int j=0; j<4; ++j) {
+      iv[i++] = telegram[11+j];
+    }
+    // tpl-version + tpl-type
+    for (int j=0; j<2; ++j) {
+      iv[i++] = telegram[17+j];
+    }
+    // tpl-acc
+    for (int j=0; j<8; ++j) {
+      iv[i++] = telegram[19];
+    }
   }
+  else {
+    ESP_LOGE(TAG, "CI unknown");
+  }
+
   pos = telegram.begin() + offset;
   int num_encrypted_bytes = 0;
   int num_not_encrypted_at_end = 0;
