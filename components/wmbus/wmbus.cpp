@@ -55,9 +55,15 @@ void WMBusComponent::loop() {
     std::string telegram = format_hex_pretty(frame);
     telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
 
-    // ToDo: add manufactures check
-    uint32_t meter_id = ((uint32_t)frame[7] << 24) | ((uint32_t)frame[6] << 16) |
-                        ((uint32_t)frame[5] << 8)  | ((uint32_t)frame[4]);
+    uint32_t meter_id{0};
+    if ((frame[10] == 0x67) || (frame[10] == 0x6E) || (frame[10] == 0x74) || (frame[10] == 0x7A) || (frame[10] == 0x7D) || (frame[10] == 0x7F) || (frame[10] == 0x9E)) {
+      meter_id = ((uint32_t)frame[7] << 24) | ((uint32_t)frame[6] << 16) |
+                 ((uint32_t)frame[5] << 8)  | ((uint32_t)frame[4]);
+    }
+    else if ((frame[10] == 0x68) || (frame[10] == 0x6F) || (frame[10] == 0x72) || (frame[10] == 0x75) || (frame[10] == 0x7C) || (frame[10] == 0x7E) || (frame[10] == 0x9F)) {
+      meter_id = ((uint32_t)frame[14] << 24) | ((uint32_t)frame[13] << 16) |
+                 ((uint32_t)frame[12] << 8)  | ((uint32_t)frame[11]);
+    }
 
     if (this->wmbus_listeners_.count(meter_id) > 0) {
       auto *sensor = this->wmbus_listeners_[meter_id];
