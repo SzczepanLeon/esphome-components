@@ -27,6 +27,8 @@ Component to receive wMBus frame (via CC1101), create HA sensor and send decoded
 You can also use this component with wmbusmeters HA addon:
 https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
+> **_NOTE:_**  From version 2.2.22 experimental support for C1 A type frames are added.
+
 > **_NOTE:_**  From version 2.0 YAML configuration is changed. You can define multiple sensors for one meter.
 
 > **_NOTE:_**  From version 1.3 features from `wmbusgw` are included in this component. It means that you need *time* component in yaml.
