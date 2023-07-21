@@ -74,7 +74,7 @@ void WMBusComponent::loop() {
                meter_id,
                mbus_data.rssi,
                mbus_data.lqi,
-               mode_to_string(mbus_data.mode).c_str(),
+               mode_to_string(mbus_data.framemode).c_str(),
                telegram.c_str());
       if (sensor->key.size()) {
         if (this->decrypt_telegram(frame, sensor->key)) {
@@ -170,7 +170,7 @@ void WMBusComponent::loop() {
                 meter_id,
                 mbus_data.rssi,
                 mbus_data.lqi,
-                mode_to_string(mbus_data.mode).c_str(),
+                mode_to_string(mbus_data.framemode).c_str(),
                 telegram.c_str());
       }
     }
@@ -213,7 +213,7 @@ void WMBusComponent::loop() {
                 {
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                             mode_to_string(mbus_data.mode).c_str(),
+                                             mode_to_string(mbus_data.framemode).c_str(),
                                              telegram_time,
                                              mbus_data.rssi);
                     for (int i = 0; i < frame.size(); i++) {
@@ -228,7 +228,7 @@ void WMBusComponent::loop() {
                 {
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
                   this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                           mode_to_string(mbus_data.mode).c_str(),
+                                           mode_to_string(mbus_data.framemode).c_str(),
                                            telegram_time,
                                            mbus_data.rssi);
                   for (int i = 0; i < frame.size(); i++) {
@@ -255,23 +255,58 @@ void WMBusComponent::loop() {
 bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key) {
   bool ret_val = false;
   std::vector<unsigned char>::iterator pos;
-  pos = telegram.begin();
+  // CI
+  pos = telegram.begin() + 10;
+  // data offset
+  int offset{0};
+
   unsigned char iv[16];
   int i=0;
-  for (int j=0; j<8; ++j) {
-    iv[i++] = telegram[2+j];
+  
+  if ((*pos == 0x67) || (*pos == 0x6E) || (*pos == 0x74) || (*pos == 0x7A) || (*pos == 0x7D) || (*pos == 0x7F) || (*pos == 0x9E)) {
+    offset = 15;
+
+    // dll-mfct + dll-id + dll-version + dll-type
+    for (int j=0; j<8; ++j) {
+      iv[i++] = telegram[2+j];
+    }
+    // tpl-acc
+    for (int j=0; j<8; ++j) {
+      iv[i++] = telegram[11];
+    }
   }
-  for (int j=0; j<8; ++j) {
-    iv[i++] = telegram[11];
+  else if ((*pos == 0x68) || (*pos == 0x6F) || (*pos == 0x72) || (*pos == 0x75) || (*pos == 0x7C) || (*pos == 0x7E) || (*pos == 0x9F)) {
+    offset = 23;
+
+    // tpl-mfct
+    for (int j=0; j<2; ++j) {
+      iv[i++] = telegram[15+j];
+    }
+    // tpl-id
+    for (int j=0; j<4; ++j) {
+      iv[i++] = telegram[11+j];
+    }
+    // tpl-version + tpl-type
+    for (int j=0; j<2; ++j) {
+      iv[i++] = telegram[17+j];
+    }
+    // tpl-acc
+    for (int j=0; j<8; ++j) {
+      iv[i++] = telegram[19];
+    }
   }
-  pos = telegram.begin() + 15;
+  else {
+    ESP_LOGE(TAG, "CI unknown");
+  }
+
+  pos = telegram.begin() + offset;
   int num_encrypted_bytes = 0;
   int num_not_encrypted_at_end = 0;
 
   if (decrypt_TPL_AES_CBC_IV(telegram, pos, key, iv,
                             &num_encrypted_bytes, &num_not_encrypted_at_end)) {
     uint32_t decrypt_check = 0x2F2F;
-    uint32_t dc = (((uint32_t)telegram[15] << 8) | ((uint32_t)telegram[16]));
+    uint32_t dc = (((uint32_t)telegram[offset] << 8) | ((uint32_t)telegram[offset+1]));
     if ( dc == decrypt_check) {
       ret_val = true;
     }
