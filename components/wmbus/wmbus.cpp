@@ -28,6 +28,7 @@ void WMBusComponent::setup() {
   this->add_driver(new Bmeters());
   this->add_driver(new C5isf());
   this->add_driver(new Compact5());
+  this->add_driver(new Dme07());
   this->add_driver(new Elf());
   this->add_driver(new Evo868());
   this->add_driver(new FhkvdataIII());
