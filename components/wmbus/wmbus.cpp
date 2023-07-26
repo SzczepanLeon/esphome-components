@@ -69,81 +69,83 @@ void WMBusComponent::loop() {
       }
       //
       auto *sensor = this->wmbus_listeners_[meter_id];
-      auto selected_driver = this->drivers_[sensor->type];
-      ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s T: %s",
-               selected_driver->get_name().c_str(),
-               meter_id,
-               mbus_data.rssi,
-               mbus_data.lqi,
-               mode_to_string(mbus_data.framemode).c_str(),
-               telegram.c_str());
-      if (sensor->key.size()) {
-        if (this->decrypt_telegram(frame, sensor->key)) {
-          std::string decrypted_telegram = format_hex_pretty(frame);
-          decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
-                                   decrypted_telegram.end());
-          ESP_LOGD(TAG, "Decrypted T : %s", decrypted_telegram.c_str());
-        }
-        else {
-          std::string decrypted_telegram = format_hex_pretty(frame);
-          decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
-                                   decrypted_telegram.end());
-          std::string key = format_hex_pretty(sensor->key);
-          key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
-          if (key.size()) {
-            key.erase(key.size() - 5);
+      //if (mbus_data.framemode == sensor->framemode ) {
+      if (mbus_data.framemode == WmBusFrameMode::WMBUS_T1_MODE ) {
+        auto selected_driver = this->drivers_[sensor->type];
+        ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s T: %s",
+                 selected_driver->get_name().c_str(),
+                 meter_id,
+                 mbus_data.rssi,
+                 mbus_data.lqi,
+                 mode_to_string(mbus_data.framemode).c_str(),
+                 telegram.c_str());
+        if (sensor->key.size()) {
+          if (this->decrypt_telegram(frame, sensor->key)) {
+            std::string decrypted_telegram = format_hex_pretty(frame);
+            decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
+                                     decrypted_telegram.end());
+            ESP_LOGD(TAG, "Decrypted T : %s", decrypted_telegram.c_str());
           }
-          ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '%s'",
-                   meter_id,
-                   selected_driver->get_name().c_str(),
-                   key.c_str());
-          ESP_LOGE(TAG, "T : %s", telegram.c_str());
-          ESP_LOGE(TAG, "T': %s", decrypted_telegram.c_str());
-        }
-      }
-      auto mapValues = selected_driver->get_values(frame);
-      if (mapValues.has_value()) {
-        if (this->wmbus_listeners_[meter_id]->sensors_.count("lqi") > 0) {
-          this->wmbus_listeners_[meter_id]->sensors_["lqi"]->publish_state(mbus_data.lqi);
-        }
-        if (this->wmbus_listeners_[meter_id]->sensors_.count("rssi") > 0) {
-          this->wmbus_listeners_[meter_id]->sensors_["rssi"]->publish_state(mbus_data.rssi);
-        }
-        for (const auto &ele : mapValues.value()) {
-          if (this->wmbus_listeners_[meter_id]->sensors_.count(ele.first) > 0) {
-            ESP_LOGVV(TAG, "Publishing '%s' = %.4f", ele.first.c_str(), ele.second);
-            this->wmbus_listeners_[meter_id]->sensors_[ele.first]->publish_state(ele.second);
+          else {
+            std::string decrypted_telegram = format_hex_pretty(frame);
+            decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
+                                     decrypted_telegram.end());
+            std::string key = format_hex_pretty(sensor->key);
+            key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
+            if (key.size()) {
+              key.erase(key.size() - 5);
+            }
+            ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '%s'",
+                     meter_id,
+                     selected_driver->get_name().c_str(),
+                     key.c_str());
+            ESP_LOGE(TAG, "T : %s", telegram.c_str());
+            ESP_LOGE(TAG, "T': %s", decrypted_telegram.c_str());
           }
-          // for debug
-          if (text_debug != nullptr) {
-            if ((this->wmbus_listeners_[meter_id]->type == "apator162") &&
-                (this->wmbus_listeners_[meter_id]->sensors_.count("total_water_m3") > 0) &&
-                (ele.second > 500000)) {
-              text_debug->text_sensor_->publish_state("apator162 strange value");
-              std::string telegramik;
-              int split = 100;
-              int start = 0;
-              int part = 1;
-              while (start < telegram.size()) {
-                telegramik = std::to_string(part++) + "  | ";
-                telegramik += telegram.substr(start, split);
-                text_debug->text_sensor_->publish_state(telegramik);
-                start += split;
-              }
-              std::string decoded_telegramik = format_hex_pretty(frame);
-              split = 75;
-              start = 0;
-              part = 1;
-              while (start < decoded_telegramik.size()) {
-                telegramik = std::to_string(part++) + "' | ";
-                telegramik += decoded_telegramik.substr(start, split);
-                text_debug->text_sensor_->publish_state(telegramik);
-                start += split;
-                split = 99;
+        }
+        auto mapValues = selected_driver->get_values(frame);
+        if (mapValues.has_value()) {
+          if (this->wmbus_listeners_[meter_id]->sensors_.count("lqi") > 0) {
+            this->wmbus_listeners_[meter_id]->sensors_["lqi"]->publish_state(mbus_data.lqi);
+          }
+          if (this->wmbus_listeners_[meter_id]->sensors_.count("rssi") > 0) {
+            this->wmbus_listeners_[meter_id]->sensors_["rssi"]->publish_state(mbus_data.rssi);
+          }
+          for (const auto &ele : mapValues.value()) {
+            if (this->wmbus_listeners_[meter_id]->sensors_.count(ele.first) > 0) {
+              ESP_LOGVV(TAG, "Publishing '%s' = %.4f", ele.first.c_str(), ele.second);
+              this->wmbus_listeners_[meter_id]->sensors_[ele.first]->publish_state(ele.second);
+            }
+            // for debug
+            if (text_debug != nullptr) {
+              if ((this->wmbus_listeners_[meter_id]->type == "apator162") &&
+                  (this->wmbus_listeners_[meter_id]->sensors_.count("total_water_m3") > 0) &&
+                  (ele.second > 500000)) {
+                text_debug->text_sensor_->publish_state("apator162 strange value");
+                std::string telegramik;
+                int split = 100;
+                int start = 0;
+                int part = 1;
+                while (start < telegram.size()) {
+                  telegramik = std::to_string(part++) + "  | ";
+                  telegramik += telegram.substr(start, split);
+                  text_debug->text_sensor_->publish_state(telegramik);
+                  start += split;
+                }
+                std::string decoded_telegramik = format_hex_pretty(frame);
+                split = 75;
+                start = 0;
+                part = 1;
+                while (start < decoded_telegramik.size()) {
+                  telegramik = std::to_string(part++) + "' | ";
+                  telegramik += decoded_telegramik.substr(start, split);
+                  text_debug->text_sensor_->publish_state(telegramik);
+                  start += split;
+                  split = 99;
+                }
               }
             }
           }
-//
         }
         this->led_blink();
       }
@@ -156,6 +158,7 @@ void WMBusComponent::loop() {
                  selected_driver->get_name().c_str());
         ESP_LOGE(TAG, "T : %s", not_ok_telegram.c_str());
       }
+      / / / /
     }
     else {
       if (this->wmbus_listeners_.count(0) > 0) {
