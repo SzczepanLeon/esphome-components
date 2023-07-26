@@ -146,19 +146,18 @@ void WMBusComponent::loop() {
               }
             }
           }
+          this->led_blink();
         }
-        this->led_blink();
+        else {
+          std::string not_ok_telegram = format_hex_pretty(frame);
+          not_ok_telegram.erase(std::remove(not_ok_telegram.begin(), not_ok_telegram.end(), '.'),
+                                not_ok_telegram.end());
+          ESP_LOGE(TAG, "Can't get value from telegram for ID [0x%08X] '%s'",
+                  meter_id, 
+                  selected_driver->get_name().c_str());
+          ESP_LOGE(TAG, "T : %s", not_ok_telegram.c_str());
+        }
       }
-      else {
-        std::string not_ok_telegram = format_hex_pretty(frame);
-        not_ok_telegram.erase(std::remove(not_ok_telegram.begin(), not_ok_telegram.end(), '.'),
-                              not_ok_telegram.end());
-        ESP_LOGE(TAG, "Can't get value from telegram for ID [0x%08X] '%s'",
-                 meter_id, 
-                 selected_driver->get_name().c_str());
-        ESP_LOGE(TAG, "T : %s", not_ok_telegram.c_str());
-      }
-      / / / /
     }
     else {
       if (this->wmbus_listeners_.count(0) > 0) {

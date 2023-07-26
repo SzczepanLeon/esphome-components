@@ -49,6 +49,7 @@ class WMBusListener {
     WMBusListener(const uint32_t id, const std::string type, const std::string key);
     uint32_t id;
     std::string type;
+    WmBusFrameMode framemode{WMBUS_UNKNOWN_MODE};
     std::vector<unsigned char> key{};
     std::map<std::string, sensor::Sensor *> sensors_{};
     void add_sensor(std::string type, sensor::Sensor *sensor) {
