@@ -69,13 +69,11 @@ void WMBusComponent::loop() {
       }
       //
       auto *sensor = this->wmbus_listeners_[meter_id];
-        // //
       if ( ((mbus_data.framemode == WmBusFrameMode::WMBUS_T1_MODE) && 
             ((sensor->framemode == MODE_T1) || (sensor->framemode == MODE_T1C1))) ||
            ((mbus_data.framemode == WmBusFrameMode::WMBUS_C1_MODE) &&
             ((sensor->framemode == MODE_C1) || (sensor->framemode == MODE_T1C1)))
           ) {
-        // //
         auto selected_driver = this->drivers_[sensor->type];
         ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s T: %s",
                  selected_driver->get_name().c_str(),
