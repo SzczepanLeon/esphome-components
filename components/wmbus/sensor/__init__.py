@@ -251,7 +251,7 @@ CONFIG_SCHEMA = cv.Schema(
 ).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_LISTENER_ID], config[CONF_METER_ID], config[CONF_TYPE].lower(), config[CONF_KEY], conf[CONF_MODE])
+    var = cg.new_Pvariable(config[CONF_LISTENER_ID], config[CONF_METER_ID], config[CONF_TYPE].lower(), config[CONF_KEY], config[CONF_MODE])
     for key, conf in config.items():
         if not isinstance(conf, dict):
             continue
