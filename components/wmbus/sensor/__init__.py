@@ -36,6 +36,7 @@ AUTO_LOAD = ["wmbus"]
 CONF_METER_ID = "meter_id"
 CONF_LISTENER_ID = "listener_id"
 CONF_ADD_PREFIX = "add_prefix"
+CONF_MODE = "mode"
 
 UNIT_LITER = "l"
 
@@ -48,6 +49,14 @@ from .. import (
 CODEOWNERS = ["@SzczepanLeon"]
 
 WMBusListener = wmbus_ns.class_('WMBusListener')
+FrameMode = wmbus_ns.enum("FrameMode")
+
+FRAME_MODE = {
+    "T1": FrameMode.MODE_T1,
+    "C1": FrameMode.MODE_C1,
+    "T1C1": FrameMode.MODE_T1C1,
+}
+validate_mode = cv.enum(FRAME_MODE, upper=True)
 
 def my_key(value):
     value = cv.string_strict(value)
@@ -73,6 +82,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_TYPE, default="unknown"): cv.string_strict,
         cv.Optional(CONF_KEY, default=""): my_key,
         cv.Optional(CONF_ADD_PREFIX, default=True): cv.boolean,
+        cv.Optional(CONF_MODE, default="T1"): cv.templatable(validate_mode),
         cv.Optional("rssi"): sensor.sensor_schema(
             accuracy_decimals=0,
             unit_of_measurement=UNIT_DECIBEL_MILLIWATT,
@@ -241,7 +251,7 @@ CONFIG_SCHEMA = cv.Schema(
 ).extend(cv.COMPONENT_SCHEMA)
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_LISTENER_ID], config[CONF_METER_ID], config[CONF_TYPE].lower(), config[CONF_KEY])
+    var = cg.new_Pvariable(config[CONF_LISTENER_ID], config[CONF_METER_ID], config[CONF_TYPE].lower(), config[CONF_KEY], config[CONF_MODE])
     for key, conf in config.items():
         if not isinstance(conf, dict):
             continue

@@ -78,6 +78,7 @@ sensor:
   - platform: wmbus
     meter_id: 0x12345678
     type: amiplus
+    mode: T1C1
     rssi:
       name: "My RSSI"
     total_energy_consumption_kwh:
@@ -136,6 +137,7 @@ Meter/sensor:
 - **type** (*Optional*, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `c5isf`, `compact5`, `dme07`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `hydrus`, `iperl`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported. Defaults to ``unknown``.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - **add_prefix** (*Optional*): Add prefix (meter_id) to sensor name. Defaults to ``True``.
+- **mode** (*Optional*): Frame to process (T1, C1 or both). Defaults to ``T1``.
 - **sensor_type** (*Optional*): Sensor type from list below. For example ``total_water_m3``
   - **id** (*Optional*, string): Manually specify the ID for code generation. At least one of **id** and **name** must be specified.
   - **name** (*Optional*, string): The name for the sensor. At least one of **id** and **name** must be specified.
