@@ -36,6 +36,12 @@ enum Transport : uint8_t {
   TRANSPORT_UDP = 1,
 };
 
+enum FrameMode : uint8_t {
+  MODE_T1 = 0,
+  MODE_C1 = 1,
+  MODE_T1C1 = 1,
+};
+
 struct Client {
   std::string name;
   network::IPAddress ip;
@@ -46,10 +52,10 @@ struct Client {
 
 class WMBusListener {
   public:
-    WMBusListener(const uint32_t id, const std::string type, const std::string key);
+    WMBusListener(const uint32_t id, const std::string type, const std::string key, const FrameMode framemode);
     uint32_t id;
     std::string type;
-    WmBusFrameMode framemode{WMBUS_UNKNOWN_MODE};
+    WmBusFrameMode framemode{};
     std::vector<unsigned char> key{};
     std::map<std::string, sensor::Sensor *> sensors_{};
     void add_sensor(std::string type, sensor::Sensor *sensor) {

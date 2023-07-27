@@ -426,9 +426,10 @@ void WMBusListener::dump_config() {
   }
 }
 
-WMBusListener::WMBusListener(const uint32_t id, const std::string type, const std::string key) {
+WMBusListener::WMBusListener(const uint32_t id, const std::string type, const std::string key, const FrameMode framemode) {
   this->id = id;
   this->type = type;
+  this->framemode = framemode;
   hex_to_bin(key, &(this->key));
 }
 
