@@ -148,6 +148,7 @@ void WMBusComponent::loop() {
                 }
               }
             }
+            //
           }
           this->led_blink();
         }

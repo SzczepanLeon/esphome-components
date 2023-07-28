@@ -168,6 +168,9 @@ Supported sensors (sensor_type) for meters:
   - total_water_m3
 - `c5isf`
   - total_heating_kwh
+  - total_water_m3
+  - flow_temperature_c
+  - return_temperature_c
 - `compact5`
   - current_heating_kwh
   - previous_heating_kwh
