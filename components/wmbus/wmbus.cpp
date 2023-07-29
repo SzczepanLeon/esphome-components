@@ -355,7 +355,7 @@ void WMBusComponent::led_handler() {
   }
 }
 
-const LogString *mode_to_string(FrameMode framemode) {
+const LogString *framemode_to_string(FrameMode framemode) {
   switch (framemode) {
     case MODE_T1:
       return LOG_STR("T1");
@@ -442,7 +442,7 @@ void WMBusListener::dump_config() {
   ESP_LOGCONFIG(TAG, "  Meter:");
   ESP_LOGCONFIG(TAG, "    ID: %zu [0x%08X]", this->id, this->id);
   ESP_LOGCONFIG(TAG, "    Type: %s", this->type.c_str());
-  ESP_LOGCONFIG(TAG, "    Mode: %s", LOG_STR_ARG(mode_to_string(this->framemode)));
+  ESP_LOGCONFIG(TAG, "    Mode: %s", LOG_STR_ARG(framemode_to_string(this->framemode)));
   ESP_LOGCONFIG(TAG, "    Key: '%s'", key.c_str());
   for (const auto &ele : this->sensors_) {
     LOG_SENSOR("    ", "Sensor", ele.second);

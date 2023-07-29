@@ -113,7 +113,7 @@ class WMBusComponent : public Component {
   private:
 
   protected:
-    const LogString *mode_to_string(FrameMode framemode);
+    const LogString *framemode_to_string(FrameMode framemode);
     const LogString *format_to_string(Format format);
     const LogString *transport_to_string(Transport transport);
     void add_driver(Driver *driver);
