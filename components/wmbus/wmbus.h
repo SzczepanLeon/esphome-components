@@ -39,7 +39,7 @@ enum Transport : uint8_t {
 enum FrameMode : uint8_t {
   MODE_T1 = 0,
   MODE_C1 = 1,
-  MODE_T1C1 = 1,
+  MODE_T1C1 = 2,
 };
 
 struct Client {
@@ -113,6 +113,7 @@ class WMBusComponent : public Component {
   private:
 
   protected:
+    const LogString *mode_to_string(FrameMode framemode);
     const LogString *format_to_string(Format format);
     const LogString *transport_to_string(Transport transport);
     void add_driver(Driver *driver);
