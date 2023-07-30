@@ -456,6 +456,12 @@ WMBusListener::WMBusListener(const uint32_t id, const std::string type, const st
   hex_to_bin(key, &(this->key));
 }
 
+WMBusListener::WMBusListener(const uint32_t id, const std::string type, const std::string key) {
+  this->id = id;
+  this->type = type;
+  hex_to_bin(key, &(this->key));
+}
+
 int WMBusListener::char_to_int(char input)
 {
   if(input >= '0' && input <= '9') {
