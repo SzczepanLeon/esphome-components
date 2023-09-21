@@ -217,6 +217,7 @@ Supported sensors (sensor_type) for meters:
   - total_gas_m3
 - `vario451`
   - total_heating_kwh
+  - total_heating_gj
 
 
 #### 2.1.2. Example for version 1.x

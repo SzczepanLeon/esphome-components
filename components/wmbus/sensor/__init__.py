@@ -173,7 +173,14 @@ CONFIG_SCHEMA = cv.Schema(
             device_class=DEVICE_CLASS_ENERGY,
             state_class=STATE_CLASS_TOTAL_INCREASING,
             icon="mdi:radiator",
-        ),  
+        ),
+        cv.Optional("total_heating_gj"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement="GJ",
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:radiator",
+        ),
         cv.Optional("current_heating_kwh"): sensor.sensor_schema(
             accuracy_decimals=3,
             unit_of_measurement=UNIT_KILOWATT_HOURS,
