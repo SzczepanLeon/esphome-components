@@ -187,6 +187,7 @@ Supported sensors (sensor_type) for meters:
   - previous_hca
 - `hydrocalm3`
   - total_heating_kwh
+  - total_water_m3
 - `hydrus`
   - total_water_m3
 - `itron`
