@@ -263,7 +263,7 @@ void WMBusComponent::loop() {
 }
 
 bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key) {
-  bool ret_val = false;
+  bool ret_val = true;
   std::vector<unsigned char>::iterator pos;
   // CI
   pos = telegram.begin() + 10;
@@ -310,7 +310,13 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
     pos = telegram.begin() + offset;
     int num_encrypted_bytes = 0;
     int num_not_encrypted_at_end = 0;
+  }
+  else {
+    ESP_LOGE(TAG, "CI unknown");
+    ret_val = false;
+  }
 
+  if (ret_val) {
     if (decrypt_TPL_AES_CBC_IV(telegram, pos, key, iv,
                               &num_encrypted_bytes, &num_not_encrypted_at_end)) {
       uint32_t decrypt_check = 0x2F2F;
@@ -318,12 +324,11 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
       if ( dc == decrypt_check) {
         ret_val = true;
       }
+      else {
+        ret_val = false;
+      }
     }
   }
-  else {
-    ESP_LOGE(TAG, "CI unknown");
-  }
-
 
   return ret_val;
 }
