@@ -254,6 +254,26 @@ CONFIG_SCHEMA = cv.Schema(
             accuracy_decimals=0,
             icon="mdi:alarm-light-outline",
         ),
+        cv.Optional("total_volume_m3"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement=UNIT_CUBIC_METER,
+            device_class=DEVICE_CLASS_WATER,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:water",
+        ),
+        cv.Optional("volume_flow_m3h"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement=UNIT_CUBIC_METER,
+            device_class=DEVICE_CLASS_WATER,
+            icon="mdi:water",
+        ),
+        cv.Optional("power_kw"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement=UNIT_KILOWATT,
+            device_class=DEVICE_CLASS_POWER,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:transmission-tower-export",
+        ),    
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
