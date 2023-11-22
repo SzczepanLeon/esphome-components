@@ -41,7 +41,7 @@ void WMBusComponent::setup() {
   this->add_driver(new Mkradio4());
   this->add_driver(new Qheat());
   this->add_driver(new Qwater());
-  this->add_driver(new Sharky774());
+  this->add_driver(new Sharky774("51728910E66D83F851728910E66D83F8"));
   this->add_driver(new TopasESKR());
   this->add_driver(new Ultrimis());
   this->add_driver(new Unismart());
@@ -83,6 +83,7 @@ void WMBusComponent::loop() {
                  mode_to_string(mbus_data.framemode).c_str(),
                  telegram.c_str());
         if (sensor->key.size()) {
+          ESP_LOGVV(TAG, "Key defined, trying to decrypt telegram ...");
           if (this->decrypt_telegram(frame, sensor->key)) {
             std::string decrypted_telegram = format_hex_pretty(frame);
             decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
@@ -194,6 +195,7 @@ void WMBusComponent::loop() {
             switch (client.transport) {
               case TRANSPORT_TCP:
                 {
+                  ESP_LOGVV(TAG, "Will send HEX telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.write((const uint8_t *) frame.data(), frame.size());
                     this->tcp_client_.stop();
@@ -202,6 +204,7 @@ void WMBusComponent::loop() {
                 break;
               case TRANSPORT_UDP:
                 {
+                  ESP_LOGVV(TAG, "Will send HEX telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
                   this->udp_client_.write((const uint8_t *) frame.data(), frame.size());
                   this->udp_client_.endPacket();
@@ -221,6 +224,7 @@ void WMBusComponent::loop() {
             switch (client.transport) {
               case TRANSPORT_TCP:
                 {
+                  ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
                                              mode_to_string(mbus_data.framemode).c_str(),
@@ -236,6 +240,7 @@ void WMBusComponent::loop() {
                 break;
               case TRANSPORT_UDP:
                 {
+                  ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
                   this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
                                            mode_to_string(mbus_data.framemode).c_str(),
@@ -270,12 +275,15 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
   // data offset
   int offset{0};
 
+  uint16_t tpl_cfg = ((uint32_t)telegram[14] << 8) | ((uint32_t)telegram[13]);
+
   unsigned char iv[16];
   int i=0;
   
   if ((*pos == 0x67) || (*pos == 0x6E) || (*pos == 0x74) ||
       (*pos == 0x7A) || (*pos == 0x7D) || (*pos == 0x7F) || (*pos == 0x9E)) {
     offset = 15;
+    ESP_LOGVV(TAG, "Decrypting: tpl-ci '%02X' tpl-cfg '%02X' offset '%d", *pos, tpl_cfg, offset);
 
     // dll-mfct + dll-id + dll-version + dll-type
     for (int j=0; j<8; ++j) {
@@ -289,6 +297,7 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
   else if ((*pos == 0x68) || (*pos == 0x6F) || (*pos == 0x72) ||
            (*pos == 0x75) || (*pos == 0x7C) || (*pos == 0x7E) || (*pos == 0x9F)) {
     offset = 23;
+    ESP_LOGVV(TAG, "Decrypting: tpl-ci '%02X' tpl-cfg '%02X' offset '%d", *pos, tpl_cfg, offset);
 
     // tpl-mfct
     for (int j=0; j<2; ++j) {
@@ -309,6 +318,7 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
   }
   else {
     ESP_LOGE(TAG, "CI unknown");
+    ESP_LOGVV(TAG, "tpl-ci '%02X' tpl-cfg '%02X'", *pos, tpl_cfg);
     ret_val = false;
   }
 
@@ -321,9 +331,11 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
       uint32_t decrypt_check = 0x2F2F;
       uint32_t dc = (((uint32_t)telegram[offset] << 8) | ((uint32_t)telegram[offset+1]));
       if ( dc == decrypt_check) {
+        ESP_LOGVV(TAG, "2F2f check after decrypting - OK");
         ret_val = true;
       }
       else {
+        ESP_LOGVV(TAG, "2F2f check after decrypting - NOT OK");
         ret_val = false;
       }
     }
