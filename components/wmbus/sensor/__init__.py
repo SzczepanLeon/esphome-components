@@ -39,7 +39,7 @@ CONF_ADD_PREFIX = "add_prefix"
 CONF_MODE = "mode"
 
 UNIT_LITER = "l"
-UNIT_LITER_METER_PER_HOUR = "l/h"
+UNIT_LITER_PER_HOUR = "l/h"
 UNIT_GIGA_JOULE = "GJ"
 UNIT_DAY = "d"
 
@@ -280,7 +280,7 @@ CONFIG_SCHEMA = cv.Schema(
         ),
         cv.Optional("volume_flow_l3h"): sensor.sensor_schema(
             accuracy_decimals=0,
-            unit_of_measurement=UNIT_LITER_METER_PER_HOUR,
+            unit_of_measurement=UNIT_LITER_PER_HOUR,
             device_class=DEVICE_CLASS_WATER,
             state_class=STATE_CLASS_MEASUREMENT,
             icon="mdi:water",
