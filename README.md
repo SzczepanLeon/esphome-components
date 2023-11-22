@@ -209,12 +209,13 @@ Supported sensors (sensor_type) for meters:
 - `qwater`
   - total_water_m3
 - `sharky774`
-  - total_energy_consumption_kwh
-  - total_volume_m3
-  - volume_flow_m3h
+  - total_energy_consumption_gj
   - power_kw
+  - total_volume_m3
+  - volume_flow_lh
   - flow_temperature_c
   - return_temperature_c
+  - operating_time_d
 - `topaseskr`
   - total_water_m3
 - `ultrimis`
