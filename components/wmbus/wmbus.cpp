@@ -188,7 +188,7 @@ void WMBusComponent::loop() {
       }
     }
     if (!(this->clients_.empty())) {
-      ESP_LOGVV(TAG, "will send talegram to clients ...");
+      ESP_LOGVV(TAG, "will send telegram to clients ...");
       this->led_blink();
     }
     for (auto & client : this->clients_) {
