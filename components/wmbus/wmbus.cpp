@@ -51,7 +51,9 @@ void WMBusComponent::setup() {
 void WMBusComponent::loop() {
   this->led_handler();
   bool frameOk{true};
+  ESP_LOGVV(TAG, "loop start ...");
   if (rf_mbus_.task()) {
+    ESP_LOGVV(TAG, "have data from CC1101 ...");
     WMbusFrame mbus_data = rf_mbus_.get_frame();
     std::vector<unsigned char> frame = mbus_data.frame;
     std::string telegram = format_hex_pretty(frame);
