@@ -51,7 +51,7 @@ void WMBusComponent::setup() {
 void WMBusComponent::loop() {
   this->led_handler();
   bool frameOk{true};
-  ESP_LOGVV(TAG, "loop start ...");
+  // ESP_LOGVV(TAG, "loop start ...");
   if (rf_mbus_.task()) {
     ESP_LOGVV(TAG, "have data from CC1101 ...");
     WMbusFrame mbus_data = rf_mbus_.get_frame();
@@ -188,6 +188,7 @@ void WMBusComponent::loop() {
       }
     }
     if (!(this->clients_.empty())) {
+      ESP_LOGVV(TAG, "will send talegram to clients ...");
       this->led_blink();
     }
     for (auto & client : this->clients_) {
