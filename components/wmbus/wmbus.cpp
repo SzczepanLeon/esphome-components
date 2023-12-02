@@ -37,6 +37,7 @@ void WMBusComponent::setup() {
   this->add_driver(new Iperl());
   this->add_driver(new Itron());
   this->add_driver(new Izar());
+  this->add_driver(new Kamheat());
   this->add_driver(new Mkradio3());
   this->add_driver(new Mkradio4());
   this->add_driver(new Qheat());
