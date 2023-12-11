@@ -95,7 +95,7 @@ async def to_code(config):
     gdo0 = await cg.gpio_pin_expression(config[CONF_GDO0_PIN])
     gdo2 = await cg.gpio_pin_expression(config[CONF_GDO2_PIN])
 
-    cg.add(var.add_cc1101(mosi, miso, clk, cs, gdo0, gdo2))
+    cg.add(var.add_cc1101(mosi, miso, clk, cs, gdo0, gdo2, config[CONF_FREQUENCY]))
 
     time = await cg.get_variable(config[CONF_TIME_ID])
     cg.add(var.set_time(time))
