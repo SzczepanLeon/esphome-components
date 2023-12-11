@@ -93,13 +93,15 @@ class WMBusComponent : public Component {
     void register_wmbus_listener(WMBusListener *listener);
     void add_cc1101(InternalGPIOPin *mosi, InternalGPIOPin *miso,
                     InternalGPIOPin *clk, InternalGPIOPin *cs,
-                    InternalGPIOPin *gdo0, InternalGPIOPin *gdo2) {
+                    InternalGPIOPin *gdo0, InternalGPIOPin *gdo2,
+                    float frequency) {
       this->spi_conf_.mosi = mosi;
       this->spi_conf_.miso = miso;
       this->spi_conf_.clk  = clk;
       this->spi_conf_.cs   = cs;
       this->spi_conf_.gdo0 = gdo0;
       this->spi_conf_.gdo2 = gdo2;
+      this->frequency_ = frequency;
     }
     void set_time(time::RealTimeClock *time) { this->time_ = time; }
     void set_log_unknown() { this->log_unknown_ = true; }
@@ -124,6 +126,7 @@ class WMBusComponent : public Component {
     HighFrequencyLoopRequester high_freq_;
     GPIOPin *led_pin_{nullptr};
     Cc1101 spi_conf_{};
+    float frequency_{};
     std::map<uint32_t, WMBusListener *> wmbus_listeners_{};
     std::map<std::string, Driver *> drivers_{};
     std::vector<Client> clients_{};

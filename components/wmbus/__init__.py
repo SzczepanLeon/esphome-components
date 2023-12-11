@@ -66,17 +66,17 @@ CLIENT_SCHEMA = cv.Schema({
 CONFIG_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(WMBusComponent),
     cv.GenerateID(CONF_TIME_ID): cv.use_id(time.RealTimeClock),
-    cv.Optional(CONF_MOSI_PIN, default=13):            pins.internal_gpio_output_pin_schema,
-    cv.Optional(CONF_MISO_PIN, default=12):            pins.internal_gpio_input_pin_schema,
-    cv.Optional(CONF_CLK_PIN,  default=14):            pins.internal_gpio_output_pin_schema,
-    cv.Optional(CONF_CS_PIN,   default=2):             pins.internal_gpio_output_pin_schema,
-    cv.Optional(CONF_GDO0_PIN, default=5):             pins.internal_gpio_input_pin_schema,
-    cv.Optional(CONF_GDO2_PIN, default=4):             pins.internal_gpio_input_pin_schema,
+    cv.Optional(CONF_MOSI_PIN,       default=13):      pins.internal_gpio_output_pin_schema,
+    cv.Optional(CONF_MISO_PIN,       default=12):      pins.internal_gpio_input_pin_schema,
+    cv.Optional(CONF_CLK_PIN,        default=14):      pins.internal_gpio_output_pin_schema,
+    cv.Optional(CONF_CS_PIN,         default=2):       pins.internal_gpio_output_pin_schema,
+    cv.Optional(CONF_GDO0_PIN,       default=5):       pins.internal_gpio_input_pin_schema,
+    cv.Optional(CONF_GDO2_PIN,       default=4):       pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_LED_PIN):                         pins.gpio_output_pin_schema,
     cv.Optional(CONF_LED_BLINK_TIME, default="300ms"): cv.positive_time_period,
-    cv.Optional(CONF_LOG_UNKNOWN, default=True):       cv.boolean,
+    cv.Optional(CONF_LOG_UNKNOWN,    default=True):    cv.boolean,
     cv.Optional(CONF_CLIENTS):                         cv.ensure_list(CLIENT_SCHEMA),
-    cv.Optional(CONF_FREQUENCY, default=868.950):      cv.float_range(min=300, max=928),
+    cv.Optional(CONF_FREQUENCY,      default=868.950): cv.float_range(min=300, max=928),
 })
 
 def safe_ip(ip):

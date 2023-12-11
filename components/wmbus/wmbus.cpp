@@ -430,6 +430,7 @@ void WMBusComponent::dump_config() {
     LOG_PIN("    Pin: ", this->led_pin_);
     ESP_LOGCONFIG(TAG, "    Duration: %d ms", this->led_blink_time_);
   }
+  ESP_LOGCONFIG(TAG, "  CC1101 frequency: %3.3f MHz", this->frequency_);
   ESP_LOGCONFIG(TAG, "  CC1101 SPI bus:");
   LOG_PIN("    MOSI Pin: ", this->spi_conf_.mosi);
   LOG_PIN("    MISO Pin: ", this->spi_conf_.miso);
