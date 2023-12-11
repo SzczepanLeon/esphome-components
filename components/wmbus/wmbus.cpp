@@ -15,7 +15,8 @@ void WMBusComponent::setup() {
   }
   if (!rf_mbus_.init(this->spi_conf_.mosi->get_pin(), this->spi_conf_.miso->get_pin(),
                      this->spi_conf_.clk->get_pin(), this->spi_conf_.cs->get_pin(),
-                     this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin())) {
+                     this->spi_conf_.gdo0->get_pin(), this->spi_conf_.gdo2->get_pin(),
+                     868950000)) {
     this->mark_failed();
     ESP_LOGE(TAG, "CC1101 initialization failed.");
     return;
