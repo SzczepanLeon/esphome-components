@@ -113,6 +113,7 @@ Configuration variables:
 
 In wmbus platform:
 
+- **frequency** (*Optional*): CC1101 Rx frequency. Defaults to ``868.950 MHz``.
 - **mosi_pin** (*Optional*): CC1101 MOSI pin connection. Defaults to ``GPIO13``.
 - **miso_pin** (*Optional*): CC1101 MISO pin connection. Defaults to ``GPIO12``.
 - **clk_pin** (*Optional*): CC1101 CLK pin connection. Defaults to ``GPIO14``.
@@ -134,7 +135,7 @@ In wmbus platform:
 Meter/sensor:
 
 - **meter_id** (*Optional*, int): Meter ID. Can be specified as decimal or hex. Defaults to ``0``.
-- **type** (*Optional*, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `c5isf`, `compact5`, `dme07`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `hydrus`, `iperl`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported. Defaults to ``unknown``.
+- **type** (*Optional*, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `c5isf`, `compact5`, `dme07`, `elf`, `evo868`, `fhkvdataiii`, `hydrocalm3`, `hydrodigit`, `hydrus`, `iperl`, `itron`, `izar`, `mkradio3`, `mkradio4`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported. Defaults to ``unknown``.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - **add_prefix** (*Optional*): Add prefix (meter_id) to sensor name. Defaults to ``True``.
 - **mode** (*Optional*): Frame to process (T1, C1 or both). Defaults to ``T1``.
@@ -187,6 +188,8 @@ Supported sensors (sensor_type) for meters:
   - previous_hca
 - `hydrocalm3`
   - total_heating_kwh
+  - total_water_m3
+- `hydrodigit`
   - total_water_m3
 - `hydrus`
   - total_water_m3
