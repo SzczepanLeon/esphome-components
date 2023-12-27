@@ -54,16 +54,20 @@ void WMBusComponent::loop() {
   bool frameOk{true};
   // ESP_LOGVV(TAG, "loop start ...");
   if (rf_mbus_.task()) {
-    ESP_LOGVV(TAG, "have data from CC1101 ...");
+    //ESP_LOGD(TAG, "have data from CC1101 ...");
     WMbusFrame mbus_data = rf_mbus_.get_frame();
     std::vector<unsigned char> frame = mbus_data.frame;
     std::string telegram = format_hex_pretty(frame);
+    //ESP_LOGI(TAG, "0: Tele: %s",  telegram.c_str()); 
     telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
 
     // ToDo: add manufactures check
     uint32_t meter_id = ((uint32_t)frame[7] << 24) | ((uint32_t)frame[6] << 16) |
                         ((uint32_t)frame[5] << 8)  | ((uint32_t)frame[4]);
-
+    //ESP_LOGI(TAG, "1: Meter ID: %d Tele: %s", meter_id, telegram.c_str());                    
+    if (meter_id == (uint32_t)0x62215006){
+      ESP_LOGD(TAG,"In data MeterID=  [0x%08X] listeners_count= %d telegram= %s", meter_id, this->wmbus_listeners_.count(meter_id), telegram.c_str());
+    }
     if (this->wmbus_listeners_.count(meter_id) > 0) {
       // for debug
       WMBusListener *text_debug{nullptr};
@@ -72,10 +76,11 @@ void WMBusComponent::loop() {
       }
       //
       auto *sensor = this->wmbus_listeners_[meter_id];
+      //ESP_LOGD(TAG,"Before Mode assesment");
       if ( ((mbus_data.framemode == WmBusFrameMode::WMBUS_T1_MODE) && 
             ((sensor->framemode == MODE_T1) || (sensor->framemode == MODE_T1C1))) ||
            ((mbus_data.framemode == WmBusFrameMode::WMBUS_C1_MODE) &&
-            ((sensor->framemode == MODE_C1) || (sensor->framemode == MODE_T1C1)))
+            ((sensor->framemode == MODE_C1) || (sensor->framemode == MODE_T1C1))) 
           ) {
         auto selected_driver = this->drivers_[sensor->type];
         ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s T: %s",
@@ -87,29 +92,29 @@ void WMBusComponent::loop() {
                  telegram.c_str());
         if (sensor->key.size()) {
           ESP_LOGVV(TAG, "Key defined, trying to decrypt telegram ...");
-          if (this->decrypt_telegram(frame, sensor->key)) {
-            std::string decrypted_telegram = format_hex_pretty(frame);
-            decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
-                                     decrypted_telegram.end());
-            ESP_LOGD(TAG, "Decrypted T : %s", decrypted_telegram.c_str());
-          }
-          else {
-            frameOk = false;
-            std::string decrypted_telegram = format_hex_pretty(frame);
-            decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
-                                     decrypted_telegram.end());
-            std::string key = format_hex_pretty(sensor->key);
-            key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
-            if (key.size()) {
-              key.erase(key.size() - 5);
+            if (this->decrypt_telegram(frame, sensor->key)) {
+              std::string decrypted_telegram = format_hex_pretty(frame);
+              decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
+                                      decrypted_telegram.end());
+              ESP_LOGD(TAG, "Decrypted T : %s", decrypted_telegram.c_str());
             }
-            ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '%s'",
-                     meter_id,
-                     selected_driver->get_name().c_str(),
-                     key.c_str());
-            ESP_LOGE(TAG, "T : %s", telegram.c_str());
-            ESP_LOGE(TAG, "T': %s", decrypted_telegram.c_str());
-          }
+            else {
+              frameOk = false;
+              std::string decrypted_telegram = format_hex_pretty(frame);
+              decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
+                                      decrypted_telegram.end());
+              std::string key = format_hex_pretty(sensor->key);
+              key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
+              if (key.size()) {
+                key.erase(key.size() - 5);
+              }
+              ESP_LOGE(TAG, "Something was not OK during decrypting telegram for ID [0x%08X] '%s' key: '%s'",
+                      meter_id,
+                      selected_driver->get_name().c_str(),
+                      key.c_str());
+              ESP_LOGE(TAG, "T : %s", telegram.c_str());
+              ESP_LOGE(TAG, "T': %s", decrypted_telegram.c_str());
+            } 
         }
         if (frameOk) {
           auto mapValues = selected_driver->get_values(frame);
@@ -283,7 +288,8 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
 
   unsigned char iv[16];
   int i=0;
-  
+  ESP_LOGVV(TAG,"Before decrypt: %02X %02X %02X %02X %02X %02X",telegram[0],telegram[1],telegram[2],telegram[3],telegram[4],telegram[5]);
+
   if ((*pos == 0x67) || (*pos == 0x6E) || (*pos == 0x74) ||
       (*pos == 0x7A) || (*pos == 0x7D) || (*pos == 0x7F) || (*pos == 0x9E)) {
     offset = 15;
@@ -320,6 +326,28 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
       iv[i++] = telegram[19];
     }
   }
+  else if ((*pos == 0x8D) ) { //C1 B type (eg. Kamheat), Ext. Link Layer II  - removed: && (telegram[0] > 0x39)
+    offset = 17;
+    tpl_cfg = (uint32_t)telegram[10]; // = 0x8D
+    ESP_LOGVV(TAG, "Decrypting: tpl-ci '%02X' tpl-cfg '%02X' offset '%d", *pos, tpl_cfg, offset);
+
+    // tpl-mfct + tpl-id + tpl-version + tpl-type
+    for (int j=0; j<8; ++j) {
+      iv[i++] = telegram[2+j];
+    }
+    // ell-cc
+    for (int j=0; j<1; ++j) {
+      iv[i++] = telegram[11+j];
+    }
+    // aes-ctr
+    for (int j=0; j<4; ++j) {
+      iv[i++] = telegram[13+j];
+    }
+    // Fill remaining 3 Bytes by zeros (000)
+    for (int j=0; j<3; ++j) {
+      iv[i++] = 0;
+    }
+  }
   else {
     ESP_LOGE(TAG, "CI unknown");
     ESP_LOGVV(TAG, "tpl-ci '%02X' tpl-cfg '%02X'", *pos, tpl_cfg);
@@ -330,21 +358,32 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
     pos = telegram.begin() + offset;
     int num_encrypted_bytes = 0;
     int num_not_encrypted_at_end = 0;
-    if (decrypt_TPL_AES_CBC_IV(telegram, pos, key, iv,
-                              &num_encrypted_bytes, &num_not_encrypted_at_end)) {
-      uint32_t decrypt_check = 0x2F2F;
-      uint32_t dc = (((uint32_t)telegram[offset] << 8) | ((uint32_t)telegram[offset+1]));
-      if ( dc == decrypt_check) {
-        ESP_LOGVV(TAG, "2F2f check after decrypting - OK");
-        ret_val = true;
+    //TODO: check if frame is ELL and apply AES CTR decryption
+    if (tpl_cfg == 0x8D){
+      if (decrypt_TPL_AES_CTR_IV(telegram, pos, key, iv,
+                                &num_encrypted_bytes, &num_not_encrypted_at_end)) {
+        ESP_LOGVV(TAG, "AES CTR OK! TODO: check after decrypting - default OK");
+        ret_val = true;                          
       }
-      else {
-        ESP_LOGVV(TAG, "2F2f check after decrypting - NOT OK");
+      else{ 
+        ESP_LOGVV(TAG, "AES CTR failed!");
         ret_val = false;
       }
     }
+    else if (decrypt_TPL_AES_CBC_IV(telegram, pos, key, iv,
+                                &num_encrypted_bytes, &num_not_encrypted_at_end)) {
+            uint32_t decrypt_check = 0x2F2F;
+            uint32_t dc = (((uint32_t)telegram[offset] << 8) | ((uint32_t)telegram[offset+1]));
+            if ( dc == decrypt_check) {
+              ESP_LOGVV(TAG, "2F2f check after decrypting - OK");
+              ret_val = true;
+            }
+            else {
+              ESP_LOGVV(TAG, "2F2f check after decrypting - NOT OK");
+              ret_val = false;
+            }
+          }
   }
-
   return ret_val;
 }
 
@@ -519,3 +558,4 @@ bool WMBusListener::hex_to_bin(const char* src, std::vector<unsigned char> *targ
 
 }  // namespace wmbus
 }  // namespace esphome
+
