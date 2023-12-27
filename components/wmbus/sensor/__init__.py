@@ -271,6 +271,20 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT,
             icon="mdi:transmission-tower-export",
         ),
+        cv.Optional("total_forward_energy_m3c"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            unit_of_measurement=UNIT_GIGA_JOULE,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:heating-coil",
+        ),
+        cv.Optional("total_return_energy_m3c"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            unit_of_measurement=UNIT_GIGA_JOULE,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:heating-coil",
+        ),
         cv.Optional("total_volume_m3"): sensor.sensor_schema(
             accuracy_decimals=3,
             unit_of_measurement=UNIT_CUBIC_METER,
