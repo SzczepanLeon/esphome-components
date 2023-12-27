@@ -119,6 +119,7 @@ class WMBusComponent : public Component {
     const LogString *transport_to_string(Transport transport);
     void add_driver(Driver *driver);
     bool decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key);
+    bool decrypt_telegram_kamheat(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key);
     void led_blink();
     void led_handler();
     HighFrequencyLoopRequester high_freq_;
