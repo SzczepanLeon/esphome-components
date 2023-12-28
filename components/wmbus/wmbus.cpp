@@ -358,12 +358,21 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
     pos = telegram.begin() + offset;
     int num_encrypted_bytes = 0;
     int num_not_encrypted_at_end = 0;
-    //TODO: check if frame is ELL and apply AES CTR decryption
+    //Check if frame is ELL and apply AES CTR decryption
     if (tpl_cfg == 0x8D){
       if (decrypt_TPL_AES_CTR_IV(telegram, pos, key, iv,
                                 &num_encrypted_bytes, &num_not_encrypted_at_end)) {
-        ESP_LOGVV(TAG, "AES CTR OK! TODO: check after decrypting - default OK");
-        ret_val = true;                          
+        uint16_t crcBytes = ((uint16_t)telegram[18] << 8) + (uint16_t)telegram[17];
+        uint16_t crcEval = crc16_EN13757(&telegram[19], (uint8_t)telegram[0]-19+1); 
+        if (crcEval == crcBytes){                         
+          ESP_LOGVV(TAG, "AES CTR OK, CRC OK!");
+          ret_val = true;         
+        }
+        else{
+          ESP_LOGVV(TAG, "AES CTR OK, CRC Not OK!");
+          ESP_LOGE(TAG, "CRC Bytes: %04X CRC Eval: %04X ",crcBytes, crcEval);
+          ret_val = false;
+        }                 
       }
       else{ 
         ESP_LOGVV(TAG, "AES CTR failed!");
