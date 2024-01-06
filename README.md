@@ -186,6 +186,7 @@ Supported sensors (sensor_type) for meters:
 - `fhkvdataiii`
   - current_hca
   - previous_hca
+  - temp_room_c
 - `hydrocalm3`
   - total_heating_kwh
   - total_water_m3
