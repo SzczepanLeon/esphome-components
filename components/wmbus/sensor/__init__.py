@@ -163,6 +163,13 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT,
             icon="mdi:heat-wave",
         ),
+        cv.Optional("temp_room_c"): sensor.sensor_schema(
+            accuracy_decimals=2,
+            unit_of_measurement=UNIT_CELSIUS,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:thermometer",
+        ),
         cv.Optional("temp_room_avg_c"): sensor.sensor_schema(
             accuracy_decimals=2,
             unit_of_measurement=UNIT_CELSIUS,
