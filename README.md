@@ -29,10 +29,6 @@ https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
 > **_NOTE:_**  From version 2.2.22 experimental support for C1 A type frames are added.
 
-> **_NOTE:_**  From version 2.0 YAML configuration is changed. You can define multiple sensors for one meter.
-
-> **_NOTE:_**  From version 1.3 features from `wmbusgw` are included in this component. It means that you need *time* component in yaml.
-
 [!["CC1101 to D1 mini PCB"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/pcb_v2.png)](https://www.pcbway.com/project/shareproject/CC1101_to_ESP_D1_mini_277f34e1.html)
 
 
@@ -48,6 +44,7 @@ external_components:
     components: [ wmbus ]
 
 wmbus:
+  frequency: 434.475
   mosi_pin: GPIO13
   miso_pin: GPIO5
   clk_pin:  GPIO2
@@ -113,7 +110,7 @@ Configuration variables:
 
 In wmbus platform:
 
-- **frequency** (*Optional*): CC1101 Rx frequency. Defaults to ``868.950 MHz``.
+- **frequency** (*Optional*): CC1101 Rx frequency in MHz. Defaults to ``868.950 MHz``.
 - **mosi_pin** (*Optional*): CC1101 MOSI pin connection. Defaults to ``GPIO13``.
 - **miso_pin** (*Optional*): CC1101 MISO pin connection. Defaults to ``GPIO12``.
 - **clk_pin** (*Optional*): CC1101 CLK pin connection. Defaults to ``GPIO14``.
@@ -233,11 +230,6 @@ Supported sensors (sensor_type) for meters:
   - total_heating_gj
 
 
-### 2.2. `wmbusgw`
-
-> **_NOTE:_**  Please switch to `wmbus`
-
-
 ## 3. Author & License
 
-Szczepan, GPL, 2022-2023
+Szczepan, GPL, 2022-2024
