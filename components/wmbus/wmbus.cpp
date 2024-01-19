@@ -84,7 +84,7 @@ void WMBusComponent::loop() {
                  meter_id,
                  mbus_data.rssi,
                  mbus_data.lqi,
-                 mode_to_string(mbus_data.framemode).c_str(),
+                 "X",
                  telegram.c_str());
         if (sensor->key.size()) {
           ESP_LOGVV(TAG, "Key defined, trying to decrypt telegram ...");
@@ -188,7 +188,7 @@ void WMBusComponent::loop() {
                 meter_id,
                 mbus_data.rssi,
                 mbus_data.lqi,
-                mode_to_string(mbus_data.framemode).c_str(),
+                "X",
                 telegram.c_str());
       }
     }
@@ -235,7 +235,7 @@ void WMBusComponent::loop() {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                             mode_to_string(mbus_data.framemode).c_str(),
+                                             "X",
                                              telegram_time,
                                              mbus_data.rssi);
                     for (int i = 0; i < frame.size(); i++) {
@@ -251,7 +251,7 @@ void WMBusComponent::loop() {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
                   this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                           mode_to_string(mbus_data.framemode).c_str(),
+                                           "X",
                                            telegram_time,
                                            mbus_data.rssi);
                   for (int i = 0; i < frame.size(); i++) {
