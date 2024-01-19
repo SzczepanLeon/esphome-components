@@ -118,7 +118,7 @@ async def to_code(config):
     cg.add_library(
         None,
         None,
-        "https://github.com/satan/SmartRC-CC1101-Driver-Lib#2.5.7",
+        "https://github.com/LSatan/SmartRC-CC1101-Driver-Lib#2.5.7",
     )
 
     cg.add_library(
