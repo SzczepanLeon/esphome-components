@@ -57,9 +57,11 @@ void WMBusComponent::loop() {
   if (rf_mbus_.task()) {
     ESP_LOGVV(TAG, "have data from CC1101 ...");
     WMbusFrame mbus_data = rf_mbus_.get_frame();
-    char frameType[3]{0};
-    frameType[0] = mbus_data.mode;
-    frameType[1] = '1';
+    char frameMode[3]{0};
+    frameMode[0] = mbus_data.mode;
+    frameMode[1] = '1';
+    char frameFormat[2]{0};
+    frameFormat[0] = mbus_data.block;
     std::vector<unsigned char> frame = mbus_data.frame;
     std::string telegram = format_hex_pretty(frame);
     telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
@@ -187,11 +189,12 @@ void WMBusComponent::loop() {
         }
       }
       if (this->log_unknown_) {
-        ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s not found in configuration T: %s",
+        ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm LQI: %d Frame: %s %s not found in configuration T: %s",
                 meter_id,
                 mbus_data.rssi,
                 mbus_data.lqi,
-                frameType,
+                frameMode,
+                frameFormat,
                 telegram.c_str());
       }
     }
@@ -210,6 +213,9 @@ void WMBusComponent::loop() {
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.write((const uint8_t *) frame.data(), frame.size());
                     this->tcp_client_.stop();
+                  }
+                  else {
+                    ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", client.ip.str().c_str(), client.port);
                   }
                 }
                 break;
@@ -238,7 +244,7 @@ void WMBusComponent::loop() {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                             frameType,
+                                             frameMode,
                                              telegram_time,
                                              mbus_data.rssi);
                     for (int i = 0; i < frame.size(); i++) {
@@ -247,6 +253,9 @@ void WMBusComponent::loop() {
                     this->tcp_client_.print("\n");
                     this->tcp_client_.stop();
                   }
+                  else {
+                    ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", client.ip.str().c_str(), client.port);
+                  }
                 }
                 break;
               case TRANSPORT_UDP:
@@ -254,7 +263,7 @@ void WMBusComponent::loop() {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
                   this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                           frameType,
+                                           frameMode,
                                            telegram_time,
                                            mbus_data.rssi);
                   for (int i = 0; i < frame.size(); i++) {
