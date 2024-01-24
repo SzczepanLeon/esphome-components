@@ -209,7 +209,7 @@ void WMBusComponent::loop() {
             switch (client.transport) {
               case TRANSPORT_TCP:
                 {
-                  ESP_LOGVV(TAG, "Will send HEX telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
+                  ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.write((const uint8_t *) frame.data(), frame.size());
                     this->tcp_client_.stop();
@@ -221,7 +221,7 @@ void WMBusComponent::loop() {
                 break;
               case TRANSPORT_UDP:
                 {
-                  ESP_LOGVV(TAG, "Will send HEX telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
+                  ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
                   this->udp_client_.write((const uint8_t *) frame.data(), frame.size());
                   this->udp_client_.endPacket();
@@ -241,7 +241,7 @@ void WMBusComponent::loop() {
             switch (client.transport) {
               case TRANSPORT_TCP:
                 {
-                  ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
+                  ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
                                              frameMode,
@@ -260,7 +260,7 @@ void WMBusComponent::loop() {
                 break;
               case TRANSPORT_UDP:
                 {
-                  ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
+                  ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
                   this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
                                            frameMode,
