@@ -236,7 +236,7 @@ void WMBusComponent::loop() {
                 {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
-                    this->tcp_client_.printf("%s;1;1;%c1;%d;;;0x",
+                    this->tcp_client_.printf("%c1;1;1;%s;%d;;;0x",
                                              mbus_data.mode,
                                              telegram_time,
                                              mbus_data.rssi);
@@ -252,7 +252,7 @@ void WMBusComponent::loop() {
                 {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
-                  this->udp_client_.printf("%s;1;1;%c1;%d;;;0x",
+                  this->udp_client_.printf("%c1;1;1;%s;%d;;;0x",
                                            mbus_data.mode,
                                            telegram_time,
                                            mbus_data.rssi);
