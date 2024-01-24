@@ -57,6 +57,9 @@ void WMBusComponent::loop() {
   if (rf_mbus_.task()) {
     ESP_LOGVV(TAG, "have data from CC1101 ...");
     WMbusFrame mbus_data = rf_mbus_.get_frame();
+    char frameType[3]{0};
+    frameType[0] = mbus_data.mode;
+    frameType[1] = "1";
     std::vector<unsigned char> frame = mbus_data.frame;
     std::string telegram = format_hex_pretty(frame);
     telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
@@ -188,7 +191,7 @@ void WMBusComponent::loop() {
                 meter_id,
                 mbus_data.rssi,
                 mbus_data.lqi,
-                mbus_data.mode,
+                frameType,
                 telegram.c_str());
       }
     }
@@ -235,7 +238,7 @@ void WMBusComponent::loop() {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
                     this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                             "T1",
+                                             frameType,
                                              telegram_time,
                                              mbus_data.rssi);
                     for (int i = 0; i < frame.size(); i++) {
@@ -251,7 +254,7 @@ void WMBusComponent::loop() {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
                   this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                           "T1",
+                                           frameType,
                                            telegram_time,
                                            mbus_data.rssi);
                   for (int i = 0; i < frame.size(); i++) {
