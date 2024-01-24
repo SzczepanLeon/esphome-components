@@ -73,9 +73,9 @@ void WMBusComponent::loop() {
       }
       //
       auto *sensor = this->wmbus_listeners_[meter_id];
-      if ( ((mbus_data.framemode == WmBusFrameMode::WMBUS_T1_MODE) && 
+      if ( ((mbus_data.mode == 'T') && 
             ((sensor->framemode == MODE_T1) || (sensor->framemode == MODE_T1C1))) ||
-           ((mbus_data.framemode == WmBusFrameMode::WMBUS_C1_MODE) &&
+           ((mbus_data.mode == 'C') &&
             ((sensor->framemode == MODE_C1) || (sensor->framemode == MODE_T1C1)))
           ) {
         auto selected_driver = this->drivers_[sensor->type];
