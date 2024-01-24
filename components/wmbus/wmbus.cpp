@@ -59,7 +59,7 @@ void WMBusComponent::loop() {
     WMbusFrame mbus_data = rf_mbus_.get_frame();
     char frameType[3]{0};
     frameType[0] = mbus_data.mode;
-    frameType[1] = "1";
+    frameType[1] = '1';
     std::vector<unsigned char> frame = mbus_data.frame;
     std::string telegram = format_hex_pretty(frame);
     telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
