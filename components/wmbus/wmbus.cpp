@@ -188,7 +188,7 @@ void WMBusComponent::loop() {
                 meter_id,
                 mbus_data.rssi,
                 mbus_data.lqi,
-                "X",
+                mbus_data.mode,
                 telegram.c_str());
       }
     }
