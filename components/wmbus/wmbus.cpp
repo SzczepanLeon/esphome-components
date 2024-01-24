@@ -73,18 +73,19 @@ void WMBusComponent::loop() {
       }
       //
       auto *sensor = this->wmbus_listeners_[meter_id];
-      if ( ((mbus_data.framemode == WmBusFrameMode::WMBUS_T1_MODE) && 
+      if ( ((mbus_data.mode == 'T') && 
             ((sensor->framemode == MODE_T1) || (sensor->framemode == MODE_T1C1))) ||
-           ((mbus_data.framemode == WmBusFrameMode::WMBUS_C1_MODE) &&
+           ((mbus_data.mode == 'C') &&
             ((sensor->framemode == MODE_C1) || (sensor->framemode == MODE_T1C1)))
           ) {
         auto selected_driver = this->drivers_[sensor->type];
-        ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s T: %s",
+        ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %c Block: %c T: %s",
                  selected_driver->get_name().c_str(),
                  meter_id,
                  mbus_data.rssi,
                  mbus_data.lqi,
-                 "X",
+                 mbus_data.mode,
+                 mbus_data.block,
                  telegram.c_str());
         if (sensor->key.size()) {
           ESP_LOGVV(TAG, "Key defined, trying to decrypt telegram ...");
@@ -184,11 +185,12 @@ void WMBusComponent::loop() {
         }
       }
       if (this->log_unknown_) {
-        ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s not found in configuration T: %s",
+        ESP_LOGD(TAG, "Meter ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %c Block: %c not found in configuration T: %s",
                 meter_id,
                 mbus_data.rssi,
                 mbus_data.lqi,
-                "X",
+                mbus_data.mode,
+                mbus_data.block,
                 telegram.c_str());
       }
     }
@@ -234,8 +236,8 @@ void WMBusComponent::loop() {
                 {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
                   if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
-                    this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                             "T1",
+                    this->tcp_client_.printf("%s;1;1;%c1;%d;;;0x",
+                                             mbus_data.mode,
                                              telegram_time,
                                              mbus_data.rssi);
                     for (int i = 0; i < frame.size(); i++) {
@@ -250,8 +252,8 @@ void WMBusComponent::loop() {
                 {
                   ESP_LOGVV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
                   this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
-                  this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
-                                           "T1",
+                  this->udp_client_.printf("%s;1;1;%c1;%d;;;0x",
+                                           mbus_data.mode,
                                            telegram_time,
                                            mbus_data.rssi);
                   for (int i = 0; i < frame.size(); i++) {
