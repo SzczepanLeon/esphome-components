@@ -210,7 +210,7 @@ class rf_cc1101 {
 
     // Validate CRC
     ESP_LOGV(TAG_LL, "Validating CRC for Block1");
-    if (!crc::crcValid(t_in.data, (BLOCK1A_SIZE - 2))) {
+    if (!crcValid(t_in.data, (BLOCK1A_SIZE - 2))) {
       return false;
     }
 
@@ -230,7 +230,7 @@ class rf_cc1101 {
 
       // Validate CRC
       ESP_LOGV(TAG_LL, "Validating CRC for Block%u", (n + 2));
-      if (!crc::crcValid(blockStartPtr, (blockSize))) {
+      if (!crcValid(blockStartPtr, (blockSize))) {
         return false;
       }
 
@@ -280,7 +280,7 @@ class rf_cc1101 {
     blockStartPtr = t_in.data;
     // Validate CRC for Block1 + Block2
     ESP_LOGV(TAG_LL, "Validating CRC for Block1 + Block2");
-    if (!crc::crcValid(t_in.data, blockSize)) {
+    if (!crcValid(t_in.data, blockSize)) {
       return false;
     }
 
@@ -294,7 +294,7 @@ class rf_cc1101 {
       blockStartPtr = (t_in.data + L_OFFSET);
       // Validate CRC for Block3
       ESP_LOGV(TAG_LL, "Validating CRC for Block3");
-      if (!crc::crcValid(blockStartPtr, blockSize)) {
+      if (!crcValid(blockStartPtr, blockSize)) {
         return false;
       }
       // Get Block3
