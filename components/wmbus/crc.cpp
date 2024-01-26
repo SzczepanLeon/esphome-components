@@ -5,7 +5,7 @@ namespace wmbus {
 
   static const char *TAG = "crc";
 
-  static uint16_t crc16(uint8_t const t_message[], uint8_t t_nBytes, uint16_t t_polynomial, uint16_t t_init) {
+  uint16_t crc16(uint8_t const t_message[], uint8_t t_nBytes, uint16_t t_polynomial, uint16_t t_init) {
     uint16_t remainder{t_init};
 
     for (uint8_t byte{0}; byte < t_nBytes; ++byte) {
@@ -23,7 +23,7 @@ namespace wmbus {
   }
 
   // Validate CRC
-  static bool crcValid(const uint8_t *t_bytes, uint8_t t_crcOffset) {
+  bool crcValid(const uint8_t *t_bytes, uint8_t t_crcOffset) {
     bool retVal{false};
     static const uint16_t CRC_POLY{0x3D65};
     uint16_t crcCalc = ~crc16(t_bytes, t_crcOffset, CRC_POLY, 0);
