@@ -97,7 +97,7 @@ typedef struct WMbusFrame {
 namespace esphome {
 namespace wmbus {
 
-static const char *TAG = "cc1101";
+static const char *TAG_LL = "cc1101";
 
 class rf_cc1101 {
   public:
@@ -132,51 +132,51 @@ class rf_cc1101 {
     bool retVal{false};
     if (t_in.mode == 'C') {
       if (t_in.block == 'A') {
-        ESP_LOGD(TAG, "Processing C1 A frame");
+        ESP_LOGD(TAG_LL, "Processing C1 A frame");
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
         std::string telegram = esphome::format_hex_pretty(frame);
         telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
-        ESP_LOGV(TAG, "Frame: %s [with CRC]", telegram.c_str());
+        ESP_LOGV(TAG_LL, "Frame: %s [with CRC]", telegram.c_str());
         if (mBusDecodeFormatA(t_in, t_frame)) {
           retVal = true;
         }
       }
       else if (t_in.block == 'B') {
-        ESP_LOGD(TAG, "Processing C1 B frame");
+        ESP_LOGD(TAG_LL, "Processing C1 B frame");
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
         std::string telegram = esphome::format_hex_pretty(frame);
         telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
-        ESP_LOGV(TAG, "Frame: %s [with CRC]", telegram.c_str());
+        ESP_LOGV(TAG_LL, "Frame: %s [with CRC]", telegram.c_str());
         if (mBusDecodeFormatB(t_in, t_frame)) {
           retVal = true;
         }
       }
     }
     else if (t_in.mode == 'T') {
-      ESP_LOGD(TAG, "Processing T1 A frame");
+      ESP_LOGD(TAG_LL, "Processing T1 A frame");
       std::vector<unsigned char> rawFrame(t_in.data, t_in.data + t_in.length);
       std::string telegram = esphome::format_hex_pretty(rawFrame);
       telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
-      ESP_LOGV(TAG, "Frame: %s [RAW]", telegram.c_str());
+      ESP_LOGV(TAG_LL, "Frame: %s [RAW]", telegram.c_str());
 
       if (decode3OutOf6(&t_in, packetSize(t_in.lengthField))) {
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
         std::string telegram = esphome::format_hex_pretty(frame);
         telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
-        ESP_LOGV(TAG, "Frame: %s [with CRC]", telegram.c_str());
+        ESP_LOGV(TAG_LL, "Frame: %s [with CRC]", telegram.c_str());
         if (mBusDecodeFormatA(t_in, t_frame)) {
           retVal = true;
         }
       }
       else {
-        ESP_LOGV(TAG, "Failed to decode 3 out of 6");
+        ESP_LOGV(TAG_LL, "Failed to decode 3 out of 6");
       }
 
     }
     if (retVal) {
       std::string telegram = esphome::format_hex_pretty(t_frame.frame);
       telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
-      ESP_LOGD(TAG, "Frame: %s [without CRC]", telegram.c_str());
+      ESP_LOGD(TAG_LL, "Frame: %s [without CRC]", telegram.c_str());
     }
     return retVal;
   }
@@ -209,7 +209,7 @@ class rf_cc1101 {
     uint8_t L = t_in.data[0];
 
     // Validate CRC
-    ESP_LOGV(TAG, "Validating CRC for Block1");
+    ESP_LOGV(TAG_LL, "Validating CRC for Block1");
     if (!crc::crcValid(t_in.data, (BLOCK1A_SIZE - 2))) {
       return false;
     }
@@ -217,8 +217,8 @@ class rf_cc1101 {
     // Check length of package is sufficient
     uint8_t numDataBlocks = (L - 9 + 15) / 16;                                           // Data blocks are 16 bytes long + 2 CRC bytes (not counted in L)
     if ((L < 9) || (((L - 9 + (numDataBlocks * 2))) > (t_in.length - BLOCK1A_SIZE))) {   // add CRC bytes for each data block
-      ESP_LOGV(TAG, "Package (%u) too short for packet Length: %u", t_in.length, L);
-      ESP_LOGV(TAG, "  %u > %u", (L - 9 + (numDataBlocks * 2)), (t_in.length - BLOCK1A_SIZE));
+      ESP_LOGV(TAG_LL, "Package (%u) too short for packet Length: %u", t_in.length, L);
+      ESP_LOGV(TAG_LL, "  %u > %u", (L - 9 + (numDataBlocks * 2)), (t_in.length - BLOCK1A_SIZE));
       return false;
     }
 
@@ -229,7 +229,7 @@ class rf_cc1101 {
       uint8_t blockSize    = (MIN((L - 9 - (n * 16)), 16));                  // Maximum block size is 16 Data (without 2 CRC)
 
       // Validate CRC
-      ESP_LOGV(TAG, "Validating CRC for Block%u", (n + 2));
+      ESP_LOGV(TAG_LL, "Validating CRC for Block%u", (n + 2));
       if (!crc::crcValid(blockStartPtr, (blockSize))) {
         return false;
       }
@@ -271,15 +271,15 @@ class rf_cc1101 {
 
     // Check length of package is sufficient
     if ((L < 12) || ((L + 1) > t_in.length)) {  // pod len mam miec zapisane ile bajtow odebralem
-      ESP_LOGV(TAG, "Package (%u) too short for packet Length: %u", t_in.length, L);
-      ESP_LOGV(TAG, "  %u > %u", (L + 1), t_in.length);
+      ESP_LOGV(TAG_LL, "Package (%u) too short for packet Length: %u", t_in.length, L);
+      ESP_LOGV(TAG_LL, "  %u > %u", (L + 1), t_in.length);
       return false;
     }
 
     blockSize = MIN((L - 1), (BLOCK1B_SIZE + BLOCK2B_SIZE - 2));
     blockStartPtr = t_in.data;
     // Validate CRC for Block1 + Block2
-    ESP_LOGV(TAG, "Validating CRC for Block1 + Block2");
+    ESP_LOGV(TAG_LL, "Validating CRC for Block1 + Block2");
     if (!crc::crcValid(t_in.data, blockSize)) {
       return false;
     }
@@ -293,7 +293,7 @@ class rf_cc1101 {
       blockSize = (L - L_OFFSET - 1);
       blockStartPtr = (t_in.data + L_OFFSET);
       // Validate CRC for Block3
-      ESP_LOGV(TAG, "Validating CRC for Block3");
+      ESP_LOGV(TAG_LL, "Validating CRC for Block3");
       if (!crc::crcValid(blockStartPtr, blockSize)) {
         return false;
       }
@@ -429,7 +429,7 @@ class rf_cc1101 {
     uint8_t freq1 = (freq_reg >> 8) & 0xFF;
     uint8_t freq0 = freq_reg & 0xFF;
 
-    ESP_LOGD(TAG, "Set CC1101 frequency to %3.3fMHz [%02X %02X %02X]",
+    ESP_LOGD(TAG_LL, "Set CC1101 frequency to %3.3fMHz [%02X %02X %02X]",
           freq/1000000, freq2, freq1, freq0);
           // don't use setMHZ() -- seems to be broken
     ELECHOUSE_cc1101.SpiWriteReg(CC1101_FREQ2, freq2);
@@ -442,14 +442,14 @@ class rf_cc1101 {
 
     if ((cc1101Version != 0) && (cc1101Version != 255)) {
       retVal = true;
-      ESP_LOGD(TAG, "wMBus-lib: CC1101 version '%d'", cc1101Version);
+      ESP_LOGD(TAG_LL, "wMBus-lib: CC1101 version '%d'", cc1101Version);
       ELECHOUSE_cc1101.SetRx();
-      ESP_LOGD(TAG, "wMBus-lib: CC1101 initialized");
+      ESP_LOGD(TAG_LL, "wMBus-lib: CC1101 initialized");
       // memset(&RXinfo, 0, sizeof(RXinfo)); // ??? dlaczego cala struktore zerowalem?
       delay(4);
     }
     else {
-      ESP_LOGE(TAG, "wMBus-lib: CC1101 initialization FAILED!");
+      ESP_LOGE(TAG_LL, "wMBus-lib: CC1101 initialization FAILED!");
     }
 
     return retVal;
@@ -557,11 +557,11 @@ class rf_cc1101 {
       rxLoop.bytesRx += rxLoop.bytesLeft;
       data_in.length  = rxLoop.bytesRx;
       if (rxLoop.length != data_in.length) {
-        ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
+        ESP_LOGE(TAG_LL, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
       }
-      ESP_LOGD(TAG, "Have %d bytes from CC1101 Rx", rxLoop.bytesRx);
+      ESP_LOGD(TAG_LL, "Have %d bytes from CC1101 Rx", rxLoop.bytesRx);
       if (mBusDecode(data_in, this->returnFrame)) {
-        ESP_LOGD(TAG, "Packet OK.");
+        ESP_LOGD(TAG_LL, "Packet OK.");
         rxLoop.complete = true;
         this->returnFrame.mode  = data_in.mode;
         this->returnFrame.block = data_in.block;
@@ -569,7 +569,7 @@ class rf_cc1101 {
         this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
       }
       else {
-        ESP_LOGD(TAG, "Error during decoding.");
+        ESP_LOGD(TAG_LL, "Error during decoding.");
       }
       rxLoop.state = INIT_RX;
       return rxLoop.complete;
