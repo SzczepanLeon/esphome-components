@@ -13,7 +13,7 @@ namespace wmbus {
       if (t_in.block == 'A') {
         ESP_LOGD(TAG, "Processing C1 A frame");
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
-        std::string telegram = esphome::format_hex_pretty(frame);
+        std::string telegram = format_hex_pretty(frame);
         telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
         ESP_LOGV(TAG, "Frame: %s [with CRC]", telegram.c_str());
         if (mBusDecodeFormatA(t_in, t_frame)) {
@@ -23,7 +23,7 @@ namespace wmbus {
       else if (t_in.block == 'B') {
         ESP_LOGD(TAG, "Processing C1 B frame");
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
-        std::string telegram = esphome::format_hex_pretty(frame);
+        std::string telegram = format_hex_pretty(frame);
         telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
         ESP_LOGV(TAG, "Frame: %s [with CRC]", telegram.c_str());
         if (mBusDecodeFormatB(t_in, t_frame)) {
@@ -34,13 +34,13 @@ namespace wmbus {
     else if (t_in.mode == 'T') {
       ESP_LOGD(TAG, "Processing T1 A frame");
       std::vector<unsigned char> rawFrame(t_in.data, t_in.data + t_in.length);
-      std::string telegram = esphome::format_hex_pretty(rawFrame);
+      std::string telegram = format_hex_pretty(rawFrame);
       telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
       ESP_LOGV(TAG, "Frame: %s [RAW]", telegram.c_str());
 
       if (decode3OutOf6(&t_in, packetSize(t_in.lengthField))) {
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
-        std::string telegram = esphome::format_hex_pretty(frame);
+        std::string telegram = format_hex_pretty(frame);
         telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
         ESP_LOGV(TAG, "Frame: %s [with CRC]", telegram.c_str());
         if (mBusDecodeFormatA(t_in, t_frame)) {
@@ -53,7 +53,7 @@ namespace wmbus {
 
     }
     if (retVal) {
-      std::string telegram = esphome::format_hex_pretty(t_frame.frame);
+      std::string telegram = format_hex_pretty(t_frame.frame);
       telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
       ESP_LOGD(TAG, "Frame: %s [without CRC]", telegram.c_str());
     }

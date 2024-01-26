@@ -1,5 +1,6 @@
 #pragma once
 
+#include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
 #include "m_bus_data.h"
 #include "utils.h"
