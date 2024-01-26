@@ -6,7 +6,6 @@
 
 #include "utils.h"
 
-#include "crc.h"
 #include "decode3of6.h"
 #include "m_bus_data.h"
 
@@ -49,10 +48,6 @@
 
 #define FIXED_PACKET_LENGTH        0x00
 #define INFINITE_PACKET_LENGTH     0x02
-
-
-
-#include "esphome/core/helpers.h"
 
 
 enum RxLoopState : uint8_t {

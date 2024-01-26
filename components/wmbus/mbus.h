@@ -3,7 +3,10 @@
 #include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
 #include "m_bus_data.h"
+#include "decode3of6.h"
 #include "utils.h"
+#include "crc.h"
+
 #include <vector>
 
 #define BLOCK1A_SIZE 12     // Size of Block 1, format A
