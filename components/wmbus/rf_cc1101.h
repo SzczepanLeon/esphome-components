@@ -17,7 +17,7 @@
 #include <ELECHOUSE_CC1101_SRC_DRV.h>
 
 #include <string>
-#include <vector>
+
 
 // CC1101 state machine
 #define MARCSTATE_SLEEP            0x00
@@ -51,17 +51,6 @@
 #define INFINITE_PACKET_LENGTH     0x02
 
 
-#define BLOCK1A_SIZE 12     // Size of Block 1, format A
-#define BLOCK1B_SIZE 10     // Size of Block 1, format B
-#define BLOCK2B_SIZE 118    // Maximum size of Block 2, format B
-
-// Helper macros, collides with MSVC's stdlib.h unless NOMINMAX is used
-#ifndef MAX
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-#endif
-#ifndef MIN
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#endif
 
 #include "esphome/core/helpers.h"
 
