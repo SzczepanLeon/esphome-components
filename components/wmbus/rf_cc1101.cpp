@@ -179,7 +179,7 @@ static const char *TAG_LL = "rxLoop";
     return this->returnFrame;
   }
 //
-   uint8_t RxLoop::start(bool force = true) {
+   uint8_t RxLoop::start(bool force) {
       // waiting to long for next part of data?
       bool reinit_needed = ((millis() - sync_time_) > max_wait_time_) ? true: false;
       if (!force) {
