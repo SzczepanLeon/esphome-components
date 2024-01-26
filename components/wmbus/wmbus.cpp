@@ -59,6 +59,7 @@ void WMBusComponent::loop() {
     ESP_LOGVV(TAG, "have data from CC1101 ...");
     WMbusFrame mbus_data = rf_mbus_.get_frame();
     myTrace();
+    crc::myTraceCrc();
     char frameMode[3]{0};
     frameMode[0] = mbus_data.mode;
     frameMode[1] = '1';

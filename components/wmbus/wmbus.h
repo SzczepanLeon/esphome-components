@@ -24,6 +24,7 @@
 #include <WiFiUdp.h>
 
 #include "rf_cc1101.h"
+#include "crc.h"
 
 namespace esphome {
 namespace wmbus {
