@@ -31,7 +31,7 @@ namespace wmbus {
     return retVal;
   }
 
-  bool decode3OutOf6(uint8_t *t_encodedData, uint8_t *t_decodedData, bool t_lastByte = false) {
+  bool decode3OutOf6(uint8_t *t_encodedData, uint8_t *t_decodedData, bool t_lastByte) {
     uint8_t data[4];
 
     if (t_lastByte) {  // If last byte, ignore postamble sequence
