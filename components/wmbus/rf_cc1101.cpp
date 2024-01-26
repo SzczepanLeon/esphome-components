@@ -1,7 +1,7 @@
 #include "rf_cc1101.h"
 
-namespace
-{
+namespace esphome {
+namespace wmbus {
 
     static const char *TAG = "cc1101";
 
@@ -9,4 +9,5 @@ namespace
         esphome::ESP_LOGI(TAG, "My trace info.");
     }
 
+}
 }

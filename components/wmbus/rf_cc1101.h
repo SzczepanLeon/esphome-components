@@ -2,7 +2,8 @@
 
 #include "esphome/core/log.h"
 
-namespace
-{
+namespace esphome {
+namespace wmbus {
     void myTrace(void);
+}
 }
