@@ -140,7 +140,7 @@ class WMBusComponent : public Component {
     uint32_t led_on_millis_{0};
     bool led_on_{false};
     bool log_unknown_{false};
-    rf_cc1101 rf_mbus_;
+    RxLoop rf_mbus_;
 };
 
 }  // namespace wmbus
