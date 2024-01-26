@@ -13,8 +13,8 @@
 #include <string>
 
 //wMBus lib
-#include "rf_mbus.hpp"
-#include "crc.hpp"
+// #include "rf_mbus.hpp"
+// #include "crc.hpp"
 #include "mbus_packet.hpp"
 #include "utils.hpp"
 
@@ -140,7 +140,7 @@ class WMBusComponent : public Component {
     uint32_t led_on_millis_{0};
     bool led_on_{false};
     bool log_unknown_{false};
-    rf_mbus rf_mbus_;
+    rf_cc1101 rf_mbus_;
 };
 
 }  // namespace wmbus
