@@ -3,10 +3,10 @@
 namespace
 {
 
-static const char *TAG = "cc1101";
+    static const char *TAG = "cc1101";
 
-void myTrace(void) {
-    esphome::ESP_LOGI(TAG, "My trace info.");
-}
+    void myTrace(void) {
+        esphome::ESP_LOGI(TAG, "My trace info.");
+    }
 
 }

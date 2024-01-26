@@ -2,4 +2,7 @@
 
 #include "esphome/core/log.h"
 
-void myTrace(void);
+namespace
+{
+    void myTrace(void);
+}
