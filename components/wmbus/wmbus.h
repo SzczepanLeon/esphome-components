@@ -12,8 +12,6 @@
 #include <map>
 #include <string>
 
-#include "rf_cc1101.h"
-
 //wMBus lib
 #include "rf_mbus.hpp"
 #include "crc.hpp"
