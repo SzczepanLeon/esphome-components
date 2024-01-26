@@ -11,6 +11,13 @@ namespace wmbus {
     char      block;
   } m_bus_data_t;
 
+  typedef struct WMbusFrame {
+    std::vector<unsigned char> frame{};
+    char      mode;
+    char      block;
+    int8_t rssi;
+    uint8_t lqi;
+  } WMbusFrame;
 
 }
 }
