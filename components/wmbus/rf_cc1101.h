@@ -11,7 +11,7 @@
 
 #include <stdint.h>
 
-#include "tmode_rf_settings.hpp"
+#include "cc1101_rf_settings.h"
 
 #include <ELECHOUSE_CC1101_SRC_DRV.h>
 
