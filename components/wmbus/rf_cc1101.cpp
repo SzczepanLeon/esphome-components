@@ -3,8 +3,5 @@
 namespace esphome {
 namespace wmbus {
 
-  static const char *TAG = "cc1101";
-
-
 }
 }
