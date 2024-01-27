@@ -1,9 +1,4 @@
-/***********************************************************************************
-    Filename: tmode_rf_settings.hpp
-***********************************************************************************/
-
-#ifndef _TMODE_RF_SETTINGS_H
-#define _TMODE_RF_SETTINGS_H
+#pragma once
 
 #include <ELECHOUSE_CC1101_SRC_DRV.h>
 
@@ -60,5 +55,3 @@ const uint8_t TMODE_RF_SETTINGS_BYTES[] = {
     CC1101_TEST1,0x35,
     CC1101_TEST0,0x09
 };
-
-#endif

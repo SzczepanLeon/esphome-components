@@ -3,10 +3,10 @@
 namespace esphome {
 namespace wmbus {
 
-static const char *TAG_LL = "rxLoop";
+static const char *TAG = "rxLoop";
 
   bool RxLoop::init(uint8_t mosi, uint8_t miso, uint8_t clk, uint8_t cs,
-            uint8_t gdo0, uint8_t gdo2, float freq) {
+                    uint8_t gdo0, uint8_t gdo2, float freq) {
     bool retVal = false;
     this->gdo0 = gdo0;
     this->gdo2 = gdo2;
@@ -18,7 +18,7 @@ static const char *TAG_LL = "rxLoop";
 
     for (uint8_t i = 0; i < TMODE_RF_SETTINGS_LEN; i++) {
       ELECHOUSE_cc1101.SpiWriteReg(TMODE_RF_SETTINGS_BYTES[i << 1],
-                                  TMODE_RF_SETTINGS_BYTES[(i << 1) + 1]);
+                                   TMODE_RF_SETTINGS_BYTES[(i << 1) + 1]);
     }
 
     uint32_t freq_reg = uint32_t(freq * 65536 / 26);
@@ -26,9 +26,9 @@ static const char *TAG_LL = "rxLoop";
     uint8_t freq1 = (freq_reg >> 8) & 0xFF;
     uint8_t freq0 = freq_reg & 0xFF;
 
-    ESP_LOGD(TAG_LL, "Set CC1101 frequency to %3.3fMHz [%02X %02X %02X]",
-          freq/1000000, freq2, freq1, freq0);
-          // don't use setMHZ() -- seems to be broken
+    ESP_LOGD(TAG, "Set CC1101 frequency to %3.3fMHz [%02X %02X %02X]",
+             freq/1000000, freq2, freq1, freq0);
+             // don't use setMHZ() -- seems to be broken
     ELECHOUSE_cc1101.SpiWriteReg(CC1101_FREQ2, freq2);
     ELECHOUSE_cc1101.SpiWriteReg(CC1101_FREQ1, freq1);
     ELECHOUSE_cc1101.SpiWriteReg(CC1101_FREQ0, freq0);
@@ -39,14 +39,14 @@ static const char *TAG_LL = "rxLoop";
 
     if ((cc1101Version != 0) && (cc1101Version != 255)) {
       retVal = true;
-      ESP_LOGD(TAG_LL, "wMBus-lib: CC1101 version '%d'", cc1101Version);
+      ESP_LOGD(TAG, "wMBus-lib: CC1101 version '%d'", cc1101Version);
       ELECHOUSE_cc1101.SetRx();
-      ESP_LOGD(TAG_LL, "wMBus-lib: CC1101 initialized");
+      ESP_LOGD(TAG, "wMBus-lib: CC1101 initialized");
       // memset(&RXinfo, 0, sizeof(RXinfo)); // ??? dlaczego cala struktore zerowalem?
       delay(4);
     }
     else {
-      ESP_LOGE(TAG_LL, "wMBus-lib: CC1101 initialization FAILED!");
+      ESP_LOGE(TAG, "CC1101 initialization FAILED!");
     }
 
     return retVal;
@@ -154,11 +154,11 @@ static const char *TAG_LL = "rxLoop";
       rxLoop.bytesRx += rxLoop.bytesLeft;
       data_in.length  = rxLoop.bytesRx;
       if (rxLoop.length != data_in.length) {
-        ESP_LOGE(TAG_LL, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
+        ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
       }
-      ESP_LOGD(TAG_LL, "Have %d bytes from CC1101 Rx", rxLoop.bytesRx);
+      ESP_LOGD(TAG, "Have %d bytes from CC1101 Rx", rxLoop.bytesRx);
       if (mBusDecode(data_in, this->returnFrame)) {
-        ESP_LOGD(TAG_LL, "Packet OK.");
+        ESP_LOGD(TAG, "Packet OK.");
         rxLoop.complete = true;
         this->returnFrame.mode  = data_in.mode;
         this->returnFrame.block = data_in.block;
@@ -166,7 +166,7 @@ static const char *TAG_LL = "rxLoop";
         this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
       }
       else {
-        ESP_LOGD(TAG_LL, "Error during decoding.");
+        ESP_LOGD(TAG, "Error during decoding.");
       }
       rxLoop.state = INIT_RX;
       return rxLoop.complete;
@@ -232,5 +232,6 @@ static const char *TAG_LL = "rxLoop";
 
       return 1; // this will indicate we just have re-started RX
     }
+
 }
 }
