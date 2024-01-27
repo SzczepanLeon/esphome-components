@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#incliude <cstring>
 #include <vector>
 
 namespace esphome {
