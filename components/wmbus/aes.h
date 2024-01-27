@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <vector>
 
 namespace esphome {
 namespace wmbus {
