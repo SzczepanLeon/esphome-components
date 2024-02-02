@@ -1,6 +1,8 @@
 #pragma once
 
+#include "esphome/core/helpers.h"
 #include "esphome/core/log.h"
+#include <algorithm> 
 #include <assert.h>
 #include <memory.h>
 #include <vector>
