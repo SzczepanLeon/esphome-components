@@ -213,6 +213,9 @@ Supported sensors (sensor_type) for meters:
   - total_water_m3
 - `mkradio4`
   - total_water_m3
+- `multical21`
+  - total_m3
+  - target_m3
 - `qheat`
   - total_energy_consumption_kwh
 - `qwater`
