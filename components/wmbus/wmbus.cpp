@@ -289,79 +289,40 @@ void WMBusComponent::loop() {
 }
 
 bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key) {
-  bool ret_val = true;
-  std::vector<unsigned char>::iterator pos;
-  // CI
-  pos = telegram.begin() + 10;
-  // data offset
-  int offset{0};
-
-  uint16_t tpl_cfg = ((uint32_t)telegram[14] << 8) | ((uint32_t)telegram[13]);
-
-  unsigned char iv[16];
-  int i=0;
-  
-  if ((*pos == 0x67) || (*pos == 0x6E) || (*pos == 0x74) ||
-      (*pos == 0x7A) || (*pos == 0x7D) || (*pos == 0x7F) || (*pos == 0x9E)) {
-    offset = 15;
-    ESP_LOGVV(TAG, "Decrypting: tpl-ci '%02X' tpl-cfg '%02X' offset '%d", *pos, tpl_cfg, offset);
-
-    // dll-mfct + dll-id + dll-version + dll-type
-    for (int j=0; j<8; ++j) {
-      iv[i++] = telegram[2+j];
-    }
-    // tpl-acc
-    for (int j=0; j<8; ++j) {
-      iv[i++] = telegram[11];
-    }
-  }
-  else if ((*pos == 0x68) || (*pos == 0x6F) || (*pos == 0x72) ||
-           (*pos == 0x75) || (*pos == 0x7C) || (*pos == 0x7E) || (*pos == 0x9F)) {
-    offset = 23;
-    ESP_LOGVV(TAG, "Decrypting: tpl-ci '%02X' tpl-cfg '%02X' offset '%d", *pos, tpl_cfg, offset);
-
-    // tpl-mfct
-    for (int j=0; j<2; ++j) {
-      iv[i++] = telegram[15+j];
-    }
-    // tpl-id
-    for (int j=0; j<4; ++j) {
-      iv[i++] = telegram[11+j];
-    }
-    // tpl-version + tpl-type
-    for (int j=0; j<2; ++j) {
-      iv[i++] = telegram[17+j];
-    }
-    // tpl-acc
-    for (int j=0; j<8; ++j) {
-      iv[i++] = telegram[19];
-    }
-  }
-  else {
-    ESP_LOGE(TAG, "CI unknown");
-    ESP_LOGVV(TAG, "tpl-ci '%02X' tpl-cfg '%02X'", *pos, tpl_cfg);
-    ret_val = false;
-  }
-
-  if (ret_val) {
-    pos = telegram.begin() + offset;
-    int num_encrypted_bytes = 0;
-    int num_not_encrypted_at_end = 0;
-    if (decrypt_TPL_AES_CBC_IV(telegram, pos, key, iv,
-                              &num_encrypted_bytes, &num_not_encrypted_at_end)) {
-      uint32_t decrypt_check = 0x2F2F;
-      uint32_t dc = (((uint32_t)telegram[offset] << 8) | ((uint32_t)telegram[offset+1]));
-      if ( dc == decrypt_check) {
-        ESP_LOGVV(TAG, "2F2f check after decrypting - OK");
-        ret_val = true;
+  bool ret_val = false;
+  int ci_field = telegram[10];
+  switch(ci_field) {
+    case 0x8D:
+      {
+        if (decrypt_ELL_AES_CTR(telegram, key)) {
+          static const uint8_t offset{17};
+          uint8_t payload_len = telegram.size() - 2 - offset;  // telefram,size - CRC - offset
+          static const uint16_t CRC_POLY{0x3D65};
+          uint16_t crcCalc = ~crc16(safeButUnsafeVectorPtr(telegram) + offset + 2, payload_len, CRC_POLY, 0);
+          uint16_t crcRead = (telegram[offset] | ((uint16_t)telegram[offset + 1] << 8));
+          if (crcCalc != crcRead) {
+            ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
+          else {
+            ESP_LOGE(TAG, "CRC check failed!");
+            ret_val = false;
+          }
+        }
+        else {
+          ESP_LOGE(TAG, "Decrypting ELL AES CTR failed!");
+          ret_val = false;
+        }
       }
-      else {
-        ESP_LOGVV(TAG, "2F2f check after decrypting - NOT OK");
-        ret_val = false;
-      }
-    }
-  }
+      break;
 
+    default:
+      {
+        if (!decrypt_TPL_AES_CBC_IV(telegram, key)) {
+          ESP_LOGE(TAG, "Decrypting TPL AES CBC IV failed!");
+          ret_val = false;
+        }
+      }
+      break;
+  }
   return ret_val;
 }
 

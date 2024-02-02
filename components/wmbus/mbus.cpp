@@ -165,6 +165,7 @@ namespace wmbus {
 
     // Get data from Block1 + Block2
     t_frame.frame.insert(t_frame.frame.begin(), blockStartPtr, (blockStartPtr + blockSize));
+    t_frame.frame[0] -= 2;
 
     // Check if Block3 is present (long telegrams)
     const uint8_t L_OFFSET = (BLOCK1B_SIZE + BLOCK2B_SIZE);
@@ -178,6 +179,7 @@ namespace wmbus {
       }
       // Get Block3
       t_frame.frame.insert((t_frame.frame.end()), blockStartPtr, (blockStartPtr + blockSize));
+      t_frame.frame[0] -= 2;
     }
     return true;
   }
