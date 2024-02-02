@@ -297,14 +297,8 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
         if (decrypt_ELL_AES_CTR(telegram, key)) {
           static const uint8_t offset{17};
           uint8_t payload_len = telegram.size() - 2 - offset;  // telefram,size - CRC - offset
-          static const uint16_t CRC_POLY{0x3D65};
-          uint16_t crcCalc = ~crc16(safeButUnsafeVectorPtr(telegram) + offset + 2, payload_len, CRC_POLY, 0);
-          uint16_t crcRead = (telegram[offset] | ((uint16_t)telegram[offset + 1] << 8));
-          if (crcCalc != crcRead) {
-            ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
-          }
-          else {
-            ESP_LOGE(TAG, "CRC check failed!");
+          ESP_LOGV(TAG, "Validating CRC for ELL payload");
+          if (!crcValid((safeButUnsafeVectorPtr(telegram) + offset), 0, payload_len){
             ret_val = false;
           }
         }

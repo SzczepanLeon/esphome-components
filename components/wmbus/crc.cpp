@@ -25,16 +25,30 @@ namespace wmbus {
   // Validate CRC
   bool crcValid(const uint8_t *t_bytes, uint8_t t_crcOffset) {
     bool retVal{false};
-    static const uint16_t CRC_POLY{0x3D65};
     uint16_t crcCalc = ~crc16(t_bytes, t_crcOffset, CRC_POLY, 0);
-    uint16_t crcRead = (((uint16_t)t_bytes[t_crcOffset] << 8) | t_bytes[t_crcOffset+1]);
-    if (crcCalc != crcRead) {
+    uint16_t crcRead = (((uint16_t)t_bytes[t_crcOffset] << 8) | t_bytes[t_crcOffset+1]);  // at the end
+    if (crcCalc == crcRead) {
+      ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
+      retVal = true;
+    }
+    else {
       ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
       retVal = false;
     }
-    else {
+    return retVal;
+  }
+
+  bool crcValid(const uint8_t *t_bytes, uint8_t t_crcOffset, uint8_t t_dataSize) {
+    bool retVal{false};
+    uint16_t crcCalc = ~crc16((t_bytes+2), t_dataSize, CRC_POLY, 0);
+    uint16_t crcRead = (((uint16_t)t_bytes[1] << 8) | t_bytes[0]);  // at the begining
+    if (crcCalc == crcRead) {
       ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
       retVal = true;
+    }
+    else {
+      ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
+      retVal = false;
     }
     return retVal;
   }
