@@ -235,7 +235,7 @@ namespace wmbus {
 
     size_t num_bytes_to_decrypt = frame.end()-pos;
 
-    int tpl_num_encr_blocks = 4;
+    uint8_t tpl_num_encr_blocks = ((uint8_t)frame[13] >> 4) & 0x0f;  // check if true for both short and long
     if (tpl_num_encr_blocks) {
       num_bytes_to_decrypt = tpl_num_encr_blocks*16;
     }
