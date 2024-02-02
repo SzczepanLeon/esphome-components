@@ -302,6 +302,7 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
           uint16_t crcRead = (telegram[offset] | ((uint16_t)telegram[offset + 1] << 8));
           if (crcCalc != crcRead) {
             ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
+          }
           else {
             ESP_LOGE(TAG, "CRC check failed!");
             ret_val = false;
