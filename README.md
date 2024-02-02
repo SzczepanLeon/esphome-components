@@ -201,6 +201,14 @@ Supported sensors (sensor_type) for meters:
   - remaining_battery_life_y
   - current_alarms
   - previous_alarms
+- `kamheat`
+  - total_energy_consumption_gj
+  - total_forward_energy_m3c
+  - total_return_energy_m3c
+  - total_volume_m3
+  - volume_flow_lh
+  - flow_temperature_c
+  - return_temperature_c
 - `mkradio3`
   - total_water_m3
 - `mkradio4`
