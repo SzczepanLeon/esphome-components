@@ -72,7 +72,7 @@ static const char *TAG = "rxLoop";
           uint8_t preamble[2];
           // Read the 3 first bytes,
           ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, 3);
-          rxLoop.bytesRx += 3;
+          rxLoop.bytesRx = 3;
           const uint8_t *currentByte = rxLoop.pByteIndex;
           // Mode C
           if (*currentByte == 0x54) {
@@ -99,8 +99,10 @@ static const char *TAG = "rxLoop";
               return false;
               // czy tu dac return czy tez inaczej rozwiazac powrot do poczatku?
             }
+            // don't include C "preamble"
             *(rxLoop.pByteIndex) = rxLoop.lengthField;
-            rxLoop.pByteIndex  += 2;
+            rxLoop.pByteIndex  += 1;
+            rxLoop.bytesLeft    = rxLoop.length - 1;
             rxLoop.bytesRx     -= 2;
           }
           // Mode T Block A
@@ -108,8 +110,10 @@ static const char *TAG = "rxLoop";
             rxLoop.lengthField = preamble[0];
             data_in.lengthField = rxLoop.lengthField;
             rxLoop.length  = byteSize(packetSize(rxLoop.lengthField));
-            data_in.mode = 'T';
+            data_in.mode  = 'T';
             data_in.block = 'A';
+            rxLoop.pByteIndex += 3;
+            rxLoop.bytesLeft   = rxLoop.length - 3;
           }
           // Unknown mode, reinit loop
           else {
@@ -122,8 +126,6 @@ static const char *TAG = "rxLoop";
           ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length));
           ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
 
-          rxLoop.pByteIndex += 3;
-          rxLoop.bytesLeft   = rxLoop.length - 3;
           rxLoop.state = READ_DATA;
           max_wait_time_ += extra_time_;
 
