@@ -81,14 +81,14 @@ static const char *TAG = "rxLoop";
             if (*currentByte == 0xCD) {
               currentByte++;
               rxLoop.lengthField = *currentByte;
-              rxLoop.length = packetSize(rxLoop.lengthField);
+              rxLoop.length = 2 + packetSize(rxLoop.lengthField);
               data_in.block = 'A';
             }
             // Block B
             else if (*currentByte == 0x3D) {
               currentByte++;
               rxLoop.lengthField = *currentByte;
-              rxLoop.length = 1 + rxLoop.lengthField;
+              rxLoop.length = 2 + 1 + rxLoop.lengthField;
               data_in.block = 'B';
             }
             // Unknown type, reinit loop
@@ -101,7 +101,7 @@ static const char *TAG = "rxLoop";
             *(rxLoop.pByteIndex) = rxLoop.lengthField;
             rxLoop.pByteIndex  += 1;
             rxLoop.bytesLeft    = rxLoop.length - 1;
-            rxLoop.bytesRx     -= 2;
+            // rxLoop.bytesRx     -= 2;
           }
           // Mode T Block A
           else if (decode3OutOf6(rxLoop.pByteIndex, preamble)) {
@@ -121,7 +121,7 @@ static const char *TAG = "rxLoop";
           }
 
           // Set CC1101 into length mode
-          ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length)); // czy tu nie powinno byc rxLoop.bytesLeft ??
+          ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length));
           ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
 
           rxLoop.state = READ_DATA;
