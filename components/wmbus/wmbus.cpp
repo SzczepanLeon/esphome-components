@@ -87,12 +87,13 @@ void WMBusComponent::loop() {
             ((sensor->framemode == MODE_C1) || (sensor->framemode == MODE_T1C1)))
           ) {
         auto selected_driver = this->drivers_[sensor->type];
-        ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Mode: %s T: %s",
+        ESP_LOGI(TAG, "Using driver '%s' for ID [0x%08X] RSSI: %d dBm LQI: %d Frame: %s %s T: %s",
                  selected_driver->get_name().c_str(),
                  meter_id,
                  mbus_data.rssi,
                  mbus_data.lqi,
-                 "X",
+                 frameMode,
+                 frameFormat,
                  telegram.c_str());
         if (sensor->key.size()) {
           ESP_LOGVV(TAG, "Key defined, trying to decrypt telegram ...");
