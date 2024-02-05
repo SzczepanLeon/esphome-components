@@ -49,7 +49,6 @@
 #define FIXED_PACKET_LENGTH        0x00
 #define INFINITE_PACKET_LENGTH     0x02
 
-
 enum RxLoopState : uint8_t {
   INIT_RX       = 0,
   WAIT_FOR_SYNC = 1,
@@ -57,7 +56,6 @@ enum RxLoopState : uint8_t {
   READ_DATA     = 3,
   DATA_END      = 4,
 };
-
 
 typedef struct RxLoopData {
   uint16_t bytesRx;
@@ -81,7 +79,7 @@ bool task();
 WMbusFrame get_frame();
 
   private:
-    uint8_t start(bool force = true);
+    bool start(bool force = true);
 
     uint8_t gdo0{0};
     uint8_t gdo2{0};

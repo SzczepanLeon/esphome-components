@@ -6,12 +6,11 @@ namespace wmbus {
 
   static const char *TAG = "utils";
 
-
   uint16_t byteSize(uint16_t t_packetSize) {
     // In T-mode data is 3 out of 6 coded.
     uint16_t size = (( 3 * t_packetSize) / 2);
 
-    // If packetsize is a odd number 1 extra byte   
+    // If packetSize is a odd number 1 extra byte   
     // that includes the 4-postamble sequence must be
     // read.    
     if (t_packetSize % 2) {
@@ -82,7 +81,7 @@ namespace wmbus {
     int ci_field = frame[10];
 
     switch(ci_field) {
-      case 0x8D:  // ELL
+      case 0x8D: // ELL
         offset = 17;
         // tpl-mfct + tpl-id + tpl-version + tpl-type
         for (int j=0; j<8; ++j) {
@@ -98,7 +97,7 @@ namespace wmbus {
         }
         break;    
       default:
-        ESP_LOGE(TAG, "(ELL) unknown CI field [%02X]\n", ci_field);
+        ESP_LOGE(TAG, "(ELL) unknown CI field [%02X]", ci_field);
         return false;
         break;
     }
@@ -107,13 +106,13 @@ namespace wmbus {
       return true;
     }
 
-    ESP_LOGV(TAG, "(ELL)  CI: %02X  offset: %d\n", ci_field, offset);
-    ESP_LOGV(TAG, "(ELL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X\n",
+    ESP_LOGV(TAG, "(ELL)  CI: %02X  offset: %d", ci_field, offset);
+    ESP_LOGV(TAG, "(ELL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
                    iv[0], iv[1], iv[2],  iv[3],  iv[4],  iv[5],  iv[6],  iv[7],
                    iv[8], iv[9], iv[10], iv[11], iv[12], iv[13], iv[14], iv[15]);
     std::string key = format_hex_pretty(aeskey);
     key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
-    ESP_LOGV(TAG, "(ELL) KEY: %s\n", key.c_str());
+    ESP_LOGV(TAG, "(ELL) KEY: %s", key.c_str());
 
     std::vector<unsigned char>::iterator pos = frame.begin() + offset;
     std::vector<unsigned char> encrypted_bytes;
@@ -122,7 +121,7 @@ namespace wmbus {
     
     std::string en_bytes = format_hex_pretty(encrypted_bytes);
     en_bytes.erase(std::remove(en_bytes.begin(), en_bytes.end(), '.'), en_bytes.end());
-    ESP_LOGD(TAG, "(ELL) AES_CTR decrypting: %s\n", en_bytes.c_str());
+    ESP_LOGD(TAG, "(ELL) AES_CTR decrypting: %s", en_bytes.c_str());
 
     int block = 0;
     for (size_t offset = 0; offset < encrypted_bytes.size(); offset += 16) {
@@ -150,7 +149,7 @@ namespace wmbus {
 
       std::string dec_bytes = format_hex_pretty(decrypted_bytes);
       dec_bytes.erase(std::remove(dec_bytes.begin(), dec_bytes.end(), '.'), dec_bytes.end());
-      ESP_LOGD(TAG, "(ELL) AES_CTR  decrypted: %s\n", dec_bytes.c_str());
+      ESP_LOGD(TAG, "(ELL) AES_CTR  decrypted: %s", dec_bytes.c_str());
 
     // Remove the encrypted bytes.
     frame.erase(pos, frame.end());
@@ -168,7 +167,7 @@ namespace wmbus {
     int ci_field = frame[10];
 
     switch(ci_field) {
-      case 0x67:  // short TPL
+      case 0x67: // short TPL
       case 0x6E:
       case 0x74:
       case 0x7A:
@@ -185,7 +184,7 @@ namespace wmbus {
           iv[i++] = frame[11];
         }
         break;
-      case 0x68:  // long TPL
+      case 0x68: // long TPL
       case 0x6F:
       case 0x72:
       case 0x75:
@@ -212,7 +211,7 @@ namespace wmbus {
         break;
       
       default:
-        ESP_LOGE(TAG, "(TPL) unknown CI field [%02X]\n", ci_field);
+        ESP_LOGE(TAG, "(TPL) unknown CI field [%02X]", ci_field);
         return false;
         break;
     }
@@ -221,13 +220,13 @@ namespace wmbus {
       return true;
     }
 
-    ESP_LOGV(TAG, "(TPL)  CI: %02X  offset: %d\n", ci_field, offset);
-    ESP_LOGV(TAG, "(TPL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X\n",
+    ESP_LOGV(TAG, "(TPL)  CI: %02X  offset: %d", ci_field, offset);
+    ESP_LOGV(TAG, "(TPL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
                    iv[0], iv[1], iv[2],  iv[3],  iv[4],  iv[5],  iv[6],  iv[7],
                    iv[8], iv[9], iv[10], iv[11], iv[12], iv[13], iv[14], iv[15]);
     std::string key = format_hex_pretty(aeskey);
     key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
-    ESP_LOGV(TAG, "(TPL) KEY: %s\n", key.c_str());
+    ESP_LOGV(TAG, "(TPL) KEY: %s", key.c_str());
 
     std::vector<unsigned char>::iterator pos = frame.begin() + offset;
     std::vector<unsigned char> buffer;
@@ -235,7 +234,7 @@ namespace wmbus {
 
     size_t num_bytes_to_decrypt = frame.end()-pos;
 
-    uint8_t tpl_num_encr_blocks = ((uint8_t)frame[13] >> 4) & 0x0f;  // check if true for both short and long
+    uint8_t tpl_num_encr_blocks = ((uint8_t)frame[13] >> 4) & 0x0f; // check if true for both short and long
     if (tpl_num_encr_blocks) {
       num_bytes_to_decrypt = tpl_num_encr_blocks*16;
     }
@@ -250,7 +249,7 @@ namespace wmbus {
 
     std::string dec_buffer = format_hex_pretty(buffer);
     dec_buffer.erase(std::remove(dec_buffer.begin(), dec_buffer.end(), '.'), dec_buffer.end());
-    ESP_LOGD(TAG, "(TPL) AES CBC IV decrypting: %s\n", dec_buffer.c_str());
+    ESP_LOGD(TAG, "(TPL) AES CBC IV decrypting: %s", dec_buffer.c_str());
 
     // The content should be a multiple of 16 since we are using AES CBC mode.
     if (num_bytes_to_decrypt % 16 != 0) {
@@ -280,7 +279,7 @@ namespace wmbus {
     std::vector<unsigned char> dec_data(decrypted_data, decrypted_data + num_bytes_to_decrypt);
     std::string dec_bytes = format_hex_pretty(dec_data);
     dec_bytes.erase(std::remove(dec_bytes.begin(), dec_bytes.end(), '.'), dec_bytes.end());
-    ESP_LOGD(TAG, "(TPL) AES CBC IV  decrypted: %s\n", dec_bytes.c_str());
+    ESP_LOGD(TAG, "(TPL) AES CBC IV  decrypted: %s", dec_bytes.c_str());
 
     if (num_bytes_to_decrypt < buffer.size()) {
       frame.insert(frame.end(), buffer.begin()+num_bytes_to_decrypt, buffer.end());

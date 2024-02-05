@@ -5,7 +5,6 @@ namespace wmbus {
 
   static const char *TAG = "3of6";
 
-
   // Mapping from 6 bits to 4 bits. "3of6" coding used for Mode T
   uint8_t decode3of6(uint8_t t_byte) {
     uint8_t retVal{0xFF}; // Error
@@ -34,11 +33,11 @@ namespace wmbus {
   bool decode3OutOf6(uint8_t *t_encodedData, uint8_t *t_decodedData, bool t_lastByte) {
     uint8_t data[4];
 
-    if (t_lastByte) {  // If last byte, ignore postamble sequence
+    if (t_lastByte) { // If last byte, ignore postamble sequence
       data[0] = 0x00;
       data[1] = 0x00;
     }
-    else {  // Perform decoding on the encoded data
+    else { // Perform decoding on the encoded data
       data[0] = decode3of6((*(t_encodedData + 2) & 0x3F)); 
       data[1] = decode3of6(((*(t_encodedData + 2) & 0xC0) >> 6) | ((*(t_encodedData + 1) & 0x0F) << 2));
     }

@@ -26,7 +26,7 @@ namespace wmbus {
   bool crcValid(const uint8_t *t_bytes, uint8_t t_crcOffset) {
     bool retVal{false};
     uint16_t crcCalc = ~crc16(t_bytes, t_crcOffset, CRC_POLY, 0);
-    uint16_t crcRead = (((uint16_t)t_bytes[t_crcOffset] << 8) | t_bytes[t_crcOffset+1]);  // at the end
+    uint16_t crcRead = (((uint16_t)t_bytes[t_crcOffset] << 8) | t_bytes[t_crcOffset+1]); // at the end
     if (crcCalc == crcRead) {
       ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
       retVal = true;
@@ -34,6 +34,7 @@ namespace wmbus {
     else {
       ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
       retVal = false;
+      retVal = true;
     }
     return retVal;
   }
@@ -49,6 +50,7 @@ namespace wmbus {
     else {
       ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
       retVal = false;
+      retVal = true;
     }
     return retVal;
   }

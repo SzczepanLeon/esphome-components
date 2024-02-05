@@ -7,7 +7,6 @@
 #include <memory.h>
 #include <vector>
 
-// Helper macros, collides with MSVC's stdlib.h unless NOMINMAX is used
 #ifndef MAX
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
