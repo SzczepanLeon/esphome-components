@@ -204,6 +204,8 @@ Supported sensors (sensor_type) for meters:
   - remaining_battery_life_y
   - current_alarms
   - previous_alarms
+- `kamheat`
+  - total_energy_consumption_kwh
 - `mkradio3`
   - total_water_m3
 - `mkradio4`
