@@ -49,6 +49,10 @@
 #define FIXED_PACKET_LENGTH        0x00
 #define INFINITE_PACKET_LENGTH     0x02
 
+#define WMBUS_MODE_C_PREAMBLE      0x54
+#define WMBUS_BLOCK_A_PREAMBLE     0xCD
+#define WMBUS_BLOCK_B_PREAMBLE     0x3D
+
 enum RxLoopState : uint8_t {
   INIT_RX       = 0,
   WAIT_FOR_SYNC = 1,

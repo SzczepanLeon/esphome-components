@@ -34,6 +34,7 @@ void WMBusComponent::setup() {
   this->add_driver(new Elf());
   this->add_driver(new Evo868());
   this->add_driver(new FhkvdataIII());
+  this->add_driver(new Flowiq2200());
   this->add_driver(new Hydrocalm3());
   this->add_driver(new Hydrus());
   this->add_driver(new Iperl());
@@ -56,9 +57,8 @@ void WMBusComponent::setup() {
 void WMBusComponent::loop() {
   this->led_handler();
   bool frameOk{true};
-  // ESP_LOGVV(TAG, "loop start ...");
   if (rf_mbus_.task()) {
-    ESP_LOGVV(TAG, "have data from CC1101 ...");
+    ESP_LOGVV(TAG, "Have data from CC1101 ...");
     WMbusFrame mbus_data = rf_mbus_.get_frame();
     char frameMode[3]{0};
     frameMode[0] = mbus_data.mode;
@@ -203,7 +203,7 @@ void WMBusComponent::loop() {
       }
     }
     if (!(this->clients_.empty())) {
-      ESP_LOGVV(TAG, "will send telegram to clients ...");
+      ESP_LOGVV(TAG, "Will send telegram to clients ...");
       this->led_blink();
     }
     for (auto & client : this->clients_) {
@@ -299,7 +299,7 @@ bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std:
       {
         if (decrypt_ELL_AES_CTR(telegram, key)) {
           static const uint8_t offset{17};
-          uint8_t payload_len = telegram.size() - 2 - offset;  // teleframSize - CRC - offset
+          uint8_t payload_len = telegram.size() - 2 - offset;  // telegramFrameSize - CRC - offset
           ESP_LOGV(TAG, "Validating CRC for ELL payload");
           if (!crcValid((safeButUnsafeVectorPtr(telegram) + offset), 0, payload_len)) {
             ret_val = false;

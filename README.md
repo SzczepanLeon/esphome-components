@@ -184,6 +184,9 @@ Supported sensors (sensor_type) for meters:
   - current_hca
   - previous_hca
   - temp_room_c
+- `flowiq2200`
+  - total_water_m3
+  - target_water_m3
 - `hydrocalm3`
   - total_heating_kwh
   - total_water_m3
@@ -201,21 +204,13 @@ Supported sensors (sensor_type) for meters:
   - remaining_battery_life_y
   - current_alarms
   - previous_alarms
-- `kamheat`
-  - total_energy_consumption_gj
-  - total_forward_energy_m3c
-  - total_return_energy_m3c
-  - total_volume_m3
-  - volume_flow_lh
-  - flow_temperature_c
-  - return_temperature_c
 - `mkradio3`
   - total_water_m3
 - `mkradio4`
   - total_water_m3
 - `multical21`
-  - total_m3
-  - target_m3
+  - total_water_m3
+  - target_water_m3
 - `qheat`
   - total_energy_consumption_kwh
 - `qwater`

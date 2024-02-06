@@ -9,7 +9,7 @@ namespace wmbus {
     bool retVal{false};
     if (t_in.mode == 'C') {
       // correct length in C mode - remove 2 bytes preamble
-      t_in.length -=2;
+      t_in.length -= 2;
       if (t_in.block == 'A') {
         ESP_LOGD(TAG, "Processing C1 A frame");
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);

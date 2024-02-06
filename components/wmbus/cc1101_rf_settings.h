@@ -7,15 +7,15 @@ const uint8_t TMODE_RF_SETTINGS_LEN = 47;
 //based on https://www.ti.com/lit/an/swra234a/swra234a.pdf
 const uint8_t TMODE_RF_SETTINGS_BYTES[] = {
     // Type B
-    CC1101_IOCFG2,   0x06,  // 2E
+    CC1101_IOCFG2,   0x06,  // 
     CC1101_IOCFG1,   0x2E,  // 
-    CC1101_IOCFG0,   0x00,  // 06
+    CC1101_IOCFG0,   0x00,  // 
     CC1101_FIFOTHR,  0x07,  // 00
     CC1101_SYNC1,    0x54,  // 54
     CC1101_SYNC0,    0x3D,  // 3D
     CC1101_PKTLEN,   0xFF,  // 30
-    CC1101_PKTCTRL1, 0x00,  // 00 - 04
-    CC1101_PKTCTRL0, 0x00,  // 02 - infinite
+    CC1101_PKTCTRL1, 0x00,  // 00
+    CC1101_PKTCTRL0, 0x00,  // 00
     CC1101_ADDR,     0x00,  // 00
     CC1101_CHANNR,   0x00,  // 00
     CC1101_FSCTRL1,  0x08,  // 08

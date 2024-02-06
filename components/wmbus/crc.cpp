@@ -34,7 +34,6 @@ namespace wmbus {
     else {
       ESP_LOGE(TAG, "  calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
       retVal = false;
-      retVal = true;
     }
     return retVal;
   }
@@ -50,7 +49,6 @@ namespace wmbus {
     else {
       ESP_LOGE(TAG, "  calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
       retVal = false;
-      retVal = true;
     }
     return retVal;
   }
