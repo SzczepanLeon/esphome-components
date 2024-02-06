@@ -187,6 +187,9 @@ Supported sensors (sensor_type) for meters:
 - `flowiq2200`
   - total_water_m3
   - target_water_m3
+  - volume_flow_lh
+  - max_flow_lh
+  - status
 - `hydrocalm3`
   - total_heating_kwh
   - total_water_m3
