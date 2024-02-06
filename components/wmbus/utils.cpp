@@ -10,9 +10,9 @@ namespace wmbus {
     // In T-mode data is 3 out of 6 coded.
     uint16_t size = (( 3 * t_packetSize) / 2);
 
-    // If packetSize is a odd number 1 extra byte   
+    // If packetSize is a odd number 1 extra byte
     // that includes the 4-postamble sequence must be
-    // read.    
+    // read.
     if (t_packetSize % 2) {
       return (size + 1);
     }
@@ -95,7 +95,7 @@ namespace wmbus {
         for (int j=0; j<4; ++j) {
           iv[i++] = frame[13+j];
         }
-        break;    
+        break;
       default:
         ESP_LOGE(TAG, "(ELL) unknown CI field [%02X]", ci_field);
         return false;
@@ -106,13 +106,13 @@ namespace wmbus {
       return true;
     }
 
-    ESP_LOGV(TAG, "(ELL)  CI: %02X  offset: %d", ci_field, offset);
-    ESP_LOGV(TAG, "(ELL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+    ESP_LOGVV(TAG, "(ELL)  CI: %02X  offset: %d", ci_field, offset);
+    ESP_LOGVV(TAG, "(ELL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
                    iv[0], iv[1], iv[2],  iv[3],  iv[4],  iv[5],  iv[6],  iv[7],
                    iv[8], iv[9], iv[10], iv[11], iv[12], iv[13], iv[14], iv[15]);
     std::string key = format_hex_pretty(aeskey);
     key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
-    ESP_LOGV(TAG, "(ELL) KEY: %s", key.c_str());
+    ESP_LOGVV(TAG, "(ELL) KEY: %s", key.c_str());
 
     std::vector<unsigned char>::iterator pos = frame.begin() + offset;
     std::vector<unsigned char> encrypted_bytes;
@@ -121,7 +121,7 @@ namespace wmbus {
     
     std::string en_bytes = format_hex_pretty(encrypted_bytes);
     en_bytes.erase(std::remove(en_bytes.begin(), en_bytes.end(), '.'), en_bytes.end());
-    ESP_LOGD(TAG, "(ELL) AES_CTR decrypting: %s", en_bytes.c_str());
+    ESP_LOGVV(TAG, "(ELL) AES_CTR decrypting: %s", en_bytes.c_str());
 
     int block = 0;
     for (size_t offset = 0; offset < encrypted_bytes.size(); offset += 16) {
@@ -149,7 +149,7 @@ namespace wmbus {
 
       std::string dec_bytes = format_hex_pretty(decrypted_bytes);
       dec_bytes.erase(std::remove(dec_bytes.begin(), dec_bytes.end(), '.'), dec_bytes.end());
-      ESP_LOGD(TAG, "(ELL) AES_CTR  decrypted: %s", dec_bytes.c_str());
+      ESP_LOGVV(TAG, "(ELL) AES_CTR  decrypted: %s", dec_bytes.c_str());
 
     // Remove the encrypted bytes.
     frame.erase(pos, frame.end());
@@ -220,13 +220,13 @@ namespace wmbus {
       return true;
     }
 
-    ESP_LOGV(TAG, "(TPL)  CI: %02X  offset: %d", ci_field, offset);
-    ESP_LOGV(TAG, "(TPL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+    ESP_LOGVV(TAG, "(TPL)  CI: %02X  offset: %d", ci_field, offset);
+    ESP_LOGVV(TAG, "(TPL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
                    iv[0], iv[1], iv[2],  iv[3],  iv[4],  iv[5],  iv[6],  iv[7],
                    iv[8], iv[9], iv[10], iv[11], iv[12], iv[13], iv[14], iv[15]);
     std::string key = format_hex_pretty(aeskey);
     key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
-    ESP_LOGV(TAG, "(TPL) KEY: %s", key.c_str());
+    ESP_LOGVV(TAG, "(TPL) KEY: %s", key.c_str());
 
     std::vector<unsigned char>::iterator pos = frame.begin() + offset;
     std::vector<unsigned char> buffer;
@@ -249,7 +249,7 @@ namespace wmbus {
 
     std::string dec_buffer = format_hex_pretty(buffer);
     dec_buffer.erase(std::remove(dec_buffer.begin(), dec_buffer.end(), '.'), dec_buffer.end());
-    ESP_LOGD(TAG, "(TPL) AES CBC IV decrypting: %s", dec_buffer.c_str());
+    ESP_LOGVV(TAG, "(TPL) AES CBC IV decrypting: %s", dec_buffer.c_str());
 
     // The content should be a multiple of 16 since we are using AES CBC mode.
     if (num_bytes_to_decrypt % 16 != 0) {
@@ -279,7 +279,7 @@ namespace wmbus {
     std::vector<unsigned char> dec_data(decrypted_data, decrypted_data + num_bytes_to_decrypt);
     std::string dec_bytes = format_hex_pretty(dec_data);
     dec_bytes.erase(std::remove(dec_bytes.begin(), dec_bytes.end(), '.'), dec_bytes.end());
-    ESP_LOGD(TAG, "(TPL) AES CBC IV  decrypted: %s", dec_bytes.c_str());
+    ESP_LOGVV(TAG, "(TPL) AES CBC IV  decrypted: %s", dec_bytes.c_str());
 
     if (num_bytes_to_decrypt < buffer.size()) {
       frame.insert(frame.end(), buffer.begin()+num_bytes_to_decrypt, buffer.end());
@@ -288,10 +288,10 @@ namespace wmbus {
     uint32_t decrypt_check = 0x2F2F;
     uint32_t dc = (((uint16_t)frame[offset] << 8) | (frame[offset+1]));
     if ( dc == decrypt_check) {
-      ESP_LOGI(TAG, "2F2f check after decrypting - OK");
+      ESP_LOGV(TAG, "2F2F check after decrypting - OK");
     }
     else {
-      ESP_LOGE(TAG, "2F2f check after decrypting - NOT OK");
+      ESP_LOGD(TAG, "2F2F check after decrypting  !!!");
       return false;
     }
     return true;

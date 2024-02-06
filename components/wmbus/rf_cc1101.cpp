@@ -3,7 +3,7 @@
 namespace esphome {
 namespace wmbus {
 
-static const char *TAG = "rxLoop";
+  static const char *TAG = "rxLoop";
 
   bool RxLoop::init(uint8_t mosi, uint8_t miso, uint8_t clk, uint8_t cs,
                     uint8_t gdo0, uint8_t gdo2, float freq) {
@@ -150,9 +150,9 @@ static const char *TAG = "rxLoop";
       rxLoop.state = DATA_END;
       rxLoop.bytesRx += rxLoop.bytesLeft;
       data_in.length  = rxLoop.bytesRx;
-      ESP_LOGD(TAG, "Have %d bytes from CC1101 Rx", rxLoop.bytesRx);
+      ESP_LOGV(TAG, "Have %d bytes from CC1101 Rx", rxLoop.bytesRx);
       if (rxLoop.length != data_in.length) {
-        ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
+        ESP_LOGVV(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
       }
       if (mBusDecode(data_in, this->returnFrame)) {
         rxLoop.complete = true;
@@ -160,9 +160,6 @@ static const char *TAG = "rxLoop";
         this->returnFrame.block = data_in.block;
         this->returnFrame.rssi  = (int8_t)ELECHOUSE_cc1101.getRssi();
         this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
-      }
-      else {
-        ESP_LOGD(TAG, "Error during decoding.");
       }
       rxLoop.state = INIT_RX;
       return rxLoop.complete;

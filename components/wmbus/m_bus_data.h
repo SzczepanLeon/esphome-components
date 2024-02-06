@@ -5,13 +5,13 @@
 namespace esphome {
 namespace wmbus {
 
-  typedef struct {
+  typedef struct WMbusData{
     uint16_t  length;
     uint8_t   lengthField;
     uint8_t   data[500];
     char      mode;
     char      block;
-  } m_bus_data_t;
+  } WMbusData;
 
   typedef struct WMbusFrame {
     std::vector<unsigned char> frame{};

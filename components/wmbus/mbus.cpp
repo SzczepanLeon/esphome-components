@@ -5,7 +5,7 @@ namespace wmbus {
 
   static const char *TAG = "mbus";
 
-  bool mBusDecode(m_bus_data_t &t_in, WMbusFrame &t_frame) {
+  bool mBusDecode(WMbusData &t_in, WMbusFrame &t_frame) {
     bool retVal{false};
     if (t_in.mode == 'C') {
       // correct length in C mode - remove 2 bytes preamble
@@ -47,15 +47,12 @@ namespace wmbus {
           retVal = true;
         }
       }
-      else {
-        ESP_LOGV(TAG, "Failed to decode 3 out of 6");
-      }
 
     }
     if (retVal) {
       std::string telegram = format_hex_pretty(t_frame.frame);
       telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
-      ESP_LOGD(TAG, "Frame: %s [without CRC]", telegram.c_str());
+      ESP_LOGV(TAG, "Frame: %s [without CRC]", telegram.c_str());
     }
     return retVal;
   }
@@ -84,7 +81,7 @@ namespace wmbus {
   |       16 or ((L-9) mod 16) bytes      | 2 bytes |
   ---------------------------------------------------
 */
-  bool mBusDecodeFormatA(const m_bus_data_t &t_in, WMbusFrame &t_frame) {  // in jako referencje przekazywac
+  bool mBusDecodeFormatA(const WMbusData &t_in, WMbusFrame &t_frame) {  // in jako referencje przekazywac
     uint8_t L = t_in.data[0];
 
     // Validate CRC
@@ -143,7 +140,7 @@ namespace wmbus {
   |             (L-129) bytes             | 2 bytes |
   ---------------------------------------------------
 */
-  bool mBusDecodeFormatB(const m_bus_data_t &t_in, WMbusFrame &t_frame) {
+  bool mBusDecodeFormatB(const WMbusData &t_in, WMbusFrame &t_frame) {
     uint8_t L = t_in.data[0];
     const uint8_t *blockStartPtr{nullptr};
     uint8_t blockSize{0};

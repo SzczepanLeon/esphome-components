@@ -46,8 +46,8 @@ namespace wmbus {
     data[3] = decode3of6(((*t_encodedData & 0xFC) >> 2));
 
     // Check for possible errors
-    if ( (data[0] == 0xFF) | (data[1] == 0xFF) |
-        (data[2] == 0xFF) | (data[3] == 0xFF) ) {
+    if ((data[0] == 0xFF) | (data[1] == 0xFF) |
+        (data[2] == 0xFF) | (data[3] == 0xFF)) {
       return false;
     }
 
@@ -56,11 +56,10 @@ namespace wmbus {
     if (!t_lastByte) {
       *(t_decodedData + 1) = (data[1] << 4) | (data[0]);
     }
-
     return true;
   } 
 
-  bool decode3OutOf6(m_bus_data_t *t_data,  uint16_t packetSize) {
+  bool decode3OutOf6(WMbusData *t_data,  uint16_t packetSize) {
     // We can decode "in place"
     uint8_t *encodedData = t_data->data;
     uint8_t *decodedData = t_data->data; 
@@ -68,11 +67,12 @@ namespace wmbus {
     uint16_t bytesDecoded{0};
     uint16_t bytesRemaining{packetSize};
 
-    // Decode packet      
+    // Decode packet
     while (bytesRemaining) {
       // If last byte
       if (bytesRemaining == 1) {
         if(!decode3OutOf6(encodedData, decodedData, true)) {
+          ESP_LOGVV(TAG, "Decode 3 out of 6 failed.");
           return false;
         }
         bytesRemaining -= 1;
@@ -80,6 +80,7 @@ namespace wmbus {
       }
       else {
         if(!decode3OutOf6(encodedData, decodedData)) {
+          ESP_LOGVV(TAG, "Decode 3 out of 6 failed.");
           return false;
         }
         bytesRemaining -= 2;
@@ -91,7 +92,7 @@ namespace wmbus {
     }
     t_data->length = bytesDecoded;
     std::fill((std::begin(t_data->data) + t_data->length), std::end(t_data->data), 0);
-    ESP_LOGI(TAG, "Data decoded.");
+    ESP_LOGVV(TAG, "Decode 3 out of 6 OK.");
     return true;
   }
 

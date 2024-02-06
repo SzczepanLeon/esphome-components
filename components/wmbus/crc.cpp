@@ -28,11 +28,11 @@ namespace wmbus {
     uint16_t crcCalc = ~crc16(t_bytes, t_crcOffset, CRC_POLY, 0);
     uint16_t crcRead = (((uint16_t)t_bytes[t_crcOffset] << 8) | t_bytes[t_crcOffset+1]); // at the end
     if (crcCalc == crcRead) {
-      ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
+      ESP_LOGV(TAG, "    calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
       retVal = true;
     }
     else {
-      ESP_LOGE(TAG, "  calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
+      ESP_LOGD(TAG, "    calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
       retVal = false;
     }
     return retVal;
@@ -43,11 +43,11 @@ namespace wmbus {
     uint16_t crcCalc = ~crc16((t_bytes+2), t_dataSize, CRC_POLY, 0);
     uint16_t crcRead = (((uint16_t)t_bytes[1] << 8) | t_bytes[0]);  // at the begining
     if (crcCalc == crcRead) {
-      ESP_LOGI(TAG, "  calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
+      ESP_LOGV(TAG, "    calculated: 0x%04X, read: 0x%04X", crcCalc, crcRead);
       retVal = true;
     }
     else {
-      ESP_LOGE(TAG, "  calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
+      ESP_LOGD(TAG, "    calculated: 0x%04X, read: 0x%04X  !!!", crcCalc, crcRead);
       retVal = false;
     }
     return retVal;

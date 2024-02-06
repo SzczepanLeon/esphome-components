@@ -3,19 +3,15 @@
 #include "esphome/core/log.h"
 
 #include "mbus.h"
-
 #include "utils.h"
-
 #include "decode3of6.h"
 #include "m_bus_data.h"
-
-#include <stdint.h>
-
 #include "cc1101_rf_settings.h"
 
-#include <ELECHOUSE_CC1101_SRC_DRV.h>
-
 #include <string>
+#include <stdint.h>
+
+#include <ELECHOUSE_CC1101_SRC_DRV.h>
 
 
 // CC1101 state machine
@@ -74,30 +70,28 @@ typedef struct RxLoopData {
 namespace esphome {
 namespace wmbus {
 
-class RxLoop {
-  public:
+  class RxLoop {
+    public:
+      bool init(uint8_t mosi, uint8_t miso, uint8_t clk, uint8_t cs,
+                uint8_t gdo0, uint8_t gdo2, float freq);
+      bool task();
+      WMbusFrame get_frame();
 
-bool init(uint8_t mosi, uint8_t miso, uint8_t clk, uint8_t cs,
-          uint8_t gdo0, uint8_t gdo2, float freq);
-bool task();
-WMbusFrame get_frame();
+    private:
+      bool start(bool force = true);
 
-  private:
-    bool start(bool force = true);
+      uint8_t gdo0{0};
+      uint8_t gdo2{0};
 
-    uint8_t gdo0{0};
-    uint8_t gdo2{0};
+      WMbusData data_in{0}; // Data from Physical layer decoded to bytes
+      WMbusFrame returnFrame;
 
-    m_bus_data_t data_in{0}; // Data from Physical layer decoded to bytes
-    WMbusFrame returnFrame;
+      RxLoopData rxLoop;
 
-    RxLoopData rxLoop;
-
-    uint32_t sync_time_{0};
-    uint8_t extra_time_{50};
-    uint8_t max_wait_time_ = extra_time_;
-};
-
+      uint32_t sync_time_{0};
+      uint8_t  extra_time_{50};
+      uint8_t  max_wait_time_ = extra_time_;
+  };
 
 }
 }

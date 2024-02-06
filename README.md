@@ -225,6 +225,7 @@ Supported sensors (sensor_type) for meters:
   - total_water_m3
 - `sharky774`
   - total_energy_consumption_gj
+  - total_energy_consumption_kwh
   - power_kw
   - total_volume_m3
   - volume_flow_lh
