@@ -107,6 +107,13 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_TOTAL_INCREASING,
             icon="mdi:water",
         ),
+        cv.Optional("target_water_m3"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement=UNIT_CUBIC_METER,
+            device_class=DEVICE_CLASS_WATER,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:water",
+        ),
         cv.Optional("last_month_total_water_m3"): sensor.sensor_schema(
             accuracy_decimals=3,
             unit_of_measurement=UNIT_CUBIC_METER,
@@ -270,6 +277,10 @@ CONFIG_SCHEMA = cv.Schema(
             accuracy_decimals=0,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
+        cv.Optional("status"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            icon="mdi:alarm-light-outline",
+        ),
         cv.Optional("current_alarms"): sensor.sensor_schema(
             accuracy_decimals=0,
             icon="mdi:alarm-light-outline",
@@ -292,6 +303,20 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT,
             icon="mdi:transmission-tower-export",
         ),
+        cv.Optional("total_forward_energy_m3c"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            unit_of_measurement=UNIT_GIGA_JOULE,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:heating-coil",
+        ),
+        cv.Optional("total_return_energy_m3c"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            unit_of_measurement=UNIT_GIGA_JOULE,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:heating-coil",
+        ),
         cv.Optional("total_volume_m3"): sensor.sensor_schema(
             accuracy_decimals=3,
             unit_of_measurement=UNIT_CUBIC_METER,
@@ -300,6 +325,13 @@ CONFIG_SCHEMA = cv.Schema(
             icon="mdi:water",
         ),
         cv.Optional("volume_flow_lh"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            unit_of_measurement=UNIT_LITER_PER_HOUR,
+            device_class=DEVICE_CLASS_WATER,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:water",
+        ),
+        cv.Optional("max_flow_lh"): sensor.sensor_schema(
             accuracy_decimals=0,
             unit_of_measurement=UNIT_LITER_PER_HOUR,
             device_class=DEVICE_CLASS_WATER,
