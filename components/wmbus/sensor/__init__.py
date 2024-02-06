@@ -277,6 +277,10 @@ CONFIG_SCHEMA = cv.Schema(
             accuracy_decimals=0,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
+        cv.Optional("status"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            icon="mdi:alarm-light-outline",
+        ),
         cv.Optional("current_alarms"): sensor.sensor_schema(
             accuracy_decimals=0,
             icon="mdi:alarm-light-outline",
