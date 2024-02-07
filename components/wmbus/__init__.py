@@ -15,7 +15,6 @@ from esphome.const import (
     CONF_FORMAT,
     CONF_TIME_ID,
     CONF_FREQUENCY,
-    CONF_SYNC_MODE,
 )
 
 CONF_TRANSPORT = "transport"
@@ -29,6 +28,8 @@ CONF_LED_BLINK_TIME = "led_blink_time"
 CONF_LOG_UNKNOWN = "log_unknown"
 
 CONF_WMBUS_ID = "wmbus_id"
+
+CONF_SYNC_MODE = "sync_mode"
 
 CODEOWNERS = ["@SzczepanLeon"]
 
