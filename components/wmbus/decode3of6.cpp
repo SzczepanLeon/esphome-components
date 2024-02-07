@@ -72,7 +72,7 @@ namespace wmbus {
       // If last byte
       if (bytesRemaining == 1) {
         if(!decode3OutOf6(encodedData, decodedData, true)) {
-          ESP_LOGVV(TAG, "Decode 3 out of 6 failed.");
+          ESP_LOGV(TAG, "Decode 3 out of 6 failed.");
           return false;
         }
         bytesRemaining -= 1;
@@ -80,7 +80,7 @@ namespace wmbus {
       }
       else {
         if(!decode3OutOf6(encodedData, decodedData)) {
-          ESP_LOGVV(TAG, "Decode 3 out of 6 failed.");
+          ESP_LOGV(TAG, "Decode 3 out of 6 failed..");
           return false;
         }
         bytesRemaining -= 2;
