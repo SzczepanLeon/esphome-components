@@ -152,7 +152,7 @@ namespace wmbus {
       data_in.length  = rxLoop.bytesRx;
       ESP_LOGV(TAG, "Have %d bytes from CC1101 Rx", rxLoop.bytesRx);
       if (rxLoop.length != data_in.length) {
-        ESP_LOGVV(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
+        ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
       }
       if (mBusDecode(data_in, this->returnFrame)) {
         rxLoop.complete = true;
