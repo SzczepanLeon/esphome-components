@@ -111,6 +111,7 @@ Configuration variables:
 In wmbus platform:
 
 - **frequency** (*Optional*): CC1101 Rx frequency in MHz. Defaults to ``868.950 MHz``.
+- **sync_mode** (*Optional*): If you have problems with MQTT set it to True. Defaults to ``False``.
 - **mosi_pin** (*Optional*): CC1101 MOSI pin connection. Defaults to ``GPIO13``.
 - **miso_pin** (*Optional*): CC1101 MISO pin connection. Defaults to ``GPIO12``.
 - **clk_pin** (*Optional*): CC1101 CLK pin connection. Defaults to ``GPIO14``.

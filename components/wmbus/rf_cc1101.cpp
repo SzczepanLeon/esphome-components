@@ -156,6 +156,9 @@ namespace wmbus {
         if (rxLoop.length != data_in.length) {
           ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
         }
+        if (this->syncMode) {
+          ESP_LOGV(TAG, "Synchronus mode enabled.");
+        }
         if (mBusDecode(data_in, this->returnFrame)) {
           rxLoop.complete = true;
           this->returnFrame.mode  = data_in.mode;
