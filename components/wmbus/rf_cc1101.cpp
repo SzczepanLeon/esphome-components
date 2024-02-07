@@ -6,8 +6,9 @@ namespace wmbus {
   static const char *TAG = "rxLoop";
 
   bool RxLoop::init(uint8_t mosi, uint8_t miso, uint8_t clk, uint8_t cs,
-                    uint8_t gdo0, uint8_t gdo2, float freq) {
+                    uint8_t gdo0, uint8_t gdo2, float freq, bool syncMode) {
     bool retVal = false;
+    this->syncMode = syncMode;
     this->gdo0 = gdo0;
     this->gdo2 = gdo2;
     pinMode(this->gdo0, INPUT);
@@ -52,119 +53,121 @@ namespace wmbus {
   }
 
   bool RxLoop::task() {
-    switch (rxLoop.state) {
-      case INIT_RX:
-        start();
-        return false;
+    do {
+      switch (rxLoop.state) {
+        case INIT_RX:
+          start();
+          return false;
 
-      // RX active, waiting for SYNC
-      case WAIT_FOR_SYNC:
-        if (digitalRead(this->gdo2)) { // assert when SYNC detected
-          rxLoop.state = WAIT_FOR_DATA;
-          sync_time_ = millis();
-        }
-        break;
+        // RX active, waiting for SYNC
+        case WAIT_FOR_SYNC:
+          if (digitalRead(this->gdo2)) { // assert when SYNC detected
+            rxLoop.state = WAIT_FOR_DATA;
+            sync_time_ = millis();
+          }
+          break;
 
-      // waiting for enough data in Rx FIFO buffer
-      case WAIT_FOR_DATA:
-        if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
-          uint8_t preamble[2];
-          // Read the 3 first bytes,
-          ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, 3);
-          rxLoop.bytesRx = 3;
-          const uint8_t *currentByte = rxLoop.pByteIndex;
-          // Mode C
-          if (*currentByte == WMBUS_MODE_C_PREAMBLE) {
-            currentByte++;
-            data_in.mode = 'C';
-            // Block A
-            if (*currentByte == WMBUS_BLOCK_A_PREAMBLE) {
+        // waiting for enough data in Rx FIFO buffer
+        case WAIT_FOR_DATA:
+          if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
+            uint8_t preamble[2];
+            // Read the 3 first bytes,
+            ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, 3);
+            rxLoop.bytesRx = 3;
+            const uint8_t *currentByte = rxLoop.pByteIndex;
+            // Mode C
+            if (*currentByte == WMBUS_MODE_C_PREAMBLE) {
               currentByte++;
-              rxLoop.lengthField = *currentByte;
-              rxLoop.length = 2 + packetSize(rxLoop.lengthField);
-              data_in.block = 'A';
+              data_in.mode = 'C';
+              // Block A
+              if (*currentByte == WMBUS_BLOCK_A_PREAMBLE) {
+                currentByte++;
+                rxLoop.lengthField = *currentByte;
+                rxLoop.length = 2 + packetSize(rxLoop.lengthField);
+                data_in.block = 'A';
+              }
+              // Block B
+              else if (*currentByte == WMBUS_BLOCK_B_PREAMBLE) {
+                currentByte++;
+                rxLoop.lengthField = *currentByte;
+                rxLoop.length = 2 + 1 + rxLoop.lengthField;
+                data_in.block = 'B';
+              }
+              // Unknown type, reinit loop
+              else {
+                rxLoop.state = INIT_RX;
+                return false;
+              }
+              // don't include C "preamble"
+              *(rxLoop.pByteIndex) = rxLoop.lengthField;
+              rxLoop.pByteIndex += 1;
             }
-            // Block B
-            else if (*currentByte == WMBUS_BLOCK_B_PREAMBLE) {
-              currentByte++;
-              rxLoop.lengthField = *currentByte;
-              rxLoop.length = 2 + 1 + rxLoop.lengthField;
-              data_in.block = 'B';
+            // Mode T Block A
+            else if (decode3OutOf6(rxLoop.pByteIndex, preamble)) {
+              rxLoop.lengthField  = preamble[0];
+              data_in.lengthField = rxLoop.lengthField;
+              rxLoop.length  = byteSize(packetSize(rxLoop.lengthField));
+              data_in.mode   = 'T';
+              data_in.block  = 'A';
+              rxLoop.pByteIndex += 3;
             }
-            // Unknown type, reinit loop
+            // Unknown mode, reinit loop
             else {
               rxLoop.state = INIT_RX;
               return false;
             }
-            // don't include C "preamble"
-            *(rxLoop.pByteIndex) = rxLoop.lengthField;
-            rxLoop.pByteIndex += 1;
+
+            rxLoop.bytesLeft = rxLoop.length - 3;
+
+            // Set CC1101 into length mode
+            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length));
+            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
+
+            rxLoop.state = READ_DATA;
+            max_wait_time_ += extra_time_;
+
+            ELECHOUSE_cc1101.SpiWriteReg(CC1101_FIFOTHR, RX_FIFO_THRESHOLD);
           }
-          // Mode T Block A
-          else if (decode3OutOf6(rxLoop.pByteIndex, preamble)) {
-            rxLoop.lengthField  = preamble[0];
-            data_in.lengthField = rxLoop.lengthField;
-            rxLoop.length  = byteSize(packetSize(rxLoop.lengthField));
-            data_in.mode   = 'T';
-            data_in.block  = 'A';
-            rxLoop.pByteIndex += 3;
+          break;
+
+        // waiting for more data in Rx FIFO buffer
+        case READ_DATA:
+          if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
+            // Do not empty the Rx FIFO (See the CC1101 SWRZ020E errata note)
+            uint8_t bytesInFIFO = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x7F;        
+            ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, bytesInFIFO - 1);
+
+            rxLoop.bytesLeft  -= (bytesInFIFO - 1);
+            rxLoop.pByteIndex += (bytesInFIFO - 1);
+            rxLoop.bytesRx    += (bytesInFIFO - 1);
+            max_wait_time_    += extra_time_;
           }
-          // Unknown mode, reinit loop
-          else {
-            rxLoop.state = INIT_RX;
-            return false;
-          }
-
-          rxLoop.bytesLeft = rxLoop.length - 3;
-
-          // Set CC1101 into length mode
-          ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length));
-          ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
-
-          rxLoop.state = READ_DATA;
-          max_wait_time_ += extra_time_;
-
-          ELECHOUSE_cc1101.SpiWriteReg(CC1101_FIFOTHR, RX_FIFO_THRESHOLD);
-        }
-        break;
-
-      // waiting for more data in Rx FIFO buffer
-      case READ_DATA:
-        if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
-          // Do not empty the Rx FIFO (See the CC1101 SWRZ020E errata note)
-          uint8_t bytesInFIFO = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x7F;        
-          ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, bytesInFIFO - 1);
-
-          rxLoop.bytesLeft  -= (bytesInFIFO - 1);
-          rxLoop.pByteIndex += (bytesInFIFO - 1);
-          rxLoop.bytesRx    += (bytesInFIFO - 1);
-          max_wait_time_    += extra_time_;
-        }
-        break;
-    }
-
-    uint8_t overfl = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x80;
-    // end of packet in length mode
-    if ((!overfl) && (!digitalRead(gdo2)) && (rxLoop.state > WAIT_FOR_DATA)) {
-      ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, (uint8_t)rxLoop.bytesLeft);
-      rxLoop.state = DATA_END;
-      rxLoop.bytesRx += rxLoop.bytesLeft;
-      data_in.length  = rxLoop.bytesRx;
-      ESP_LOGV(TAG, "Have %d bytes from CC1101 Rx", rxLoop.bytesRx);
-      if (rxLoop.length != data_in.length) {
-        ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
+          break;
       }
-      if (mBusDecode(data_in, this->returnFrame)) {
-        rxLoop.complete = true;
-        this->returnFrame.mode  = data_in.mode;
-        this->returnFrame.block = data_in.block;
-        this->returnFrame.rssi  = (int8_t)ELECHOUSE_cc1101.getRssi();
-        this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
+
+      uint8_t overfl = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x80;
+      // end of packet in length mode
+      if ((!overfl) && (!digitalRead(gdo2)) && (rxLoop.state > WAIT_FOR_DATA)) {
+        ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, (uint8_t)rxLoop.bytesLeft);
+        rxLoop.state = DATA_END;
+        rxLoop.bytesRx += rxLoop.bytesLeft;
+        data_in.length  = rxLoop.bytesRx;
+        ESP_LOGV(TAG, "Have %d bytes from CC1101 Rx", rxLoop.bytesRx);
+        if (rxLoop.length != data_in.length) {
+          ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
+        }
+        if (mBusDecode(data_in, this->returnFrame)) {
+          rxLoop.complete = true;
+          this->returnFrame.mode  = data_in.mode;
+          this->returnFrame.block = data_in.block;
+          this->returnFrame.rssi  = (int8_t)ELECHOUSE_cc1101.getRssi();
+          this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
+        }
+        rxLoop.state = INIT_RX;
+        return rxLoop.complete;
       }
-      rxLoop.state = INIT_RX;
-      return rxLoop.complete;
-    }
-    start(false);
+      start(false);
+    } while ((this->syncMode) && (rxLoop.state > WAIT_FOR_SYNC));
     return rxLoop.complete;
   }
 

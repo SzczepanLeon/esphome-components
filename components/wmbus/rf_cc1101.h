@@ -80,6 +80,8 @@ namespace wmbus {
     private:
       bool start(bool force = true);
 
+      bool syncMode{false};
+
       uint8_t gdo0{0};
       uint8_t gdo2{0};
 

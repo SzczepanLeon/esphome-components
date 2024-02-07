@@ -15,6 +15,7 @@ from esphome.const import (
     CONF_FORMAT,
     CONF_TIME_ID,
     CONF_FREQUENCY,
+    CONF_SYNC_MODE,
 )
 
 CONF_TRANSPORT = "transport"
@@ -77,6 +78,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_LOG_UNKNOWN,    default=True):    cv.boolean,
     cv.Optional(CONF_CLIENTS):                         cv.ensure_list(CLIENT_SCHEMA),
     cv.Optional(CONF_FREQUENCY,      default=868.950): cv.float_range(min=300, max=928),
+    cv.Optional(CONF_SYNC_MODE,      default=False):   cv.boolean,
 })
 
 def safe_ip(ip):
@@ -95,7 +97,7 @@ async def to_code(config):
     gdo0 = await cg.gpio_pin_expression(config[CONF_GDO0_PIN])
     gdo2 = await cg.gpio_pin_expression(config[CONF_GDO2_PIN])
 
-    cg.add(var.add_cc1101(mosi, miso, clk, cs, gdo0, gdo2, config[CONF_FREQUENCY]))
+    cg.add(var.add_cc1101(mosi, miso, clk, cs, gdo0, gdo2, config[CONF_FREQUENCY], config[CONF_SYNC_MODE]))
 
     time = await cg.get_variable(config[CONF_TIME_ID])
     cg.add(var.set_time(time))

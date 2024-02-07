@@ -93,7 +93,7 @@ namespace wmbus {
       void add_cc1101(InternalGPIOPin *mosi, InternalGPIOPin *miso,
                       InternalGPIOPin *clk, InternalGPIOPin *cs,
                       InternalGPIOPin *gdo0, InternalGPIOPin *gdo2,
-                      float frequency) {
+                      float frequency, bool sync_mode) {
         this->spi_conf_.mosi = mosi;
         this->spi_conf_.miso = miso;
         this->spi_conf_.clk  = clk;
@@ -101,6 +101,7 @@ namespace wmbus {
         this->spi_conf_.gdo0 = gdo0;
         this->spi_conf_.gdo2 = gdo2;
         this->frequency_ = frequency;
+        this->sync_mode_ = sync_mode;
       }
       void set_time(time::RealTimeClock *time) { this->time_ = time; }
       void set_log_unknown() { this->log_unknown_ = true; }
@@ -126,6 +127,7 @@ namespace wmbus {
       GPIOPin *led_pin_{nullptr};
       Cc1101 spi_conf_{};
       float frequency_{};
+      bool sync_mode_{false};
       std::map<uint32_t, WMBusListener *> wmbus_listeners_{};
       std::map<std::string, Driver *> drivers_{};
       std::vector<Client> clients_{};
