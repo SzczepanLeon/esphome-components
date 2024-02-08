@@ -27,8 +27,6 @@ Component to receive wMBus frame (via CC1101), create HA sensor and send decoded
 You can also use this component with wmbusmeters HA addon:
 https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
-> **_NOTE:_**  From version 2.2.22 experimental support for C1 A type frames are added.
-
 [!["CC1101 to D1 mini PCB"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/pcb_v2.png)](https://www.pcbway.com/project/shareproject/CC1101_to_ESP_D1_mini_277f34e1.html)
 
 
