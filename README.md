@@ -133,7 +133,7 @@ In wmbus platform:
 Meter/sensor:
 
 - **meter_id** (*Optional*, int): Meter ID. Can be specified as decimal or hex. Defaults to ``0``.
-- **type** (*Optional*, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `c5isf`, `compact5`, `dme07`, `elf`, `evo868`, `fhkvdataiii`, `flowiq2200`, `hydrocalm3`, `hydrodigit`, `hydrus`, `iperl`, `itron`, `izar`, `kamheat`, `mkradio3`, `mkradio4`, `multical21`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported. Defaults to ``unknown``.
+- **type** (*Optional*, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `c5isf`, `compact5`, `dme07`, `elf`, `evo868`, `fhkvdataiii`, `flowiq2200`, `hydrocalm3`, `hydrodigit`, `hydrus`, `iperl`, `itron`, `izar`, `kamheat`, `mkradio3`, `mkradio4`, `mkradio4a`, `multical21`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported. Defaults to ``unknown``.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
 - **add_prefix** (*Optional*): Add prefix (meter_id) to sensor name. Defaults to ``True``.
 - **mode** (*Optional*): Frame to process (T1, C1 or both). Defaults to ``T1``.
@@ -215,6 +215,8 @@ Supported sensors (sensor_type) for meters:
   - total_water_m3
 - `mkradio4`
   - total_water_m3
+- `mkradio4a`
+  - target_water_m3
 - `multical21`
   - total_water_m3
   - target_water_m3

@@ -42,6 +42,7 @@ namespace wmbus {
     this->add_driver(new Kamheat());
     this->add_driver(new Mkradio3());
     this->add_driver(new Mkradio4());
+    this->add_driver(new Mkradio4a());
     this->add_driver(new Multical21());
     this->add_driver(new Qheat());
     this->add_driver(new Qwater());
