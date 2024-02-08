@@ -185,6 +185,7 @@ Supported sensors (sensor_type) for meters:
   - current_hca
   - previous_hca
   - temp_room_c
+  - temp_radiator_c
 - `flowiq2200`
   - total_water_m3
   - target_water_m3
