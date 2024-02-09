@@ -42,8 +42,8 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 #include <string.h> // CBC mode, for memset
 #include "aes.h"
 
-namespace esphome {
-namespace wmbus {
+// namespace esphome {
+// namespace wmbus {
   /*****************************************************************************/
   /* Defines:                                                                  */
   /*****************************************************************************/
@@ -599,5 +599,5 @@ namespace wmbus {
 
   #endif // #if defined(CBC) && (CBC == 1)
 
-}
-}
+// }
+// }

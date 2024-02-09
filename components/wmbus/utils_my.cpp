@@ -134,7 +134,7 @@ namespace wmbus {
 
       // Generate the pseudo-random bits from the IV and the key.
       unsigned char xordata[16];
-      AES_ECB_encrypt(iv, safeButUnsafeVectorPtr(aeskey), xordata, 16);
+      // AES_ECB_encrypt(iv, safeButUnsafeVectorPtr(aeskey), xordata, 16);
 
       // Xor the data with the pseudo-random bits to decrypt into tmp.
       unsigned char tmp[block_size];
@@ -265,11 +265,11 @@ namespace wmbus {
     memcpy(buffer_data, safeButUnsafeVectorPtr(buffer), num_bytes_to_decrypt);
     unsigned char decrypted_data[num_bytes_to_decrypt];
 
-    AES_CBC_decrypt_buffer(decrypted_data,
-                          buffer_data,
-                          num_bytes_to_decrypt,
-                          safeButUnsafeVectorPtr(aeskey),
-                          iv);
+    // AES_CBC_decrypt_buffer(decrypted_data,
+    //                       buffer_data,
+    //                       num_bytes_to_decrypt,
+    //                       safeButUnsafeVectorPtr(aeskey),
+    //                       iv);
 
     // Remove the encrypted bytes.
     frame.erase(pos, frame.end());
