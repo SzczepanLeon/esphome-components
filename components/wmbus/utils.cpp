@@ -837,7 +837,7 @@ std::string strdate(struct tm* date)
 
 std::string strdate(double v)
 {
-    if (isnan(v)) return "null";
+    if (std::isnan(v)) return "null";
     struct tm date;
     time_t t = v;
     localtime_r( &t,&date);
@@ -853,7 +853,7 @@ std::string strdatetime(struct tm* datetime)
 
 std::string strdatetime(double v)
 {
-    if (isnan(v)) return "null";
+    if (std::isnan(v)) return "null";
     struct tm datetime;
     time_t t = v;
     localtime_r( &t,&datetime);
