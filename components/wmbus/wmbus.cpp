@@ -1,6 +1,8 @@
 #include "wmbus.h"
 #include "version.h"
 
+#include "DriversWmbusMeters/meters.h"
+
 namespace esphome {
 namespace wmbus {
 
@@ -274,6 +276,17 @@ namespace wmbus {
   bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key) {
     bool ret_val = true;
     int ci_field = telegram[10];
+    //
+    MeterInfo mi;
+    // mi.parse("apator08", "apator08", "00065158", "");
+    // auto meter1 = createMeter(&mi);
+    // AboutTelegram about;
+    // string id = "00065158";
+    // bool id_match = false;
+    // Telegram* tt = new Telegram();
+    // meter1->handleTelegram(about, frame, false, &id, &id_match, tt);
+    // double val = meter1->getNumericValue("total", Unit::M3);
+    //
     switch(ci_field) {
       case 0x8D:
         {
