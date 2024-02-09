@@ -7,7 +7,7 @@
 #include "types.h"
 #include <map>
 #include <set>
-#include <Arduino.h>
+//#include <Arduino.h>
 
 //----------------------------------------------------------------------------------
 //  Function Declareration

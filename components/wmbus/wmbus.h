@@ -22,7 +22,7 @@
 #include "utils.h"
 #include "crc.h"
 
-#include <DriversWmbusMeters/utils.h>
+#include "DriversWmbusMeters/utils.h"
 
 namespace esphome {
 namespace wmbus {
