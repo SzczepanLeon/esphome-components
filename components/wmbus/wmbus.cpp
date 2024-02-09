@@ -97,6 +97,18 @@ namespace wmbus {
                   frameMode,
                   frameFormat,
                   telegram.c_str());
+          //
+          MeterInfo mi;
+          mi.parse("izar", "izar", "4122b45c", "");
+          auto meter = createMeter(&mi);
+          AboutTelegram about;
+          string id = "4122b45c";
+          bool id_match = false;
+          Telegram* tt = new Telegram();
+          meter->handleTelegram(about, telegram, false, &id, &id_match, tt);
+          double val = meter->getNumericValue("total_m3", Unit::M3);
+          ESP_LOGI(TAG, "Mamy z wmbusmeters: %.4f", val);
+          //
           if (sensor->key.size()) {
             ESP_LOGVV(TAG, "Key defined, trying to decrypt telegram ...");
             if (this->decrypt_telegram(frame, sensor->key)) {
@@ -276,18 +288,6 @@ namespace wmbus {
   bool WMBusComponent::decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key) {
     bool ret_val = true;
     int ci_field = telegram[10];
-    //
-    MeterInfo mi;
-    mi.parse("izar", "izar", "4122b45c", "");
-    auto meter = createMeter(&mi);
-    AboutTelegram about;
-    string id = "4122b45c";
-    bool id_match = false;
-    Telegram* tt = new Telegram();
-    meter->handleTelegram(about, telegram, false, &id, &id_match, tt);
-    double val = meter->getNumericValue("total_m3", Unit::M3);
-    ESP_LOGI(TAG, "Mamy z wmbusmeters: %.4f", val);
-    //
     switch(ci_field) {
       case 0x8D:
         {
