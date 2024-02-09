@@ -1,7 +1,7 @@
 #include "wmbus.h"
 #include "version.h"
 
-#include "DriversWmbusMeters/meters.h"
+#include "meters.h"
 
 namespace esphome {
 namespace wmbus {
