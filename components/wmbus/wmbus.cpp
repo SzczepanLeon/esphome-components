@@ -285,7 +285,7 @@ namespace wmbus {
     bool id_match = false;
     Telegram* tt = new Telegram();
     meter->handleTelegram(about, telegram, false, &id, &id_match, tt);
-    double val = meter1->getNumericValue("total_m3", Unit::M3);
+    double val = meter->getNumericValue("total_m3", Unit::M3);
     ESP_LOGI(TAG, "Mamy z wmbusmeters: %.4f", val);
     //
     switch(ci_field) {
