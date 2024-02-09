@@ -105,7 +105,7 @@ namespace wmbus {
           string id = "4122b45c";
           bool id_match = false;
           Telegram* tt = new Telegram();
-          meter->handleTelegram(about, telegram, false, &id, &id_match, tt);
+          meter->handleTelegram(about, frame, false, &id, &id_match, tt);
           double val = meter->getNumericValue("total_m3", Unit::M3);
           ESP_LOGI(TAG, "Mamy z wmbusmeters: %.4f", val);
           //
