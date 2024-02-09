@@ -1,3 +1,5 @@
+#include "esphome/core/log.h"
+
 #include "meters.h"
 /*
  Copyright (C) 2017-2023 Fredrik �hrstr�m (gpl-3.0-or-later)
@@ -1915,6 +1917,7 @@ DriverInfo pickMeterDriver(Telegram* t)
 
 shared_ptr<Meter> createMeter(MeterInfo* mi)
 {
+    esphome::ESP_LOGI("meters.cpp", "Szczepan createMeter";
     shared_ptr<Meter> newm;
 
     const char* keymsg = (mi->key[0] == 0) ? "not-encrypted" : "encrypted";
