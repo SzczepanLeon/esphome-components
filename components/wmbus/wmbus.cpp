@@ -278,10 +278,10 @@ namespace wmbus {
     int ci_field = telegram[10];
     //
     MeterInfo mi;
-    mi.parse("apator162", "apator162", "04175054", "00000000000000000000000000000000");
+    mi.parse("izar", "izar", "4122b45c", "");
     auto meter = createMeter(&mi);
     AboutTelegram about;
-    string id = "04175054";
+    string id = "4122b45c";
     bool id_match = false;
     Telegram* tt = new Telegram();
     meter->handleTelegram(about, telegram, false, &id, &id_match, tt);
