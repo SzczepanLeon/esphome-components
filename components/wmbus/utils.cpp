@@ -241,19 +241,19 @@ void error(const char* fmt, ...) {
 
 void debug(const char* fmt, ...) {
   va_list arg;
-  va_start(arg, format);
+  va_start(arg, fmt);
   // esp_log_printf_(ESPHOME_LOG_LEVEL_VERY_VERBOSE, tag, __LINE__, ESPHOME_LOG_FORMAT(format), ##__VA_ARGS__)
   // esp_log_printf_(int level, const char *tag, int line, const char *format, ...) 
-  esphome::esp_log_vprintf_(3, "wmbusmeters", 0, format, arg);
+  esphome::esp_log_vprintf_(3, "wmbusmeters", 0, fmt, arg);
   va_end(arg);
 }
 
 void verbose(const char* fmt, ...) {
   va_list arg;
-  va_start(arg, format);
+  va_start(arg, fmt);
   // esp_log_printf_(ESPHOME_LOG_LEVEL_VERY_VERBOSE, tag, __LINE__, ESPHOME_LOG_FORMAT(format), ##__VA_ARGS__)
   // esp_log_printf_(int level, const char *tag, int line, const char *format, ...) 
-  esphome::esp_log_vprintf_(3, "wmbusmeters", 0, format, arg);
+  esphome::esp_log_vprintf_(3, "wmbusmeters", 0, fmt, arg);
   va_end(arg);
 }
 
