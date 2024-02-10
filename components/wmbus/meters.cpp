@@ -1917,7 +1917,11 @@ DriverInfo pickMeterDriver(Telegram* t)
 
 shared_ptr<Meter> createMeter(MeterInfo* mi)
 {
-    esphome::ESP_LOGI("meters.cpp", "Szczepan createMeter");
+    namespace esphome {
+    namespace wmbus {
+        ESP_LOGI("meters.cpp", "Szczepan createMeter");
+    }
+    }
     shared_ptr<Meter> newm;
 
     const char* keymsg = (mi->key[0] == 0) ? "not-encrypted" : "encrypted";
