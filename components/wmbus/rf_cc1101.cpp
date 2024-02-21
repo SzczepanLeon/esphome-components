@@ -106,7 +106,7 @@ namespace wmbus {
             else if (decode3OutOf6(rxLoop.pByteIndex, preamble)) {
               rxLoop.lengthField  = preamble[0];
               data_in.lengthField = rxLoop.lengthField;
-              rxLoop.length  = byteSize(packetSize(rxLoop.lengthField));
+              rxLoop.length  = byteSize(packetSize(rxLoop.lengthField)) + 2;
               data_in.mode   = 'T';
               data_in.block  = 'A';
               rxLoop.pByteIndex += 3;

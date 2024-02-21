@@ -37,9 +37,9 @@ namespace wmbus {
       std::string telegram = format_hex_pretty(rawFrame);
       telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
       if (telegram.size() > 200) {
-        std::string tel_01 = telegram.substr(0,200);
+        std::string tel_01 = telegram.substr(0,400);
         ESP_LOGV(TAG, "Frame: %s [RAW]", tel_01.c_str());
-        std::string tel_02 = telegram.substr(200,400);
+        std::string tel_02 = telegram.substr(400,800);
         ESP_LOGV(TAG, "Frame: %s [RAW]", tel_02.c_str());
       }
       else {
