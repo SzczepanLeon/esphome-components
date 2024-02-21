@@ -119,15 +119,15 @@ namespace wmbus {
 
             rxLoop.bytesLeft = rxLoop.length - 3;
 
+            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%255);
+
             if ( rxLoop.length > 255) {
               // Set CC1101 into infinite mode
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%255);
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH);
               rxLoop.infinite = true;
             }
             else {
               // Set CC1101 into length mode
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length));
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
               rxLoop.infinite = false;
             }
@@ -153,7 +153,7 @@ namespace wmbus {
 
             if ((rxLoop.infinite) && (rxLoop.bytesLeft < 255)) {
               // Set CC1101 into length mode
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.bytesLeft));
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.bytesLeft+2));
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
               rxLoop.infinite = false;
             }
