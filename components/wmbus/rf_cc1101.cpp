@@ -119,9 +119,18 @@ namespace wmbus {
 
             rxLoop.bytesLeft = rxLoop.length - 3;
 
-            // Set CC1101 into length mode
-            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length));
-            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
+            if ( rxLoop.length > 255) {
+              // Set CC1101 into infinite mode
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%255);
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH);
+              rxLoop.infinite = true;
+            }
+            else {
+              // Set CC1101 into length mode
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length));
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
+              rxLoop.infinite = false;
+            }
 
             rxLoop.state = READ_DATA;
             max_wait_time_ += extra_time_;
@@ -141,6 +150,13 @@ namespace wmbus {
             rxLoop.pByteIndex += (bytesInFIFO - 1);
             rxLoop.bytesRx    += (bytesInFIFO - 1);
             max_wait_time_    += extra_time_;
+
+            if ((rxLoop.infinite) && (rxLoop.bytesLeft < 255)) {
+              // Set CC1101 into length mode
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.bytesLeft));
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
+              rxLoop.infinite = false;
+            }
           }
           break;
       }
@@ -223,6 +239,7 @@ namespace wmbus {
     ELECHOUSE_cc1101.SpiWriteReg(CC1101_FIFOTHR, RX_FIFO_START_THRESHOLD);
     // Set infinite length 
     ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH);
+    rxLoop.infinite = true;
 
     ELECHOUSE_cc1101.SpiStrobe(CC1101_SRX);
     while((ELECHOUSE_cc1101.SpiReadStatus(CC1101_MARCSTATE) != MARCSTATE_RX));
