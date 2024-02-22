@@ -119,18 +119,18 @@ namespace wmbus {
 
             rxLoop.bytesLeft = rxLoop.length - 3;
 
-            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%MAX_PACKET_LENGTH_COUNTER);
+            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%255);
 
-            if ( rxLoop.length > MAX_PACKET_LENGTH_COUNTER) {
+            if ( rxLoop.length > 255) {
               // Set CC1101 into infinite mode
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH);
               rxLoop.infinite = true;
-              ESP_LOGE(TAG, "CC1101 in infinite mode");
+              // ESP_LOGE(TAG, "CC1101 in infinite mode");
             }
             else {
               // Set CC1101 into length mode
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
-              ESP_LOGV(TAG, "CC1101 in length mode");
+              // ESP_LOGV(TAG, "CC1101 in length mode");
             }
 
             rxLoop.state = READ_DATA;
@@ -157,7 +157,7 @@ namespace wmbus {
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.bytesLeft));
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
               rxLoop.infinite = false;
-              ESP_LOGV(TAG, "CC1101 in length mode.");
+              // ESP_LOGV(TAG, "CC1101 in length mode.");
             }
           }
           break;
