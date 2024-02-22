@@ -45,6 +45,8 @@
 #define FIXED_PACKET_LENGTH        0x00
 #define INFINITE_PACKET_LENGTH     0x02
 
+#define MAX_FIXED_LENGTH           256
+
 #define WMBUS_MODE_C_PREAMBLE      0x54
 #define WMBUS_BLOCK_A_PREAMBLE     0xCD
 #define WMBUS_BLOCK_B_PREAMBLE     0x3D
@@ -54,7 +56,11 @@ enum RxLoopState : uint8_t {
   WAIT_FOR_SYNC = 1,
   WAIT_FOR_DATA = 2,
   READ_DATA     = 3,
-  DATA_END      = 4,
+};
+
+enum Cc1101LengthMode : uint8_t {
+  INFINITE      = 0,
+  FIXED         = 1,
 };
 
 typedef struct RxLoopData {
@@ -64,6 +70,7 @@ typedef struct RxLoopData {
   uint16_t bytesLeft;           // Bytes left to to be read from the RX FIFO
   uint8_t *pByteIndex;          // Pointer to current position in the byte array
   bool complete;                // Packet received complete
+  Cc1101LengthMode cc1101Mode;
   RxLoopState state;
 } RxLoopData;
 

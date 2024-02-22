@@ -212,6 +212,9 @@ Supported sensors (sensor_type) for meters:
 - `kamheat`
   - total_energy_consumption_kwh
   - volume_flow_lh
+  - power_kw
+  - flow_temperature_c
+  - return_temperature_c
 - `mkradio3`
   - total_water_m3
 - `mkradio4`
