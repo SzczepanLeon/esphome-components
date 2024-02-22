@@ -124,7 +124,8 @@ namespace wmbus {
             if ( rxLoop.length > MAX_PACKET_LENGTH_COUNTER) {
               // Set CC1101 into infinite mode
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH);
-              ESP_LOGV(TAG, "CC1101 in infinite mode");
+              rxLoop.infinite = true;
+              ESP_LOGE(TAG, "CC1101 in infinite mode");
             }
             else {
               // Set CC1101 into length mode
@@ -151,10 +152,11 @@ namespace wmbus {
             rxLoop.bytesRx    += (bytesInFIFO - 1);
             max_wait_time_    += extra_time_;
 
-            if (rxLoop.bytesRx > MAX_PACKET_LENGTH_COUNTER) {
+            if ((rxLoop.infinite) && (rxLoop.bytesRx > MAX_PACKET_LENGTH_COUNTER)) {
               // Set CC1101 into length mode
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.bytesLeft));
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
+              rxLoop.infinite = false;
               ESP_LOGV(TAG, "CC1101 in length mode.");
             }
           }
@@ -221,6 +223,7 @@ namespace wmbus {
     rxLoop.bytesRx     = 0;              // Bytes read from Rx FIFO
     rxLoop.pByteIndex  = data_in.data;   // Pointer to current position in the byte array
     rxLoop.complete    = false;          // Packet received
+    rxLoop.infinite    = false;
 
     this->returnFrame.frame.clear();
     this->returnFrame.rssi  = 0;

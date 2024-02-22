@@ -65,6 +65,7 @@ typedef struct RxLoopData {
   uint16_t bytesLeft;           // Bytes left to to be read from the RX FIFO
   uint8_t *pByteIndex;          // Pointer to current position in the byte array
   bool complete;                // Packet received complete
+  bool infinite;
   RxLoopState state;
 } RxLoopData;
 
