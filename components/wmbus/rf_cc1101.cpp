@@ -123,14 +123,14 @@ namespace wmbus {
               // Set CC1101 into length mode
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)rxLoop.length);
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
-              ESP_LOGV(TAG, "CC1101 in length mode");
+              // ESP_LOGV(TAG, "CC1101 in length mode");
               rxLoop.format = FIXED;
             }
             else {
               // Set CC1101 into infinite mode
               // ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH?);
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length%MAX_FIXED_LENGTH));
-              ESP_LOGE(TAG, "CC1101 in infinite mode");
+              // ESP_LOGE(TAG, "CC1101 in infinite mode");
             }
 
             rxLoop.state = READ_DATA;
