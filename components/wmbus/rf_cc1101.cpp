@@ -119,17 +119,19 @@ namespace wmbus {
 
             rxLoop.bytesLeft = rxLoop.length - 3;
 
-            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%80);
+            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%MAX_PACKET_LENGTH_COUNTER);
 
-            if ( rxLoop.length > 80) {
+            if ( rxLoop.length > MAX_PACKET_LENGTH_COUNTER) {
               // Set CC1101 into infinite mode
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH);
               rxLoop.infinite = true;
+              ESP_LOGE(TAG, "CC1101 infinite mode");
             }
             else {
               // Set CC1101 into length mode
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
               rxLoop.infinite = false;
+              ESP_LOGE(TAG, "CC1101 length mode");
             }
 
             rxLoop.state = READ_DATA;
@@ -143,7 +145,7 @@ namespace wmbus {
         case READ_DATA:
           if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
             // Do not empty the Rx FIFO (See the CC1101 SWRZ020E errata note)
-            uint8_t bytesInFIFO = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x7F;        
+            uint8_t bytesInFIFO = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x7F;
             ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, bytesInFIFO - 1);
 
             rxLoop.bytesLeft  -= (bytesInFIFO - 1);
@@ -151,11 +153,12 @@ namespace wmbus {
             rxLoop.bytesRx    += (bytesInFIFO - 1);
             max_wait_time_    += extra_time_;
 
-            if ((rxLoop.infinite) && (rxLoop.bytesRx > 80)) {
+            if ((rxLoop.infinite) && (rxLoop.bytesRx > MAX_PACKET_LENGTH_COUNTER)) {
               // Set CC1101 into length mode
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.bytesLeft));
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
               rxLoop.infinite = false;
+              ESP_LOGE(TAG, "CC1101 length mode E");
             }
             // if ((rxLoop.infinite) && (rxLoop.bytesLeft <= 64)) {
             //   rxLoop.infinite = false;
@@ -173,7 +176,7 @@ namespace wmbus {
         rxLoop.bytesRx += rxLoop.bytesLeft;
         data_in.length  = rxLoop.bytesRx;
         this->returnFrame.rssi  = (int8_t)ELECHOUSE_cc1101.getRssi();
-          this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
+        this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
         ESP_LOGV(TAG, "Have %d bytes from CC1101 Rx, RSSI: %d dBm LQI: %d", rxLoop.bytesRx, this->returnFrame.rssi, this->returnFrame.lqi);
         if (rxLoop.length != data_in.length) {
           ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
