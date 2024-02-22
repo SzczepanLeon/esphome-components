@@ -66,6 +66,7 @@ typedef struct RxLoopData {
   bool complete;                // Packet received complete
   RxLoopState state;
   bool infinite;
+  bool lastRx;
 } RxLoopData;
 
 namespace esphome {
