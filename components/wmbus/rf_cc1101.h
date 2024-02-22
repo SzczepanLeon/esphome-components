@@ -45,7 +45,7 @@
 #define FIXED_PACKET_LENGTH        0x00
 #define INFINITE_PACKET_LENGTH     0x02
 
-#define MAX_PACKET_LENGTH_COUNTER  255
+#define MAX_PACKET_LENGTH_COUNTER  190
 
 #define WMBUS_MODE_C_PREAMBLE      0x54
 #define WMBUS_BLOCK_A_PREAMBLE     0xCD
@@ -56,7 +56,6 @@ enum RxLoopState : uint8_t {
   WAIT_FOR_SYNC = 1,
   WAIT_FOR_DATA = 2,
   READ_DATA     = 3,
-  DATA_END      = 4,
 };
 
 typedef struct RxLoopData {
@@ -67,8 +66,6 @@ typedef struct RxLoopData {
   uint8_t *pByteIndex;          // Pointer to current position in the byte array
   bool complete;                // Packet received complete
   RxLoopState state;
-  bool infinite;
-  bool lastRx;
 } RxLoopData;
 
 namespace esphome {

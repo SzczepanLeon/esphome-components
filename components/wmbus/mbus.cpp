@@ -8,8 +8,7 @@ namespace wmbus {
   bool mBusDecode(WMbusData &t_in, WMbusFrame &t_frame) {
     bool retVal{false};
     if (t_in.mode == 'C') {
-      // correct length in C mode - remove 2 bytes preamble
-      t_in.length -= 2;
+      t_in.length -= 2;  // correct length in C mode - remove 2 bytes preamble
       if (t_in.block == 'A') {
         ESP_LOGD(TAG, "Processing C1 A frame");
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
@@ -36,7 +35,7 @@ namespace wmbus {
       std::vector<unsigned char> rawFrame(t_in.data, t_in.data + t_in.length);
       std::string telegram = format_hex_pretty(rawFrame);
       telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
-      if (telegram.size() > 400) {
+      if (telegram.size() > 400) {  // ToDo: fix it
         std::string tel_01 = telegram.substr(0,400);
         ESP_LOGV(TAG, "Frame: %s [RAW]", tel_01.c_str());
         std::string tel_02 = telegram.substr(400,800);
@@ -89,7 +88,7 @@ namespace wmbus {
   |       16 or ((L-9) mod 16) bytes      | 2 bytes |
   ---------------------------------------------------
 */
-  bool mBusDecodeFormatA(const WMbusData &t_in, WMbusFrame &t_frame) {  // in jako referencje przekazywac
+  bool mBusDecodeFormatA(const WMbusData &t_in, WMbusFrame &t_frame) {
     uint8_t L = t_in.data[0];
 
     // Validate CRC
