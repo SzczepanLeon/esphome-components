@@ -119,19 +119,19 @@ namespace wmbus {
 
             rxLoop.bytesLeft = rxLoop.length - 3;
 
-            ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%255);
+            // ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%255);
 
-            if ( rxLoop.length > 255) {
+            // if ( rxLoop.length > 255) {
               // Set CC1101 into infinite mode
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH);
-              rxLoop.infinite = true;
+              // rxLoop.infinite = true;
               // ESP_LOGE(TAG, "CC1101 in infinite mode");
-            }
-            else {
+            // }
+            // else {
               // Set CC1101 into length mode
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
+              // ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
               // ESP_LOGV(TAG, "CC1101 in length mode");
-            }
+            // }
 
             rxLoop.state = READ_DATA;
             max_wait_time_ += extra_time_;
@@ -152,12 +152,9 @@ namespace wmbus {
             rxLoop.bytesRx    += (bytesInFIFO - 1);
             max_wait_time_    += extra_time_;
 
-            if ((rxLoop.infinite) && (rxLoop.bytesRx > MAX_PACKET_LENGTH_COUNTER)) {
-              // Set CC1101 into length mode
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.bytesLeft));
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
-              rxLoop.infinite = false;
-              // ESP_LOGV(TAG, "CC1101 in length mode.");
+            if (rxLoop.bytesLeft <= 64) {
+              // rxLoop.infinite = false;
+              rxLoop.lastRx = true;
             }
           }
           break;
@@ -165,7 +162,7 @@ namespace wmbus {
 
       uint8_t overfl = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x80;
       // end of packet in length mode
-      if ((!overfl) && (!digitalRead(gdo2)) && (rxLoop.state > WAIT_FOR_DATA)) {
+      if ((!overfl) && ((rxLoop.lastRx)) && (rxLoop.state > WAIT_FOR_DATA)) {
         ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, (uint8_t)rxLoop.bytesLeft);
         rxLoop.bytesRx += rxLoop.bytesLeft;
         data_in.length  = rxLoop.bytesRx;
@@ -224,6 +221,7 @@ namespace wmbus {
     rxLoop.pByteIndex  = data_in.data;   // Pointer to current position in the byte array
     rxLoop.complete    = false;          // Packet received
     rxLoop.infinite    = false;
+    rxLoop.lastRx      = false;
 
     this->returnFrame.frame.clear();
     this->returnFrame.rssi  = 0;

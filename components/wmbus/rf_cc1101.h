@@ -66,6 +66,7 @@ typedef struct RxLoopData {
   uint8_t *pByteIndex;          // Pointer to current position in the byte array
   bool complete;                // Packet received complete
   bool infinite;
+  bool lastRx;
   RxLoopState state;
 } RxLoopData;
 
