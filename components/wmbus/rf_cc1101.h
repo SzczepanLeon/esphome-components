@@ -45,7 +45,9 @@
 #define FIXED_PACKET_LENGTH        0x00
 #define INFINITE_PACKET_LENGTH     0x02
 
-#define MAX_PACKET_LENGTH_COUNTER  190
+#define INFINITE                   0
+#define FIXED                      1
+#define MAX_FIXED_LENGTH           256
 
 #define WMBUS_MODE_C_PREAMBLE      0x54
 #define WMBUS_BLOCK_A_PREAMBLE     0xCD
@@ -65,8 +67,7 @@ typedef struct RxLoopData {
   uint16_t bytesLeft;           // Bytes left to to be read from the RX FIFO
   uint8_t *pByteIndex;          // Pointer to current position in the byte array
   bool complete;                // Packet received complete
-  bool infinite;
-  bool lastRx;
+  uint8_t format;
   RxLoopState state;
 } RxLoopData;
 

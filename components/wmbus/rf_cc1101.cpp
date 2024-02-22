@@ -119,19 +119,19 @@ namespace wmbus {
 
             rxLoop.bytesLeft = rxLoop.length - 3;
 
-            // ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, rxLoop.length%255);
-
-            // if ( rxLoop.length > 255) {
-              // Set CC1101 into infinite mode
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH);
-              // rxLoop.infinite = true;
-              // ESP_LOGE(TAG, "CC1101 in infinite mode");
-            // }
-            // else {
+            if (rxLoop.length < MAX_FIXED_LENGTH) {
               // Set CC1101 into length mode
-              // ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
-              // ESP_LOGV(TAG, "CC1101 in length mode");
-            // }
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)rxLoop.length);
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
+              ESP_LOGV(TAG, "CC1101 in length mode");
+              rxLoop.format = FIXED;
+            }
+            else {
+              // Set CC1101 into infinite mode
+              // ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, INFINITE_PACKET_LENGTH?);
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length%MAX_FIXED_LENGTH));
+              ESP_LOGE(TAG, "CC1101 in infinite mode");
+            }
 
             rxLoop.state = READ_DATA;
             max_wait_time_ += extra_time_;
@@ -143,6 +143,10 @@ namespace wmbus {
         // waiting for more data in Rx FIFO buffer
         case READ_DATA:
           if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
+            if (((rxLoop.bytesLeft) < (MAX_FIXED_LENGTH)) && (rxLoop.format == INFINITE)) {
+              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
+              rxLoop.format = FIXED;
+            }
             // Do not empty the Rx FIFO (See the CC1101 SWRZ020E errata note)
             uint8_t bytesInFIFO = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x7F;
             ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, bytesInFIFO - 1);
@@ -151,18 +155,13 @@ namespace wmbus {
             rxLoop.pByteIndex += (bytesInFIFO - 1);
             rxLoop.bytesRx    += (bytesInFIFO - 1);
             max_wait_time_    += extra_time_;
-
-            if (rxLoop.bytesLeft <= 64) {
-              // rxLoop.infinite = false;
-              rxLoop.lastRx = true;
-            }
           }
           break;
       }
 
       uint8_t overfl = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x80;
       // end of packet in length mode
-      if ((!overfl) && ((rxLoop.lastRx)) && (rxLoop.state > WAIT_FOR_DATA)) {
+      if ((!overfl) && (!digitalRead(gdo2))  && (rxLoop.state > WAIT_FOR_DATA)) {
         ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, (uint8_t)rxLoop.bytesLeft);
         rxLoop.bytesRx += rxLoop.bytesLeft;
         data_in.length  = rxLoop.bytesRx;
@@ -220,8 +219,7 @@ namespace wmbus {
     rxLoop.bytesRx     = 0;              // Bytes read from Rx FIFO
     rxLoop.pByteIndex  = data_in.data;   // Pointer to current position in the byte array
     rxLoop.complete    = false;          // Packet received
-    rxLoop.infinite    = false;
-    rxLoop.lastRx      = false;
+    rxLoop.format      = INFINITE;       // Infinite or fixed packet mode
 
     this->returnFrame.frame.clear();
     this->returnFrame.rssi  = 0;
