@@ -135,6 +135,27 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_TOTAL_INCREASING,
             icon="mdi:transmission-tower-export",
         ),
+        cv.Optional("total_energy_consumption_t1_kwh"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement=UNIT_KILOWATT_HOURS,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:transmission-tower-export",
+        ),
+        cv.Optional("total_energy_consumption_t2_kwh"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement=UNIT_KILOWATT_HOURS,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:transmission-tower-export",
+        ),
+        cv.Optional("total_energy_consumption_t3_kwh"): sensor.sensor_schema(
+            accuracy_decimals=3,
+            unit_of_measurement=UNIT_KILOWATT_HOURS,
+            device_class=DEVICE_CLASS_ENERGY,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
+            icon="mdi:transmission-tower-export",
+        ),                        
         cv.Optional("current_power_consumption_kw"): sensor.sensor_schema(
             accuracy_decimals=3,
             unit_of_measurement=UNIT_KILOWATT,
