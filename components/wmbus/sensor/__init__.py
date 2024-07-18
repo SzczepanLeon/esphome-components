@@ -310,6 +310,13 @@ CONFIG_SCHEMA = cv.Schema(
             state_class=STATE_CLASS_MEASUREMENT,
             icon="mdi:coolant-temperature",
         ),
+        cv.Optional("external_temperature_c"): sensor.sensor_schema(
+            accuracy_decimals=0,
+            unit_of_measurement=UNIT_CELSIUS,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+            icon="mdi:thermometer",
+        ),
         cv.Optional("voltage_at_phase_1_v"): sensor.sensor_schema(
             accuracy_decimals=0,
             unit_of_measurement=UNIT_VOLT,
