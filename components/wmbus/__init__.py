@@ -127,5 +127,5 @@ async def to_code(config):
     cg.add_library(
         None,
         None,
-        "https://github.com/cenobitedk/wmbus-drivers#multical21",
+        "https://github.com/SzczepanLeon/wmbus-drivers#1.3.13",
     )
