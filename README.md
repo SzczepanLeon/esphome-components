@@ -224,6 +224,8 @@ Supported sensors (sensor_type) for meters:
 - `multical21`
   - total_water_m3
   - target_water_m3
+  - flow_temperature_c (depends on meter configuration)
+  - external_temperature_c (depends on meter configuration)
 - `qheat`
   - total_energy_consumption_kwh
 - `qwater`
