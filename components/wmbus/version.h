@@ -1,3 +1,4 @@
 #ifndef MY_VERSION
-#define MY_VERSION "3.2.3"
+#define MY_VERSION "4.0.0"
+#define WMBUSMETERS_VERSION "1.17.1"
 #endif

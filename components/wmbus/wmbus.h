@@ -5,22 +5,31 @@
 #include "esphome/core/helpers.h"
 #include "esphome/core/component.h"
 #include "esphome/components/network/ip_address.h"
-#include "esphome/components/time/real_time_clock.h"
 #include "esphome/components/sensor/sensor.h"
-#include "esphome/components/text_sensor/text_sensor.h"
+#ifdef USE_WMBUS_MQTT
+#include <PubSubClient.h>
+#elif defined(USE_MQTT)
+#include "esphome/components/mqtt/mqtt_client.h"
+#endif
+#ifdef USE_ETHERNET
+#include "esphome/components/ethernet/ethernet_component.h"
+#elif defined(USE_WIFI)
+#include "esphome/components/wifi/wifi_component.h"
+#endif
+#include "esphome/components/time/real_time_clock.h"
 
 #include <map>
 #include <string>
 
-#include "drivers.h"
+#include "rf_cc1101.h"
+#include "m_bus_data.h"
+#include "crc.h"
+
+#include "utils.h"
 
 #include <WiFiClient.h>
 #include <WiFiUdp.h>
 
-#include "rf_cc1101.h"
-#include "m_bus_data.h"
-#include "utils.h"
-#include "crc.h"
 
 namespace esphome {
 namespace wmbus {
@@ -35,12 +44,6 @@ namespace wmbus {
     TRANSPORT_UDP = 1,
   };
 
-  enum FrameMode : uint8_t {
-    MODE_T1   = 0,
-    MODE_C1   = 1,
-    MODE_T1C1 = 2,
-  };
-
   struct Client {
     std::string name;
     network::IPAddress ip;
@@ -49,21 +52,24 @@ namespace wmbus {
     Format format;
   };
 
+  struct MqttClient {
+    std::string name;
+    std::string password;
+    network::IPAddress ip;
+    uint16_t port;
+    bool retained;
+  };
+
   class WMBusListener {
     public:
-      WMBusListener(const uint32_t id, const std::string type, const std::string key, const FrameMode framemode);
       WMBusListener(const uint32_t id, const std::string type, const std::string key);
       uint32_t id;
       std::string type;
-      FrameMode framemode{};
+      std::string myKey;
       std::vector<unsigned char> key{};
-      std::map<std::string, sensor::Sensor *> sensors_{};
-      void add_sensor(std::string type, sensor::Sensor *sensor) {
-        this->sensors_[type] = sensor;
-      };
-      text_sensor::TextSensor* text_sensor_{nullptr};
-      void add_sensor(text_sensor::TextSensor *text_sensor) {
-        this->text_sensor_ = text_sensor;
+      std::map<std::string, sensor::Sensor *> fields{};
+      void add_sensor(std::string field, sensor::Sensor *sensor) {
+        this->fields[field] = sensor;
       };
 
       void dump_config();
@@ -81,6 +87,12 @@ namespace wmbus {
     InternalGPIOPin *gdo2{nullptr};
   };
 
+  class InfoComponent : public Component {
+    public:
+      void setup() override;
+      float get_setup_priority() const override { return setup_priority::PROCESSOR; }
+  };
+
   class WMBusComponent : public Component {
     public:
       void setup() override;
@@ -93,7 +105,7 @@ namespace wmbus {
       void add_cc1101(InternalGPIOPin *mosi, InternalGPIOPin *miso,
                       InternalGPIOPin *clk, InternalGPIOPin *cs,
                       InternalGPIOPin *gdo0, InternalGPIOPin *gdo2,
-                      float frequency, bool sync_mode) {
+                      double frequency, bool sync_mode) {
         this->spi_conf_.mosi = mosi;
         this->spi_conf_.miso = miso;
         this->spi_conf_.clk  = clk;
@@ -103,8 +115,24 @@ namespace wmbus {
         this->frequency_ = frequency;
         this->sync_mode_ = sync_mode;
       }
+#ifdef USE_ETHERNET
+      void set_eth(ethernet::EthernetComponent *eth_component) { this->net_component_ = eth_component; }
+#elif defined(USE_WIFI)
+      void set_wifi(wifi::WiFiComponent *wifi_component) { this->net_component_ = wifi_component; }
+#endif
       void set_time(time::RealTimeClock *time) { this->time_ = time; }
-      void set_log_unknown() { this->log_unknown_ = true; }
+#ifdef USE_WMBUS_MQTT
+      void set_mqtt(const std::string name,
+                    const std::string password,
+                    const network::IPAddress ip,
+                    const uint16_t port,
+                    const bool retained) {
+        this->mqtt_ = new MqttClient{name, password, ip, port, retained};
+      }
+#elif defined(USE_MQTT)
+      void set_mqtt(mqtt::MQTTClientComponent *mqtt_client) { this->mqtt_client_ = mqtt_client; }
+#endif
+      void set_log_all(bool log_all) { this->log_all_ = log_all; }
       void add_client(const std::string name,
                       const network::IPAddress ip,
                       const uint16_t port,
@@ -116,20 +144,17 @@ namespace wmbus {
     private:
 
     protected:
-      const LogString *framemode_to_string(FrameMode framemode);
       const LogString *format_to_string(Format format);
       const LogString *transport_to_string(Transport transport);
-      void add_driver(Driver *driver);
-      bool decrypt_telegram(std::vector<unsigned char> &telegram, std::vector<unsigned char> &key);
+      void send_to_clients(WMbusFrame &mbus_data);
       void led_blink();
       void led_handler();
       HighFrequencyLoopRequester high_freq_;
       GPIOPin *led_pin_{nullptr};
       Cc1101 spi_conf_{};
-      float frequency_{};
+      double frequency_{};
       bool sync_mode_{false};
       std::map<uint32_t, WMBusListener *> wmbus_listeners_{};
-      std::map<std::string, Driver *> drivers_{};
       std::vector<Client> clients_{};
       WiFiClient tcp_client_;
       WiFiUDP udp_client_;
@@ -137,8 +162,20 @@ namespace wmbus {
       uint32_t led_blink_time_{0};
       uint32_t led_on_millis_{0};
       bool led_on_{false};
-      bool log_unknown_{false};
+      bool log_all_{false};
       RxLoop rf_mbus_;
+#ifdef USE_ETHERNET
+      ethernet::EthernetComponent *net_component_{nullptr};
+#elif defined(USE_WIFI)
+      wifi::WiFiComponent *net_component_{nullptr};
+#endif
+#ifdef USE_WMBUS_MQTT
+      PubSubClient mqtt_client_;
+      MqttClient *mqtt_{nullptr};
+#elif defined(USE_MQTT)
+      mqtt::MQTTClientComponent *mqtt_client_{nullptr};
+#endif
+      time_t frame_timestamp_;
   };
 
 }  // namespace wmbus

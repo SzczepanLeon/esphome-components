@@ -4,7 +4,7 @@
 #include "esphome/core/log.h"
 #include "m_bus_data.h"
 #include "decode3of6.h"
-#include "utils.h"
+#include "utils_my.h"
 #include "crc.h"
 
 #include <vector>
