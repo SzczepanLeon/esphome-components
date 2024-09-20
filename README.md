@@ -18,7 +18,6 @@ external_components:
   - source: github://SzczepanLeon/esphome-components@main
 ```
 
-
 ## 2. Components
 
 ### 2.1. `wmbus`
@@ -29,6 +28,7 @@ https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
 [!["CC1101 to D1 mini PCB"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/pcb_v2.png)](https://www.pcbway.com/project/shareproject/CC1101_to_ESP_D1_mini_277f34e1.html)
 
+> **_NOTE:_**  Configuration for version 3.x is described [here](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/version_3.md)
 
 #### 2.1.1. Example
 
@@ -39,10 +39,10 @@ time:
 
 external_components:
   - source: github://SzczepanLeon/esphome-components@main
+    refresh: 0d
     components: [ wmbus ]
 
 wmbus:
-  frequency: 434.475
   mosi_pin: GPIO13
   miso_pin: GPIO5
   clk_pin:  GPIO2
@@ -53,53 +53,91 @@ wmbus:
   led_pin: GPIO0
   led_blink_time: "1s"
 
+  frequency: 868.950
+  all_drivers: False
+  sync_mode: True
+  log_all: True
+
+  mqtt:
+    broker: 10.0.0.88
+    username: mqttUser
+    password: mqttPass
+
   clients:
     - name: "wmbusmeters"
-      ip_address: "10.0.0.1"
+      ip_address: "10.0.0.22"
       port: 7227
 
 sensor:
+# add driver to compile list (will be available for autodetect), don't create sensor
   - platform: wmbus
-    meter_id: 0x24202020
-    type: apator162
-    key: "00000000000000000000000000000000"
-    lqi:
-      name: "My lqi"
-    rssi:
-      name: "My RSSI"
-    total_water_m3:
-      name: "My cold water"
+    type: itron
 
+# add sensor with defined type (driver will be also added to compile list)
   - platform: wmbus
     meter_id: 0x12345678
+    type: apator162
+    key: "00000000000000000000000000000000"
+    sensors:
+      - name: "my hot water RSSi"
+        field: "rssi"
+        accuracy_decimals: 0
+        unit_of_measurement: "dBm"
+        device_class: "signal_strength"
+        state_class: "measurement"
+        entity_category: "diagnostic"
+      - name: "my hot water"
+        field: "total"
+        accuracy_decimals: 3
+        unit_of_measurement: "m3"
+        device_class: "water"
+        state_class: "total_increasing"
+        icon: "mdi:water"
+
+# add more sensors, one without field (name will be used)
+  - platform: wmbus
+    meter_id: 0xABCD4321
     type: amiplus
-    mode: T1C1
-    rssi:
-      name: "My RSSI"
-    total_energy_consumption_kwh:
-      name: "My consumption in kWh"
-      icon: "mdi:power-plug"
-    voltage_at_phase_1_v:
-      name: "My V1"
+    sensors:
+      - name: "my current power consumption in Watts"
+        field: "current_power_consumption"
+        accuracy_decimals: 1
+        unit_of_measurement: "w"
+        device_class: "power"
+        state_class: "measurement"
+        icon: "mdi:transmission-tower-import"
+      - name: "total energy on T1"
+        field: "total_energy_consumption_tariff_1"
+        accuracy_decimals: 3
+        unit_of_measurement: "kwh"
+        device_class: "energy"
+        state_class: "total_increasing"
+        icon: "mdi:transmission-tower-import"
+      - name: "voltage_at_phase_1"
+        accuracy_decimals: 0
+        unit_of_measurement: "v"
+        device_class: "voltage"
+        state_class: "measurement"
+        icon: "mdi:sine-wave"
 
+# sensor with offset, type should be autodetected
+   - platform: wmbus
+    meter_id: 0x11223344
+    sensors:
+      - name: "cold water from Apator NA-1"
+        field: "total"
+        accuracy_decimals: 3
+        unit_of_measurement: "m3"
+        device_class: "water"
+        state_class: "total_increasing"
+        icon: "mdi:water"
+        filters:
+          - offset: 123.0
+
+# if mqtt defined, JSON with all decoded fields will be published to broker
   - platform: wmbus
-    meter_id: 0xAB125432
-    type: bmeters
-    key: "00004000000300000500001000000600"
-    lqi:
-      name: "My lqi"
-    total_water_m3:
-      id: "my_hot_water"
-      filters:
-        - offset: 325.0
-```
-
-> **_NOTE:_**  For Apator16-2 water meter please add also text sensor (for debug purposes):
-
-```
-text_sensor:
-  - platform: wmbus
-    name: "Text debug for Apator 16-2"
+    meter_id: 0x22113366
+    type: vario411
 ```
 
 
@@ -108,8 +146,6 @@ Configuration variables:
 
 In wmbus platform:
 
-- **frequency** (*Optional*): CC1101 Rx frequency in MHz. Defaults to ``868.950 MHz``.
-- **sync_mode** (*Optional*): If you have problems with MQTT set it to True. Defaults to ``False``.
 - **mosi_pin** (*Optional*): CC1101 MOSI pin connection. Defaults to ``GPIO13``.
 - **miso_pin** (*Optional*): CC1101 MISO pin connection. Defaults to ``GPIO12``.
 - **clk_pin** (*Optional*): CC1101 CLK pin connection. Defaults to ``GPIO14``.
@@ -118,138 +154,41 @@ In wmbus platform:
 - **gdo2_pin** (*Optional*): CC1101 GDO2 pin connection. Defaults to ``GPIO4``.
 - **led_pin** (*Optional*): Pin where LED is connected. It will blink on each telegram. You can use all options from [Pin Schema](https://esphome.io/guides/configuration-types.html#config-pin-schema).
 - **led_blink_time** (*Optional*): How long LED will stay ON. Defaults to ``300 ms``.
-- **log_unknown** (*Optional*): Show telegrams from not configured meters in log. Defaults to ``True``.
+- **frequency** (*Optional*): Rx frequency in MHz. Defaults to ``868.950 MHz``.
+- **sync_mode** (*Optional*): Receive telegram in one loop. Defaults to ``False``.
+- **log_all** (*Optional*): Show all received telegrams in log. Defaults to ``False``.
+- **all_drivers** (*Optional*): Compile with all drivers. Defaults to ``False``.
 - **clients** (*Optional*):
   - **name** (**Required**): The name for this client.
   - **ip_address** (**Required**): IP address.
   - **port** (**Required**): Port number.
   - **format** (*Optional*): Telegram format to send. HEX or RTLWMBUS. Defaults to ``RTLWMBUS``.
   - **transport** (*Optional*): TCP or UDP. Defaults to ``TCP``.
+- **mqtt** (*Optional*):
+  - **broker** (**Required**): Broker IP address.
+  - **username** (**Required**): User name.
+  - **password** (**Required**): password.
+  - **port** (*Optional*): Port number. Defaults to ``1883``.
+  - **retain** (*Optional*): If the published message should have a retain flag on or not. Defaults to ``False``.
 
+> **_NOTE:_**  MQTT can be defined in wmbus component or in [ESPHome level](https://esphome.io/components/mqtt.html).
 
 
 Meter/sensor:
 
-- **meter_id** (*Optional*, int): Meter ID. Can be specified as decimal or hex. Defaults to ``0``.
-- **type** (*Optional*, string):  Meter type. Currently `amiplus`, `apator08`, `apator162`, `apatoreitn`, `bmeters`, `c5isf`, `compact5`, `dme07`, `elf`, `evo868`, `fhkvdataiii`, `flowiq2200`, `hydrocalm3`, `hydrodigit`, `hydrus`, `iperl`, `itron`, `izar`, `kamheat`, `mkradio3`, `mkradio4`, `mkradio4a`, `multical21`, `qheat`, `qwater`, `sharky774`, `topaseskr`, `ultrimis`, `unismart`, `vario451` are supported. Defaults to ``unknown``.
+- **meter_id** (*Optional*, int): Meter ID. Can be specified as decimal or hex.
+- **type** (*Optional*, string):  Meter type. When not defined, driver will be detected from telegram.
 - **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
-- **add_prefix** (*Optional*): Add prefix (meter_id) to sensor name. Defaults to ``True``.
-- **mode** (*Optional*): Frame to process (T1, C1 or both). Defaults to ``T1``.
-- **sensor_type** (*Optional*): Sensor type from list below. For example ``total_water_m3``
+- **sensors** (*Optional*):
   - **id** (*Optional*, string): Manually specify the ID for code generation. At least one of **id** and **name** must be specified.
   - **name** (*Optional*, string): The name for the sensor. At least one of **id** and **name** must be specified.
+  - **field** (*Optional*): Field from decoded telegram (without unit).
+  - **unit_of_measurement** (*Optional*): Unit for field defined above.
   - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
-
 
 ------------------------
 
-Supported sensors (sensor_type) for meters:
-
-- `amiplus`
-  - total_energy_consumption_kwh
-  - current_power_consumption_kw
-  - total_energy_production_kwh
-  - current_power_production_kw
-  - voltage_at_phase_1_v
-  - voltage_at_phase_2_v
-  - voltage_at_phase_3_v
-- `apatoreitn`
-  - current_hca
-  - previous_hca
-  - temp_room_avg_c
-- `apator08`
-  - total_water_m3
-- `apator162`
-  - total_water_m3
-- `bmeters`
-  - total_water_m3
-- `c5isf`
-  - total_heating_kwh
-  - total_water_m3
-  - flow_temperature_c
-  - return_temperature_c
-  - power_kw
-  - volume_flow_lh
-- `compact5`
-  - current_heating_kwh
-  - previous_heating_kwh
-- `dme07`
-  - total_water_m3
-- `elf`
-  - total_energy_consumption_kwh
-  - current_power_consumption_kw
-  - total_water_m3
-- `evo868`
-  - total_water_m3
-- `fhkvdataiii`
-  - current_hca
-  - previous_hca
-  - temp_room_c
-  - temp_radiator_c
-- `flowiq2200`
-  - total_water_m3
-  - target_water_m3
-  - volume_flow_lh
-  - max_flow_lh
-  - status
-- `hydrocalm3`
-  - total_heating_kwh
-  - total_water_m3
-- `hydrodigit`
-  - total_water_m3
-- `hydrus`
-  - total_water_m3
-- `itron`
-  - total_water_m3
-- `izar`
-  - total_water_m3
-  - last_month_total_water_m3
-  - current_month_total_water_l
-  - transmit_period_s
-  - remaining_battery_life_y
-  - current_alarms
-  - previous_alarms
-- `kamheat`
-  - total_energy_consumption_kwh
-  - volume_flow_lh
-  - power_kw
-  - flow_temperature_c
-  - return_temperature_c
-- `mkradio3`
-  - total_water_m3
-- `mkradio4`
-  - total_water_m3
-- `mkradio4a`
-  - target_water_m3
-- `multical21`
-  - total_water_m3
-  - target_water_m3
-  - flow_temperature_c (depends on meter configuration)
-  - external_temperature_c (depends on meter configuration)
-- `qheat`
-  - total_energy_consumption_kwh
-- `qwater`
-  - total_water_m3
-- `rfmtx1`
-  - total_water_m3
-- `sharky774`
-  - total_energy_consumption_gj
-  - total_energy_consumption_kwh
-  - power_kw
-  - total_volume_m3
-  - volume_flow_lh
-  - flow_temperature_c
-  - return_temperature_c
-  - operating_time_d
-- `topaseskr`
-  - total_water_m3
-- `ultrimis`
-  - total_water_m3
-- `unismart`
-  - total_gas_m3
-- `vario451`
-  - total_heating_kwh
-  - total_heating_gj
+Supported drivers: almost all from wmbusmeters version 1.17.1 (without drivers from [file](https://github.com/wmbusmeters/wmbusmeters/blob/1.17.1/src/generated_database.cc))
 
 
 ## 3. Author & License
