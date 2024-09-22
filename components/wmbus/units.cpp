@@ -451,7 +451,7 @@ const char* toString(Quantity q)
 
 Unit toUnit(string s)
 {
-#define X(cname,lcname,hrname,quantity,explanation) if (s == #cname || s == #lcname) return Unit::cname;
+#define X(cname,lcname,hrname,quantity,explanation) if (s == #cname || s == #lcname || s == #hrname) return Unit::cname;
     LIST_OF_UNITS
 #undef X
 
