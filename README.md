@@ -74,7 +74,7 @@ You can decode that telegram on [wmbusmeters](https://wmbusmeters.org/analyze/4E
 
 - everything is known, let's find field and unit
 From decoded JSON:
-https://github.com/SzczepanLeon/esphome-components/blob/main/docs/decoded_telegram.png)
+(https://github.com/SzczepanLeon/esphome-components/blob/main/docs/decoded_telegram.png)
 
 find interesting data (in that case total_m3), split it into field (total) and unit (m3) and create sensor in YAML. In YAML config please use units from HA (ie. "m³" not "m3", etc).
 You can also use similar unit - for example liters "l".
