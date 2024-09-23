@@ -30,7 +30,82 @@ https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
 
 > **_NOTE:_**  Configuration for version 3.x is described [here](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/version_3.md)
 
-#### 2.1.1. Example
+#### 2.1.1. Fast start
+
+- don't know meter type (driver) and don't know ID
+```yaml
+wmbus:
+  all_drivers: True
+  log_all: True
+```
+Then in logs you will have trace with driver name and ID:
+```
+[17:13:07][I][wmbus:085]: apator162 [0x00148686] RSSI: -44dBm T: 4e4401068686140005077a350040852f2f0f005B599600000010aa55000041545a42850Bd800437d037301c5500000564B00009e46 (79) T1 A
+```
+
+
+- meter type (driver) and ID are known, but you don't know how to add sensors (map decoded data to sensor)
+
+```yaml
+wmbus:
+  all_drivers: False
+  log_all: False
+
+  - platform: wmbus
+    meter_id: 0x00148686
+    type: apator162
+    key: "00000000000000000000000000000000"
+    sensors:
+      - name: "my hot water RSSi"
+        field: "rssi"
+        accuracy_decimals: 0
+        unit_of_measurement: "dBm"
+        device_class: "signal_strength"
+        state_class: "measurement"
+        entity_category: "diagnostic"
+```
+
+Then in logs you will have trace with telegram:
+```
+[17:13:07][I][wmbus:085]: apator162 [0x00148686] RSSI: -44dBm T: 4e4401068686140005077a350040852f2f0f005B599600000010aa55000041545a42850Bd800437d037301c5500000564B00009e46 (79) T1 A
+```
+You can decode that telegram on [wmbusmeters](https://wmbusmeters.org/analyze/4E4401068686140005077A350040852F2F0F005B599600000010AA55000041545A42850BD800437D037301C5500000564B00009E4600006A410000A01778EC03FFFFFFFFFFFFFFFFFFFFFFFFFFE393) and create sensors.
+
+
+- everything is known, let's find field and unit
+From decoded JSON:
+https://github.com/SzczepanLeon/esphome-components/blob/main/docs/decoded_telegram.png)
+
+find interesting data (in that case total_m3), split it into field (total) and unit (m3) and create sensor in YAML. In YAML config please use units from HA (ie. "m³" not "m3", etc).
+You can also use similar unit - for example liters "l".
+
+```yaml
+wmbus:
+  all_drivers: False
+  log_all: False
+
+  - platform: wmbus
+    meter_id: 0x00148686
+    type: apator162
+    key: "00000000000000000000000000000000"
+    sensors:
+      - name: "my hot water RSSi"
+        field: "rssi"
+        accuracy_decimals: 0
+        unit_of_measurement: "dBm"
+        device_class: "signal_strength"
+        state_class: "measurement"
+        entity_category: "diagnostic"
+      - name: "my hot water"
+        field: "total"
+        accuracy_decimals: 3
+        unit_of_measurement: "m³"
+        device_class: "water"
+        state_class: "total_increasing"
+        icon: "mdi:water"
+```
+
+#### 2.1.2. Example
 
 ```yaml
 time:
@@ -89,7 +164,7 @@ sensor:
       - name: "my hot water"
         field: "total"
         accuracy_decimals: 3
-        unit_of_measurement: "m3"
+        unit_of_measurement: "m³"
         device_class: "water"
         state_class: "total_increasing"
         icon: "mdi:water"
@@ -127,7 +202,7 @@ sensor:
       - name: "cold water from Apator NA-1"
         field: "total"
         accuracy_decimals: 3
-        unit_of_measurement: "m3"
+        unit_of_measurement: "m³"
         device_class: "water"
         state_class: "total_increasing"
         icon: "mdi:water"
