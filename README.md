@@ -51,6 +51,7 @@ wmbus:
   all_drivers: False
   log_all: False
 
+sensor:
   - platform: wmbus
     meter_id: 0x00148686
     type: apator162
@@ -84,6 +85,7 @@ wmbus:
   all_drivers: False
   log_all: False
 
+sensor:
   - platform: wmbus
     meter_id: 0x00148686
     type: apator162

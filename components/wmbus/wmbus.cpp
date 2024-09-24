@@ -62,22 +62,22 @@ namespace wmbus {
       else {
         uint32_t meter_id = (uint32_t)strtol(t.addresses[0].id.c_str(), nullptr, 16);
         auto drv_info = pickMeterDriver(&t);
+        std::string detected_driver = (drv_info.name().str().empty() ? "" : drv_info.name().str().c_str());
         bool supported_link_mode{false};
         if (drv_info.linkModes().empty()) {
           supported_link_mode = true;
           ESP_LOGW(TAG, "Link modes not defined in driver %s. Processing anyway.",
-                   mbus_data.mode,
-                   drv_info.name().str().c_str());
+                   detected_driver.c_str());
         }
         else {
           supported_link_mode = ( ((mbus_data.mode == 'T') && (drv_info.linkModes().has(LinkMode::T1))) ||
                                   ((mbus_data.mode == 'C') && (drv_info.linkModes().has(LinkMode::C1))) );
         }
-        bool meter_in_config = (this->wmbus_listeners_.count(meter_id) > 0) ? true : false;
+        bool meter_in_config = (this->wmbus_listeners_.count(meter_id) == 1) ? true : false;
         if ( this->log_all_ || meter_in_config) {
           this->led_blink();
           ESP_LOGI(TAG, "%s [0x%08x] RSSI: %ddBm T: %s %c1 %c",
-                    (drv_info.name().str().empty() ? "" : drv_info.name().str().c_str()),
+                    detected_driver.c_str(),
                     meter_id,
                     mbus_data.rssi,
                     telegram.c_str(),
@@ -85,19 +85,19 @@ namespace wmbus {
                     mbus_data.block);
         }
         if (meter_in_config) {
-          if (drv_info.name().str().empty()) {
+          if (detected_driver.empty()) {
             ESP_LOGW(TAG, "Can't find driver for T: %s", telegram.c_str());
           }
           else if (!supported_link_mode) {
             ESP_LOGW(TAG, "Link mode %c1 not supported in driver %s",
                      mbus_data.mode,
-                     drv_info.name().str().c_str());
+                     detected_driver.c_str());
           }
           else {
             auto *sensor = this->wmbus_listeners_[meter_id];
-            std::string used_driver = ((sensor->type).empty() ? drv_info.name().str() : sensor->type);
+            std::string used_driver = ((sensor->type).empty() ? detected_driver : sensor->type);
             if (lookupDriver(used_driver) == nullptr) {
-              used_driver = drv_info.name().str();
+              used_driver = detected_driver;
               ESP_LOGW(TAG, "Selected driver %s doesn't exist, using %s", (sensor->type).c_str(), used_driver.c_str());
             }
             bool id_match;
