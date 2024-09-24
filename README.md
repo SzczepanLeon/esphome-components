@@ -78,7 +78,6 @@ From decoded JSON:
 ![decoded JSON](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/decoded_telegram.png)
 
 find interesting data (in that case total_m3), split it into field (total) and unit (m3) and create sensor in YAML. In YAML config please use units from HA (ie. "m³" not "m3", etc).
-You can also use similar unit - for example liters "l".
 
 ```yaml
 wmbus:
@@ -259,8 +258,8 @@ Meter/sensor:
 - **sensors** (*Optional*):
   - **id** (*Optional*, string): Manually specify the ID for code generation. At least one of **id** and **name** must be specified.
   - **name** (*Optional*, string): The name for the sensor. At least one of **id** and **name** must be specified.
-  - **field** (*Optional*): Field from decoded telegram (without unit).
-  - **unit_of_measurement** (*Optional*): Unit for field defined above.
+  - **field** (*Optional*): Field from decoded telegram (without unit). If **field** is not present then **name** is used.
+  - **unit_of_measurement** (**Required**): Unit for field defined above.
   - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
 
 ------------------------

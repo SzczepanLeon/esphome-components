@@ -19,6 +19,7 @@
 #include "esphome/components/time/real_time_clock.h"
 
 #include <map>
+#include <utility>
 #include <string>
 
 #include "rf_cc1101.h"
@@ -67,9 +68,9 @@ namespace wmbus {
       std::string type;
       std::string myKey;
       std::vector<unsigned char> key{};
-      std::map<std::string, sensor::Sensor *> fields{};
-      void add_sensor(std::string field, sensor::Sensor *sensor) {
-        this->fields[field] = sensor;
+      std::map<std::pair<std::string, std::string>, sensor::Sensor *> fields{};
+      void add_sensor(std::string field, std::string unit, sensor::Sensor *sensor) {
+        this->fields[std::pair<std::string, std::string>(field, unit)] = sensor;
       };
 
       void dump_config();

@@ -109,6 +109,8 @@ namespace wmbus {
             meter->handleTelegram(about, mbus_data.frame, false, &addresses, &id_match, &t);
             if (id_match) {
               for (auto const& field : sensor->fields) {
+                std::string field_name = field.first.first;
+                std::string unit = field.first.second;
                 if (field.first == "rssi") {
                   field.second->publish_state(mbus_data.rssi);
                 }
@@ -118,16 +120,16 @@ namespace wmbus {
                 else {
                   Unit field_unit = toUnit(field.second->get_unit_of_measurement());
                   if (field_unit != Unit::Unknown) {
-                    double value  = meter->getMyNumericValue(field.first, field_unit);
+                    double value  = meter->getNumericValue(field_name, field_unit);
                     if (!std::isnan(value)) {
                       field.second->publish_state(value);
                     }
                     else {
-                      ESP_LOGW(TAG, "Can't get requested field '%s' with unit '%s'", field.first.c_str(), field.second->get_unit_of_measurement().c_str());
+                      ESP_LOGW(TAG, "Can't get requested field '%s' with unit '%s'", field_name.c_str(), unit.c_str());
                     }
                   }
                   else {
-                    ESP_LOGW(TAG, "Can't get proper unit from '%s'", field.second->get_unit_of_measurement().c_str());
+                    ESP_LOGW(TAG, "Can't get proper unit from '%s'", unit.c_str());
                   }
                 }
               }
@@ -347,7 +349,7 @@ namespace wmbus {
     ESP_LOGCONFIG(TAG, "    Type: %s", ((this->type).empty() ? "auto detect" : this->type.c_str()));
     ESP_LOGCONFIG(TAG, "    Key: '%s'", key.c_str());
     for (const auto &ele : this->fields) {
-      ESP_LOGCONFIG(TAG, "    Field: '%s'", ele.first.c_str());
+      ESP_LOGCONFIG(TAG, "    Field: '%s'", ele.first.first.c_str());
       LOG_SENSOR("     ", "Name:", ele.second);
     }
   }
