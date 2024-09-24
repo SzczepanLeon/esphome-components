@@ -111,7 +111,7 @@ namespace wmbus {
               for (auto const& field : sensor->fields) {
                 std::string field_name = field.first.first;
                 std::string unit = field.first.second;
-                if (field.first == "rssi") {
+                if (field_name == "rssi") {
                   field.second->publish_state(mbus_data.rssi);
                 }
                 else if (field.second->get_unit_of_measurement().empty()) {
