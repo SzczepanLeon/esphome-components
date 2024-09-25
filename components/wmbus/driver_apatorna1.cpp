@@ -76,8 +76,6 @@ namespace
 
         const double volume = static_cast<double>(reading) * multiplier / 1000;
 
-        debug("Volume: %.3f", volume);
-
         setNumericValue("total", Unit::M3, volume);
     }
 }
