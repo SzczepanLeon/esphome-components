@@ -11,7 +11,7 @@
 #include "esphome/components/captive_portal/captive_portal.h"
 #endif
 
-SET_LOOP_TASK_STACK_SIZE(16 * 1024);
+SET_LOOP_TASK_STACK_SIZE(32 * 1024);
 
 namespace esphome {
 namespace wmbus {
