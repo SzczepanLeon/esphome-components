@@ -60,7 +60,7 @@ namespace wmbus {
         ESP_LOGE(TAG, "Address is empty! T: %s", telegram.c_str());
       }
       else {
-        uint32_t meter_id = (uint32_t)strtol(t.addresses[0].id.c_str(), nullptr, 16);
+        uint32_t meter_id = (uint32_t)strtoul(t.addresses[0].id.c_str(), nullptr, 16);
         auto drv_info = pickMeterDriver(&t);
         std::string detected_driver = (drv_info.name().str().empty() ? "" : drv_info.name().str().c_str());
         bool supported_link_mode{false};
