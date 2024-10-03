@@ -11,7 +11,13 @@
 #include "esphome/components/captive_portal/captive_portal.h"
 #endif
 
+#ifdef USE_ESP32
 SET_LOOP_TASK_STACK_SIZE(32 * 1024);
+#pragma message ( "Loop task stack increased." )
+#endif
+#ifdef USE_ESP8266
+#warning "ToDo - increase loop task stack"
+#endif
 
 namespace esphome {
 namespace wmbus {
@@ -313,7 +319,12 @@ namespace wmbus {
       LOG_PIN("    Pin: ", this->led_pin_);
       ESP_LOGCONFIG(TAG, "    Duration: %d ms", this->led_blink_time_);
     }
+#ifdef USE_ESP32
     ESP_LOGCONFIG(TAG, "  MAC: %08X", ESP.getEfuseMac());
+#endif
+#ifdef USE_ESP8266
+    ESP_LOGCONFIG(TAG, "  ChipID: %08X", ESP.getChipId());
+#endif
     ESP_LOGCONFIG(TAG, "  CC1101 frequency: %3.3f MHz", this->frequency_);
     ESP_LOGCONFIG(TAG, "  CC1101 SPI bus:");
     if (this->is_failed()) {
