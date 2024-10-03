@@ -102,7 +102,7 @@ using namespace std;
     X(F,      1.0,        SIExp().f(1)) \
     \
     X(Volt,   1.0,           SIExp().kg(1).m(2).s(-3).a(-1))         \
-    X(Hz,     1.0,           SIExp().s(-1))                          \
+    X(Hertz,     1.0,           SIExp().s(-1))                       \
     X(PA,     1.0,           SIExp().kg(1).m(-1).s(-2))              \
     X(BAR,    100000.0,      SIExp().kg(1).m(-1).s(-2))              \
     \
