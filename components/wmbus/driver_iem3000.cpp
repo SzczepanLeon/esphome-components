@@ -578,7 +578,7 @@ namespace
             VifScaling::None, DifSignedness::Signed,
             FieldMatcher::build()
             .set(DifVifKey("05FF0B")),
-            Unit::HZ);
+            Unit::Hertz);
 
         addNumericFieldWithExtractor(
             "power",
@@ -1655,7 +1655,7 @@ namespace
             VifScaling::None, DifSignedness::Signed,
             FieldMatcher::build()
             .set(DifVifKey("03FF24")),
-            Unit::HZ);
+            Unit::Hertz);
 
     }
 }
