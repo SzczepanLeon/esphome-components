@@ -334,7 +334,6 @@ namespace wmbus {
     LOG_PIN("    GDO0 Pin: ", this->spi_conf_.gdo0);
     LOG_PIN("    GDO2 Pin: ", this->spi_conf_.gdo2);
     std::string drivers = "";
-    verifyDriverLookupCreated();
     for (DriverInfo* p : allDrivers()) {
       drivers += p->name().str() + ", ";
     }
