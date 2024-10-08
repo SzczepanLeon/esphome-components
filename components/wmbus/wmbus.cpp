@@ -16,7 +16,7 @@ SET_LOOP_TASK_STACK_SIZE(32 * 1024);
 #pragma message ( "Loop task stack increased." )
 #endif
 #ifdef USE_ESP8266
-#warning "ToDo - increase loop task stack"
+#error "ESP8266 not supported. Please use version 3.x: https://github.com/SzczepanLeon/esphome-components/issues/131"
 #endif
 
 namespace esphome {
@@ -321,9 +321,6 @@ namespace wmbus {
     }
 #ifdef USE_ESP32
     ESP_LOGCONFIG(TAG, "  MAC: %08X", ESP.getEfuseMac());
-#endif
-#ifdef USE_ESP8266
-    ESP_LOGCONFIG(TAG, "  ChipID: %08X", ESP.getChipId());
 #endif
     ESP_LOGCONFIG(TAG, "  CC1101 frequency: %3.3f MHz", this->frequency_);
     ESP_LOGCONFIG(TAG, "  CC1101 SPI bus:");

@@ -177,8 +177,12 @@ async def to_code(config):
 
     cg.add_library("SPI", None)
     cg.add_library("LSatan/SmartRC-CC1101-Driver-Lib", "2.5.7")
-    cg.add_platformio_option("build_src_filter", ["+<*>", "-<.git/>", "-<.svn/>"] + ["-<**/wmbus/driver_*.cpp>"])
+
+    cg.add_platformio_option("build_src_filter", ["+<*>", "-<.git/>", "-<.svn/>"])
 
     if config[CONF_ALL_DRIVERS]:
         cg.add_platformio_option("build_src_filter", ["+<**/wmbus/driver_*.cpp>"])
+    else:
+        cg.add_platformio_option("build_src_filter", ["-<**/wmbus/driver_*.cpp>"])
 
+    cg.add_platformio_option("build_src_filter", ["+<**/wmbus/driver_unknown.cpp>"])
