@@ -67,104 +67,125 @@ namespace wmbus {
       }
       else {
         uint32_t meter_id = (uint32_t)strtoul(t.addresses[0].id.c_str(), nullptr, 16);
-        auto drv_info = pickMeterDriver(&t);
-        std::string detected_driver = (drv_info.name().str().empty() ? "" : drv_info.name().str().c_str());
-        bool supported_link_mode{false};
-        if (drv_info.linkModes().empty()) {
-          supported_link_mode = true;
-          ESP_LOGW(TAG, "Link modes not defined in driver %s. Processing anyway.",
-                   detected_driver.c_str());
-        }
-        else {
-          supported_link_mode = ( ((mbus_data.mode == 'T') && (drv_info.linkModes().has(LinkMode::T1))) ||
-                                  ((mbus_data.mode == 'C') && (drv_info.linkModes().has(LinkMode::C1))) );
-        }
         bool meter_in_config = (this->wmbus_listeners_.count(meter_id) == 1) ? true : false;
-        if ( this->log_all_ || meter_in_config) {
+        
+        if (this->log_all_ || meter_in_config) { //No need to do sth if logging is disabled and meter is not configured
+
+          auto detected_drv_info      = pickMeterDriver(&t);
+          std::string detected_driver = (detected_drv_info.name().str().empty() ? "" : detected_drv_info.name().str().c_str());
+
+          //If the driver was explicitly stated in meter config, use that driver instead on detected one
+          auto used_drv_info      = detected_drv_info;
+          std::string used_driver = detected_driver;
+          if (meter_in_config) {
+            auto *sensor = this->wmbus_listeners_[meter_id];
+            used_driver = ((sensor->type).empty() ? detected_driver : sensor->type);
+            if (!(sensor->type).empty()){
+              auto *used_drv_info_ptr = lookupDriver(used_driver);
+              if (used_drv_info_ptr == nullptr) {
+                used_driver = detected_driver;
+                used_drv_info = detected_drv_info;
+                ESP_LOGW(TAG, "Selected driver %s doesn't exist, using %s", (sensor->type).c_str(), used_driver.c_str());
+              }
+              else{
+                used_drv_info = *used_drv_info_ptr;
+                ESP_LOGI(TAG, "Using selected driver %s (detected driver was %s)", used_driver.c_str(), detected_driver.c_str());
+              }
+            }
+          }
+
           this->led_blink();
           ESP_LOGI(TAG, "%s [0x%08x] RSSI: %ddBm T: %s %c1 %c",
-                    detected_driver.c_str(),
+                    (used_driver.empty()? "Unknown!" : used_driver.c_str()),
                     meter_id,
                     mbus_data.rssi,
                     telegram.c_str(),
                     mbus_data.mode,
                     mbus_data.block);
-        }
-        if (meter_in_config) {
-          if (detected_driver.empty()) {
-            ESP_LOGW(TAG, "Can't find driver for T: %s", telegram.c_str());
-          }
-          else if (!supported_link_mode) {
-            ESP_LOGW(TAG, "Link mode %c1 not supported in driver %s",
-                     mbus_data.mode,
-                     detected_driver.c_str());
-          }
-          else {
-            auto *sensor = this->wmbus_listeners_[meter_id];
-            std::string used_driver = ((sensor->type).empty() ? detected_driver : sensor->type);
-            if (lookupDriver(used_driver) == nullptr) {
-              used_driver = detected_driver;
-              ESP_LOGW(TAG, "Selected driver %s doesn't exist, using %s", (sensor->type).c_str(), used_driver.c_str());
-            }
-            bool id_match;
-            MeterInfo mi;
-            mi.parse("ESPHome", used_driver, t.addresses[0].id + ",", sensor->myKey);
-            auto meter = createMeter(&mi);
-            std::vector<Address> addresses;
-            AboutTelegram about{"ESPHome wM-Bus", mbus_data.rssi, FrameType::WMBUS, this->frame_timestamp_};
-            meter->handleTelegram(about, mbus_data.frame, false, &addresses, &id_match, &t);
-            if (id_match) {
-              for (auto const& field : sensor->fields) {
-                std::string field_name = field.first.first;
-                std::string unit = field.first.second;
-                if (field_name == "rssi") {
-                  field.second->publish_state(mbus_data.rssi);
-                }
-                else if (field.second->get_unit_of_measurement().empty()) {
-                  ESP_LOGW(TAG, "Fields without unit not supported yet!");
-                }
-                else {
-                  Unit field_unit = toUnit(field.second->get_unit_of_measurement());
-                  if (field_unit != Unit::Unknown) {
-                    double value  = meter->getNumericValue(field_name, field_unit);
-                    if (!std::isnan(value)) {
-                      field.second->publish_state(value);
-                    }
-                    else {
-                      ESP_LOGW(TAG, "Can't get requested field '%s' with unit '%s'", field_name.c_str(), unit.c_str());
-                    }
-                  }
-                  else {
-                    ESP_LOGW(TAG, "Can't get proper unit from '%s'", unit.c_str());
-                  }
-                }
-              }
-#ifdef USE_WMBUS_MQTT
-              std::string json;
-              meter->printJsonMeter(&t, &json, false);
-              std::string mqtt_topic = (App.get_friendly_name().empty() ? App.get_name() : App.get_friendly_name()) + "/wmbus/" + t.addresses[0].id;
-              if (this->mqtt_client_.connect("", this->mqtt_->name.c_str(), this->mqtt_->password.c_str())) {
-                this->mqtt_client_.publish(mqtt_topic.c_str(), json.c_str(), this->mqtt_->retained);
-                ESP_LOGV(TAG, "Publish(topic='%s' payload='%s' retain=%d)", mqtt_topic.c_str(), json.c_str(), this->mqtt_->retained);
-                this->mqtt_client_.disconnect();
-              }
-              else {
-                ESP_LOGV(TAG, "Publish failed for topic='%s' (len=%u).", mqtt_topic.c_str(), json.length());
-              }
-#elif defined(USE_MQTT)
-              std::string json;
-              meter->printJsonMeter(&t, &json, false);
-              std::string mqtt_topic = this->mqtt_client_->get_topic_prefix() + "/wmbus/" + t.addresses[0].id;
-              this->mqtt_client_->publish(mqtt_topic, json);
-#endif
+
+          if (meter_in_config) {
+            bool supported_link_mode{false};
+            if (used_drv_info.linkModes().empty()) {
+              supported_link_mode = true;
+              ESP_LOGW(TAG, "Link modes not defined in driver %s. Processing anyway.",
+                      (used_driver.empty()? "Unknown!" : used_driver.c_str()));
             }
             else {
-              ESP_LOGE(TAG, "Not for me T: %s", telegram.c_str());
+              supported_link_mode = ( ((mbus_data.mode == 'T') && (used_drv_info.linkModes().has(LinkMode::T1))) ||
+                                      ((mbus_data.mode == 'C') && (used_drv_info.linkModes().has(LinkMode::C1))) );
+            }
+
+            if (used_driver.empty()) {
+              ESP_LOGW(TAG, "Can't find driver for T: %s", telegram.c_str());
+            }
+            else if (!supported_link_mode) {
+              ESP_LOGW(TAG, "Link mode %c1 not supported in driver %s",
+                      mbus_data.mode,
+                      used_driver.c_str());
+            }
+            else {
+              auto *sensor = this->wmbus_listeners_[meter_id];
+              
+              bool id_match;
+              MeterInfo mi;
+              mi.parse("ESPHome", used_driver, t.addresses[0].id + ",", sensor->myKey);
+              auto meter = createMeter(&mi);
+              std::vector<Address> addresses;
+              AboutTelegram about{"ESPHome wM-Bus", mbus_data.rssi, FrameType::WMBUS, this->frame_timestamp_};
+              meter->handleTelegram(about, mbus_data.frame, false, &addresses, &id_match, &t);
+              if (id_match) {
+                for (auto const& field : sensor->fields) {
+                  std::string field_name = field.first.first;
+                  std::string unit = field.first.second;
+                  if (field_name == "rssi") {
+                    field.second->publish_state(mbus_data.rssi);
+                  }
+                  else if (field.second->get_unit_of_measurement().empty()) {
+                    ESP_LOGW(TAG, "Fields without unit not supported yet!");
+                  }
+                  else {
+                    Unit field_unit = toUnit(field.second->get_unit_of_measurement());
+                    if (field_unit != Unit::Unknown) {
+                      double value  = meter->getNumericValue(field_name, field_unit);
+                      if (!std::isnan(value)) {
+                        field.second->publish_state(value);
+                      }
+                      else {
+                        ESP_LOGW(TAG, "Can't get requested field '%s' with unit '%s'", field_name.c_str(), unit.c_str());
+                      }
+                    }
+                    else {
+                      ESP_LOGW(TAG, "Can't get proper unit from '%s'", unit.c_str());
+                    }
+                  }
+                }
+#ifdef USE_WMBUS_MQTT
+                std::string json;
+                meter->printJsonMeter(&t, &json, false);
+                std::string mqtt_topic = (App.get_friendly_name().empty() ? App.get_name() : App.get_friendly_name()) + "/wmbus/" + t.addresses[0].id;
+                if (this->mqtt_client_.connect("", this->mqtt_->name.c_str(), this->mqtt_->password.c_str())) {
+                  this->mqtt_client_.publish(mqtt_topic.c_str(), json.c_str(), this->mqtt_->retained);
+                  ESP_LOGV(TAG, "Publish(topic='%s' payload='%s' retain=%d)", mqtt_topic.c_str(), json.c_str(), this->mqtt_->retained);
+                  this->mqtt_client_.disconnect();
+                }
+                else {
+                  ESP_LOGV(TAG, "Publish failed for topic='%s' (len=%u).", mqtt_topic.c_str(), json.length());
+                }
+#elif defined(USE_MQTT)
+                std::string json;
+                meter->printJsonMeter(&t, &json, false);
+                std::string mqtt_topic = this->mqtt_client_->get_topic_prefix() + "/wmbus/" + t.addresses[0].id;
+                this->mqtt_client_->publish(mqtt_topic, json);
+#endif
+              }
+              else {
+                ESP_LOGE(TAG, "Not for me T: %s", telegram.c_str());
+              }
             }
           }
-        }
-        else {
-          // meter not in config
+          else {
+            // meter not in config
+          }
         }
       }
     }
