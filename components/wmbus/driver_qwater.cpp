@@ -37,6 +37,9 @@ namespace
                             "timestamp");
         di.setMeterType(MeterType::WaterMeter);
         di.addLinkMode(LinkMode::S1);
+        di.addLinkMode(LinkMode::C1);
+        di.addDetection(MANUFACTURER_QDS, 0x07,  0x1a);
+        di.addDetection(MANUFACTURER_QDS, 0x06,  0x1a);
         di.addDetection(MANUFACTURER_QDS, 0x37,  0x33);
         di.addDetection(MANUFACTURER_QDS, 0x06,  0x16);
         di.addDetection(MANUFACTURER_QDS, 0x07,  0x16);
