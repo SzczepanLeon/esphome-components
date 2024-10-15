@@ -675,23 +675,10 @@ bool MeterCommonImplementation::isTelegramForMeter(Telegram* t, Meter* meter, Me
             string possible_drivers = t->autoDetectPossibleDrivers();
             if (t->beingAnalyzed() == false && driver_name != "auto")
             {
-                warning("(meter) %s: meter detection did not match the selected driver %s! correct driver is: %s\n"
-                    "(meter) Not printing this warning again for id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x",
+                debug("(meter) %s: meter detection did not match the selected driver '%s', detected driver is: '%s'",
                     name.c_str(),
                     driver_name.c_str(),
-                    possible_drivers.c_str(),
-                    t->dll_id_b[3], t->dll_id_b[2], t->dll_id_b[1], t->dll_id_b[0],
-                    manufacturerFlag(t->dll_mfct).c_str(),
-                    manufacturer(t->dll_mfct).c_str(),
-                    t->dll_mfct,
-                    mediaType(t->dll_type, t->dll_mfct).c_str(), t->dll_type,
-                    t->dll_version);
-
-                if (possible_drivers == "unknown!")
-                {
-                    warning("(meter) please consider opening an issue at https://github.com/wmbusmeters/wmbusmeters/");
-                    warning("(meter) to add support for this unknown mfct,media,version combination");
-                }
+                    possible_drivers.c_str());
             }
         }
     }
