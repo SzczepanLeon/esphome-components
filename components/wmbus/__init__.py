@@ -100,7 +100,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.OnlyWith(CONF_TIME_ID, "time"):                 cv.use_id(time.RealTimeClock),
     cv.OnlyWith(CONF_WIFI_REF, "wifi"):                cv.use_id(wifi.WiFiComponent),
     cv.OnlyWith(CONF_ETH_REF, "ethernet"):             cv.use_id(ethernet.EthernetComponent),
-    cv.Optional(CONF_BOARD, default=""):               cv.templatable(validate_format),
+    cv.Optional(CONF_BOARD, default=""):               cv.templatable(validate_board),
     cv.Optional(CONF_MOSI_PIN,       default=13):      pins.internal_gpio_output_pin_schema,
     cv.Optional(CONF_MISO_PIN,       default=12):      pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_CLK_PIN,        default=14):      pins.internal_gpio_output_pin_schema,
