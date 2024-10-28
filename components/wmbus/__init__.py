@@ -71,7 +71,8 @@ TRANSPORT = {
 validate_transport = cv.enum(TRANSPORT, upper=True)
 
 BOARD = {
-    "": 123,
+    "":           123,
+    "T3S3":       {CONF_MOSI_PIN: 6, CONF_MISO_PIN: 3},
 }
 validate_board = cv.enum(BOARD, upper=True)
 
@@ -132,6 +133,7 @@ async def to_code(config):
 
     if config.get(CONF_BOARD):
         print("Mamy boarda")
+        print(BOARD.get(config.get(CONF_BOARD)))
     else:
         print(color(Fore.RED, "Wrong board!"))
     
