@@ -130,7 +130,7 @@ async def to_code(config):
         print(color(Fore.RED, "Only one MQTT can be configured!"))
         exit()
 
-    if config.get(CONF_BOARD) in BOARD:
+    if config.get(CONF_BOARD):
         print("Mamy boarda")
     else:
         print(color(Fore.RED, "Wrong board!"))
