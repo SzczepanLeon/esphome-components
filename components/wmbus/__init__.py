@@ -43,6 +43,7 @@ CONF_WMBUS_MQTT_ID = "wmbus_mqtt_id"
 CONF_CLIENTS = 'clients'
 CONF_ETH_REF = "wmbus_eth_id"
 CONF_WIFI_REF = "wmbus_wifi_id"
+CONF_BOARD = "board"
 
 CODEOWNERS = ["@SzczepanLeon"]
 
@@ -69,6 +70,11 @@ TRANSPORT = {
 }
 validate_transport = cv.enum(TRANSPORT, upper=True)
 
+BOARD = {
+    "": 123,
+}
+validate_board = cv.enum(BOARD, upper=True)
+
 CLIENT_SCHEMA = cv.Schema({
     cv.GenerateID():                              cv.declare_id(Client),
     cv.Required(CONF_NAME):                       cv.string_strict,
@@ -94,6 +100,7 @@ CONFIG_SCHEMA = cv.Schema({
     cv.OnlyWith(CONF_TIME_ID, "time"):                 cv.use_id(time.RealTimeClock),
     cv.OnlyWith(CONF_WIFI_REF, "wifi"):                cv.use_id(wifi.WiFiComponent),
     cv.OnlyWith(CONF_ETH_REF, "ethernet"):             cv.use_id(ethernet.EthernetComponent),
+    cv.Optional(CONF_BOARD, default=""):               cv.templatable(validate_format),
     cv.Optional(CONF_MOSI_PIN,       default=13):      pins.internal_gpio_output_pin_schema,
     cv.Optional(CONF_MISO_PIN,       default=12):      pins.internal_gpio_input_pin_schema,
     cv.Optional(CONF_CLK_PIN,        default=14):      pins.internal_gpio_output_pin_schema,
@@ -123,6 +130,11 @@ async def to_code(config):
         print(color(Fore.RED, "Only one MQTT can be configured!"))
         exit()
 
+    if (config.get(CONF_BOARD) in BOARD:
+        print("Mamy boarda")
+    else:
+        print(color(Fore.RED, "Wrong board!"))
+    
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
