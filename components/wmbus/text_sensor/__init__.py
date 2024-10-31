@@ -7,7 +7,6 @@ from esphome.const import (
     CONF_TYPE,
     CONF_KEY,
     CONF_NAME,
-    CONF_UNIT_OF_MEASUREMENT,
 )
 
 AUTO_LOAD = ["wmbus"]
