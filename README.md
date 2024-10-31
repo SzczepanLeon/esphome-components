@@ -250,7 +250,7 @@ In wmbus platform:
 > **_NOTE:_**  MQTT can be defined in wmbus component or in [ESPHome level](https://esphome.io/components/mqtt.html).
 
 
-Meter/sensor:
+sensor:
 
 - **meter_id** (*Optional*, int): Meter ID. Can be specified as decimal or hex.
 - **type** (*Optional*, string):  Meter type. When not defined, driver will be detected from telegram.
@@ -260,7 +260,19 @@ Meter/sensor:
   - **name** (*Optional*, string): The name for the sensor. At least one of **id** and **name** must be specified.
   - **field** (*Optional*): Field from decoded telegram (without unit). If **field** is not present then **name** is used.
   - **unit_of_measurement** (**Required**): Unit for field defined above.
-  - All other options from [Sensor](https://esphome.io/components/sensor/index.html#config-sensor).
+  - All other options from [Sensor](https://esphome.io/components/sensor/).
+
+
+text_sensor:
+
+- **meter_id** (*Optional*, int): Meter ID. Can be specified as decimal or hex.
+- **type** (*Optional*, string):  Meter type. When not defined, driver will be detected from telegram.
+- **key** (*Optional*): Key for meter, used in payload decoding process. Defaults to ``""``.
+- **sensors** (*Optional*):
+  - **id** (*Optional*, string): Manually specify the ID for code generation. At least one of **id** and **name** must be specified.
+  - **name** (*Optional*, string): The name for the sensor. At least one of **id** and **name** must be specified.
+  - **field** (*Optional*): Text field from decoded telegram. If **field** is not present then **name** is used.
+  - All other options from [Text Sensor](https://esphome.io/components/text_sensor/).
 
 ------------------------
 
