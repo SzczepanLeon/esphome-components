@@ -1144,6 +1144,11 @@ bool MeterCommonImplementation::hasStringValue(FieldInfo* fi)
     return string_values_.count(fi->vname()) != 0;
 }
 
+bool MeterCommonImplementation::hasStringValue(string name)
+{
+    return string_values_.count(name) != 0;
+}
+
 string MeterCommonImplementation::getMyStringValue(string name)
 {
     for (auto& p : string_values_)

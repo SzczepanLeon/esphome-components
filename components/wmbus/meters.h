@@ -343,6 +343,8 @@ struct Meter
     virtual std::string getStringValue(FieldInfo* fi) = 0;
     virtual std::string decodeTPLStatusByte(uchar sts) = 0;
 
+    virtual bool hasStringValue(string name) = 0;
+
     virtual void onUpdate(std::function<void(Telegram* t, Meter*)> cb) = 0;
     virtual int numUpdates() = 0;
 

@@ -6,6 +6,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/network/ip_address.h"
 #include "esphome/components/sensor/sensor.h"
+#include "esphome/components/text_sensor/text_sensor.h"
 #ifdef USE_WMBUS_MQTT
 #include <PubSubClient.h>
 #elif defined(USE_MQTT)
@@ -72,6 +73,10 @@ namespace wmbus {
       void add_sensor(std::string field, std::string unit, sensor::Sensor *sensor) {
         this->fields[std::pair<std::string, std::string>(field, unit)] = sensor;
       };
+      std::map<std::string, text_sensor::TextSensor *> text_fields{};
+      void add_sensor(std::string field, text_sensor::TextSensor *sensor) {
+        this->text_fields[field] = sensor;
+      };
 
       void dump_config();
       int char_to_int(char input);
@@ -102,7 +107,7 @@ namespace wmbus {
       float get_setup_priority() const override { return setup_priority::LATE; }
       void set_led_pin(GPIOPin *led) { this->led_pin_ = led; }
       void set_led_blink_time(uint32_t led_blink_time) { this->led_blink_time_ = led_blink_time; }
-      void register_wmbus_listener(WMBusListener *listener);
+      void register_wmbus_listener(const uint32_t meter_id, const std::string type, const std::string key);
       void add_cc1101(InternalGPIOPin *mosi, InternalGPIOPin *miso,
                       InternalGPIOPin *clk, InternalGPIOPin *cs,
                       InternalGPIOPin *gdo0, InternalGPIOPin *gdo2,
@@ -115,6 +120,16 @@ namespace wmbus {
         this->spi_conf_.gdo2 = gdo2;
         this->frequency_ = frequency;
         this->sync_mode_ = sync_mode;
+      }
+      void add_sensor(uint32_t meter_id, std::string field, std::string unit, sensor::Sensor *sensor) {
+        if (this->wmbus_listeners_.count(meter_id) != 0) {
+          this->wmbus_listeners_[meter_id]->add_sensor(field, unit, sensor);
+        }
+      }
+      void add_sensor(uint32_t meter_id, std::string field, text_sensor::TextSensor  *sensor) {
+        if (this->wmbus_listeners_.count(meter_id) != 0) {
+          this->wmbus_listeners_[meter_id]->add_sensor(field, sensor);
+        }
       }
 #ifdef USE_ETHERNET
       void set_eth(ethernet::EthernetComponent *eth_component) { this->net_component_ = eth_component; }
