@@ -214,6 +214,14 @@ sensor:
   - platform: wmbus
     meter_id: 0x22113366
     type: vario411
+
+text_sensor:
+  - platform: wmbus
+    meter_id: 0xABCD1122
+    type: izar
+    sensors:
+      - name: "Izar current_alarms"
+        field: "current_alarms"
 ```
 
 
