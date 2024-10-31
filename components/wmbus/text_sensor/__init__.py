@@ -95,6 +95,5 @@ async def to_code(config):
                 field = s[CONF_FIELD].lower()
             else:
                 field = s[CONF_NAME].lower()
-            unit = s[CONF_UNIT_OF_MEASUREMENT]
             sens = await text_sensor.new_text_sensor(s)
             cg.add(wmbus.add_sensor(config[CONF_METER_ID], field, sens))
