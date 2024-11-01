@@ -141,7 +141,7 @@ namespace wmbus {
                     field.second->publish_state(mbus_data.rssi);
                   }
                   else if (field.second->get_unit_of_measurement().empty()) {
-                    ESP_LOGW(TAG, "Fields without unit not supported yet!");
+                    ESP_LOGW(TAG, "Fields without unit not supported as sensor, please switch to text_sensor.");
                   }
                   else {
                     Unit field_unit = toUnit(field.second->get_unit_of_measurement());
@@ -157,6 +157,15 @@ namespace wmbus {
                     else {
                       ESP_LOGW(TAG, "Can't get proper unit from '%s'", unit.c_str());
                     }
+                  }
+                }
+                for (auto const& field : sensor->text_fields) {
+                  if (meter->hasStringValue(field.first)) {
+                    std::string value  = meter->getMyStringValue(field.first);
+                    field.second->publish_state(value);
+                  }
+                  else {
+                    ESP_LOGW(TAG, "Can't get requested field '%s'", field.first.c_str());
                   }
                 }
 #ifdef USE_WMBUS_MQTT
@@ -191,8 +200,11 @@ namespace wmbus {
     }
   }
 
-  void WMBusComponent::register_wmbus_listener(WMBusListener *listener) {
-    this->wmbus_listeners_[listener->id] = listener;
+  void WMBusComponent::register_wmbus_listener(const uint32_t meter_id, const std::string type, const std::string key) {
+    if (this->wmbus_listeners_.count(meter_id) == 0) {
+      WMBusListener *listener = new wmbus::WMBusListener(meter_id, type, key);
+      this->wmbus_listeners_.insert({meter_id, listener});
+    }
   }
 
   void WMBusComponent::led_blink() {
@@ -380,6 +392,10 @@ namespace wmbus {
     for (const auto &ele : this->fields) {
       ESP_LOGCONFIG(TAG, "    Field: '%s'", ele.first.first.c_str());
       LOG_SENSOR("     ", "Name:", ele.second);
+    }
+    for (const auto &ele : this->text_fields) {
+      ESP_LOGCONFIG(TAG, "    Text field: '%s'", ele.first.c_str());
+      LOG_TEXT_SENSOR("     ", "Name:", ele.second);
     }
   }
 

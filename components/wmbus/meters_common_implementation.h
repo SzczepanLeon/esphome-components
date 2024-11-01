@@ -206,6 +206,7 @@ protected:
     bool hasValue(FieldInfo* fi);
     bool hasNumericValue(FieldInfo* fi);
     bool hasStringValue(FieldInfo* fi);
+    bool hasStringValue(string name);
 
     std::string decodeTPLStatusByte(uchar sts);
 
