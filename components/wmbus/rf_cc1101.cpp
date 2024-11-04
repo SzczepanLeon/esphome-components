@@ -140,6 +140,7 @@ namespace wmbus {
 
             ELECHOUSE_cc1101.SpiWriteReg(CC1101_FIFOTHR, RX_FIFO_THRESHOLD);
             this->loopLog += "W";
+            this->loopLog += std::to_string(3);
           }
           else {
             this->loopLog += "w";
@@ -162,6 +163,7 @@ namespace wmbus {
             rxLoop.bytesRx    += (bytesInFIFO - 1);
             max_wait_time_    += extra_time_;
             this->loopLog += "R";
+            this->loopLog += std::to_string(bytesInFIFO - 1);
           }
           else {
             this->loopLog += "r";
@@ -173,6 +175,7 @@ namespace wmbus {
       // end of packet in length mode
       if ((!overfl) && (!digitalRead(gdo2))  && (rxLoop.state > WAIT_FOR_DATA)) {
         this->loopLog += "E";
+        this->loopLog += std::to_string(rxLoop.bytesLeft)
         ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, (uint8_t)rxLoop.bytesLeft);
         rxLoop.bytesRx += rxLoop.bytesLeft;
         data_in.length  = rxLoop.bytesRx;
