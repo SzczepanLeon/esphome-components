@@ -57,18 +57,22 @@ namespace wmbus {
       switch (rxLoop.state) {
         case INIT_RX:
           start();
+          this->loopLog += "I";
           return false;
 
         // RX active, waiting for SYNC
         case WAIT_FOR_SYNC:
+          this->loopLog += "s";
           if (digitalRead(this->gdo2)) { // assert when SYNC detected
             rxLoop.state = WAIT_FOR_DATA;
             sync_time_ = millis();
+            this->loopLog += "S";
           }
           break;
 
         // waiting for enough data in Rx FIFO buffer
         case WAIT_FOR_DATA:
+          this->loopLog += "w";
           if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
             uint8_t preamble[2];
             // Read the 3 first bytes,
@@ -134,11 +138,13 @@ namespace wmbus {
             max_wait_time_ += extra_time_;
 
             ELECHOUSE_cc1101.SpiWriteReg(CC1101_FIFOTHR, RX_FIFO_THRESHOLD);
+            this->loopLog += "W";
           }
           break;
 
         // waiting for more data in Rx FIFO buffer
         case READ_DATA:
+          this->loopLog += "r";
           if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
             if ((rxLoop.bytesLeft < MAX_FIXED_LENGTH) && (rxLoop.cc1101Mode == INFINITE)) {
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
@@ -152,6 +158,7 @@ namespace wmbus {
             rxLoop.pByteIndex += (bytesInFIFO - 1);
             rxLoop.bytesRx    += (bytesInFIFO - 1);
             max_wait_time_    += extra_time_;
+            this->loopLog += "R";
           }
           break;
       }
@@ -159,6 +166,7 @@ namespace wmbus {
       uint8_t overfl = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x80;
       // end of packet in length mode
       if ((!overfl) && (!digitalRead(gdo2))  && (rxLoop.state > WAIT_FOR_DATA)) {
+        this->loopLog += "E";
         ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, (uint8_t)rxLoop.bytesLeft);
         rxLoop.bytesRx += rxLoop.bytesLeft;
         data_in.length  = rxLoop.bytesRx;
@@ -179,6 +187,7 @@ namespace wmbus {
         rxLoop.state = INIT_RX;
         return rxLoop.complete;
       }
+      ESP_LOGD(TAG, "RxLoopLog: %s", this->loopLog.c_str());
       start(false);
     } while ((this->syncMode) && (rxLoop.state > WAIT_FOR_SYNC));
     return rxLoop.complete;
@@ -189,15 +198,20 @@ namespace wmbus {
   }
 
   bool RxLoop::start(bool force) {
+    this->loopLog.clear();
     // waiting to long for next part of data?
     bool reinit_needed = ((millis() - sync_time_) > max_wait_time_) ? true: false;
     if (!force) {
+      this->loopLog += "s";
       if (!reinit_needed) {
         // already in RX?
         if (ELECHOUSE_cc1101.SpiReadStatus(CC1101_MARCSTATE) == MARCSTATE_RX) {
           return false;
         }
       }
+    }
+    else {
+      this->loopLog += "S";
     }
     // init RX here, each time we're idle
     rxLoop.state = INIT_RX;
@@ -239,7 +253,6 @@ namespace wmbus {
     while((ELECHOUSE_cc1101.SpiReadStatus(CC1101_MARCSTATE) != MARCSTATE_RX));
 
     rxLoop.state = WAIT_FOR_SYNC;
-
     return true; // this will indicate we just have re-started Rx
   }
 
