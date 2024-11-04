@@ -62,17 +62,18 @@ namespace wmbus {
 
         // RX active, waiting for SYNC
         case WAIT_FOR_SYNC:
-          this->loopLog += "s";
           if (digitalRead(this->gdo2)) { // assert when SYNC detected
             rxLoop.state = WAIT_FOR_DATA;
             sync_time_ = millis();
             this->loopLog += "S";
           }
+          else {
+            this->loopLog += "s";
+          }
           break;
 
         // waiting for enough data in Rx FIFO buffer
         case WAIT_FOR_DATA:
-          this->loopLog += "w";
           if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
             uint8_t preamble[2];
             // Read the 3 first bytes,
@@ -140,11 +141,13 @@ namespace wmbus {
             ELECHOUSE_cc1101.SpiWriteReg(CC1101_FIFOTHR, RX_FIFO_THRESHOLD);
             this->loopLog += "W";
           }
+          else {
+            this->loopLog += "w";
+          }
           break;
 
         // waiting for more data in Rx FIFO buffer
         case READ_DATA:
-          this->loopLog += "r";
           if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
             if ((rxLoop.bytesLeft < MAX_FIXED_LENGTH) && (rxLoop.cc1101Mode == INFINITE)) {
               ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
@@ -160,6 +163,9 @@ namespace wmbus {
             max_wait_time_    += extra_time_;
             this->loopLog += "R";
           }
+          else {
+            this->loopLog += "r";
+          }
           break;
       }
 
@@ -172,7 +178,7 @@ namespace wmbus {
         data_in.length  = rxLoop.bytesRx;
         this->returnFrame.rssi  = (int8_t)ELECHOUSE_cc1101.getRssi();
         this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
-        ESP_LOGV(TAG, "Have %d bytes from CC1101 Rx, RSSI: %d dBm LQI: %d  | %s", rxLoop.bytesRx, this->returnFrame.rssi, this->returnFrame.lqi, this->loopLog.c_str());
+        ESP_LOGI(TAG, "Have %d bytes from CC1101 Rx, RSSI: %d dBm LQI: %d  | %s", rxLoop.bytesRx, this->returnFrame.rssi, this->returnFrame.lqi, this->loopLog.c_str());
         if (rxLoop.length != data_in.length) {
           ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
         }
@@ -201,7 +207,7 @@ namespace wmbus {
     // waiting to long for next part of data?
     bool reinit_needed = ((millis() - sync_time_) > max_wait_time_) ? true: false;
     if (!force) {
-      this->loopLog += "s";
+      this->loopLog += "x";
       if (!reinit_needed) {
         // already in RX?
         if (ELECHOUSE_cc1101.SpiReadStatus(CC1101_MARCSTATE) == MARCSTATE_RX) {
@@ -210,7 +216,7 @@ namespace wmbus {
       }
     }
     else {
-      this->loopLog += "S";
+      this->loopLog += "X";
     }
     // init RX here, each time we're idle
     rxLoop.state = INIT_RX;
