@@ -185,9 +185,9 @@ namespace wmbus {
           this->returnFrame.block = data_in.block;
         }
         rxLoop.state = INIT_RX;
+        ESP_LOGD(TAG, "RxLoopLog: %s", this->loopLog.c_str());
         return rxLoop.complete;
       }
-      ESP_LOGD(TAG, "RxLoopLog: %s", this->loopLog.c_str());
       start(false);
     } while ((this->syncMode) && (rxLoop.state > WAIT_FOR_SYNC));
     return rxLoop.complete;
