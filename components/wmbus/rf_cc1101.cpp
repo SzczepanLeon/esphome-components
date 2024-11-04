@@ -172,7 +172,7 @@ namespace wmbus {
         data_in.length  = rxLoop.bytesRx;
         this->returnFrame.rssi  = (int8_t)ELECHOUSE_cc1101.getRssi();
         this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
-        ESP_LOGV(TAG, "Have %d bytes from CC1101 Rx, RSSI: %d dBm LQI: %d", rxLoop.bytesRx, this->returnFrame.rssi, this->returnFrame.lqi);
+        ESP_LOGV(TAG, "Have %d bytes from CC1101 Rx, RSSI: %d dBm LQI: %d  | %s", rxLoop.bytesRx, this->returnFrame.rssi, this->returnFrame.lqi, this->loopLog.c_str());
         if (rxLoop.length != data_in.length) {
           ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
         }
@@ -185,7 +185,6 @@ namespace wmbus {
           this->returnFrame.block = data_in.block;
         }
         rxLoop.state = INIT_RX;
-        ESP_LOGD(TAG, "RxLoopLog: %s", this->loopLog.c_str());
         return rxLoop.complete;
       }
       start(false);
