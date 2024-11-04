@@ -175,7 +175,7 @@ namespace wmbus {
       // end of packet in length mode
       if ((!overfl) && (!digitalRead(gdo2))  && (rxLoop.state > WAIT_FOR_DATA)) {
         this->loopLog += "E";
-        this->loopLog += std::to_string(rxLoop.bytesLeft)
+        this->loopLog += std::to_string(rxLoop.bytesLeft);
         ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, (uint8_t)rxLoop.bytesLeft);
         rxLoop.bytesRx += rxLoop.bytesLeft;
         data_in.length  = rxLoop.bytesRx;
