@@ -5,6 +5,8 @@ namespace wmbus {
 
   static const char *TAG = "rxLoop";
 
+  std::string loopLog;
+
   bool RxLoop::init(uint8_t mosi, uint8_t miso, uint8_t clk, uint8_t cs,
                     uint8_t gdo0, uint8_t gdo2, float freq, bool syncMode) {
     bool retVal = false;
@@ -57,7 +59,7 @@ namespace wmbus {
       switch (rxLoop.state) {
         case INIT_RX:
           start();
-          this->loopLog += "I";
+          loopLog += "I";
           return false;
 
         // RX active, waiting for SYNC
@@ -65,10 +67,10 @@ namespace wmbus {
           if (digitalRead(this->gdo2)) { // assert when SYNC detected
             rxLoop.state = WAIT_FOR_DATA;
             sync_time_ = millis();
-            this->loopLog += "S";
+            loopLog += "S";
           }
           else {
-            this->loopLog += "s";
+            loopLog += "s";
           }
           break;
 
@@ -139,11 +141,11 @@ namespace wmbus {
             max_wait_time_ += extra_time_;
 
             ELECHOUSE_cc1101.SpiWriteReg(CC1101_FIFOTHR, RX_FIFO_THRESHOLD);
-            this->loopLog += "W";
-            this->loopLog += std::to_string(3);
+            loopLog += "W";
+            loopLog += std::to_string(3);
           }
           else {
-            this->loopLog += "w";
+            loopLog += "w";
           }
           break;
 
@@ -162,11 +164,11 @@ namespace wmbus {
             rxLoop.pByteIndex += (bytesInFIFO - 1);
             rxLoop.bytesRx    += (bytesInFIFO - 1);
             max_wait_time_    += extra_time_;
-            this->loopLog += "R";
-            this->loopLog += std::to_string(bytesInFIFO - 1);
+            loopLog += "R";
+            loopLog += std::to_string(bytesInFIFO - 1);
           }
           else {
-            this->loopLog += "r";
+            loopLog += "r";
           }
           break;
       }
@@ -174,14 +176,14 @@ namespace wmbus {
       uint8_t overfl = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x80;
       // end of packet in length mode
       if ((!overfl) && (!digitalRead(gdo2))  && (rxLoop.state > WAIT_FOR_DATA)) {
-        this->loopLog += "E";
-        this->loopLog += std::to_string(rxLoop.bytesLeft);
+        loopLog += "E";
+        loopLog += std::to_string(rxLoop.bytesLeft);
         ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, (uint8_t)rxLoop.bytesLeft);
         rxLoop.bytesRx += rxLoop.bytesLeft;
         data_in.length  = rxLoop.bytesRx;
         this->returnFrame.rssi  = (int8_t)ELECHOUSE_cc1101.getRssi();
         this->returnFrame.lqi   = (uint8_t)ELECHOUSE_cc1101.getLqi();
-        ESP_LOGI(TAG, "Have %d bytes from CC1101 Rx, RSSI: %d dBm LQI: %d  | %s", rxLoop.bytesRx, this->returnFrame.rssi, this->returnFrame.lqi, this->loopLog.c_str());
+        ESP_LOGI(TAG, "Have %d bytes from CC1101 Rx, RSSI: %d dBm LQI: %d  | %s", rxLoop.bytesRx, this->returnFrame.rssi, this->returnFrame.lqi, loopLog.c_str());
         if (rxLoop.length != data_in.length) {
           ESP_LOGE(TAG, "Length problem: req(%d) != rx(%d)", rxLoop.length, data_in.length);
         }
@@ -206,11 +208,11 @@ namespace wmbus {
   }
 
   bool RxLoop::start(bool force) {
-    this->loopLog.clear();
+    loopLog.clear();
     // waiting to long for next part of data?
     bool reinit_needed = ((millis() - sync_time_) > max_wait_time_) ? true: false;
     if (!force) {
-      this->loopLog += "x";
+      loopLog += "x";
       if (!reinit_needed) {
         // already in RX?
         if (ELECHOUSE_cc1101.SpiReadStatus(CC1101_MARCSTATE) == MARCSTATE_RX) {
@@ -219,7 +221,7 @@ namespace wmbus {
       }
     }
     else {
-      this->loopLog += "X";
+      loopLog += "X";
     }
     // init RX here, each time we're idle
     rxLoop.state = INIT_RX;
