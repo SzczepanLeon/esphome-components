@@ -40,7 +40,8 @@
 #define MARCSTATE_TXFIFO_UNDERFLOW 0x16
 
 #define RX_FIFO_START_THRESHOLD    0
-#define RX_FIFO_THRESHOLD          10  // 44 bytes in Rx FIFO
+//#define RX_FIFO_THRESHOLD          10  // 44 bytes in Rx FIFO
+#define RX_FIFO_THRESHOLD           2  // 12 bytes in Rx FIFO
 
 #define FIXED_PACKET_LENGTH        0x00
 #define INFINITE_PACKET_LENGTH     0x02
