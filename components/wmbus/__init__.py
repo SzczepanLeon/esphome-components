@@ -57,7 +57,7 @@ CONF_CLIENTS = 'clients'
 CLIENT_SCHEMA = cv.Schema({
     cv.GenerateID(): cv.declare_id(Client),
     cv.Required(CONF_NAME): cv.string_strict,
-    cv.Required(CONF_IP_ADDRESS): cv.ipv4,
+    cv.Required(CONF_IP_ADDRESS): cv.ipv4address,
     cv.Required(CONF_PORT): cv.port,
     cv.Optional(CONF_TRANSPORT, default="TCP"): cv.templatable(validate_transport),
     cv.Optional(CONF_FORMAT, default="RTLWMBUS"): cv.templatable(validate_format),
@@ -82,7 +82,7 @@ CONFIG_SCHEMA = cv.Schema({
 def safe_ip(ip):
     if ip is None:
         return IPAddress(0, 0, 0, 0)
-    return IPAddress(*ip.args)
+    return IPAddress(str(ip))
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
