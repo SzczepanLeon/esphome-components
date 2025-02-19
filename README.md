@@ -1,3 +1,4 @@
+# Version 2
 # Szczepan's esphome custom components
 
 This repository contains a collection of my custom components
@@ -15,7 +16,7 @@ with external components and add this to your `.yaml` definition:
 
 ```yaml
 external_components:
-  - source: github://SzczepanLeon/esphome-components@main
+  - source: github://SzczepanLeon/esphome-components@version_2
 ```
 
 
@@ -40,7 +41,7 @@ time:
     id: time_sntp
 
 external_components:
-  - source: github://SzczepanLeon/esphome-components@main
+  - source: github://SzczepanLeon/esphome-components@version_2
     components: [ wmbus ]
 
 wmbus:
