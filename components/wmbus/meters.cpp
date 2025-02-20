@@ -717,6 +717,7 @@ void MeterCommonImplementation::triggerUpdate(Telegram* t)
     num_updates_++;
     for (auto& cb : on_update_) if (cb) cb(t, this);
     t->handled = true;
+    addStringField("timestamp", "TimeStamp", PrintProperty::HIDE);
     setStringValue("timestamp", datetimeOfUpdateRobot());
 }
 
