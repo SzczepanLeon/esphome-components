@@ -42,6 +42,8 @@ CONF_INFO_COMP_ID = "info_comp_id"
 CONF_WMBUS_MQTT_ID = "wmbus_mqtt_id"
 CONF_WMBUS_MQTT_RAW = "mqtt_raw"
 CONF_WMBUS_MQTT_RAW_PREFIX = "mqtt_raw_prefix"
+CONF_WMBUS_MQTT_RAW_PARSED = "mqtt_raw_parsed"
+CONF_WMBUS_MQTT_RAW_FORMAT = "mqtt_raw_format"
 CONF_CLIENTS = 'clients'
 CONF_ETH_REF = "wmbus_eth_id"
 CONF_WIFI_REF = "wmbus_wifi_id"
@@ -56,6 +58,7 @@ WMBusComponent = wmbus_ns.class_('WMBusComponent', cg.Component)
 InfoComponent = wmbus_ns.class_('InfoComponent', cg.Component)
 Client = wmbus_ns.struct('Client')
 Format = wmbus_ns.enum("Format")
+RawFormat = wmbus_ns.enum("RawFormat")
 Transport = wmbus_ns.enum("Transport")
 MqttClient = wmbus_ns.struct('MqttClient')
 
@@ -64,6 +67,12 @@ FORMAT = {
     "RTLWMBUS": Format.FORMAT_RTLWMBUS,
 }
 validate_format = cv.enum(FORMAT, upper=True)
+
+RAW_FORMAT = {
+    "JSON": RawFormat.RAW_FORMAT_JSON,
+    "RTLWMBUS": RawFormat.RAW_FORMAT_RTLWMBUS,
+}
+validate_raw_format = cv.enum(RAW_FORMAT, upper=True)
 
 TRANSPORT = {
     "TCP": Transport.TRANSPORT_TCP,
@@ -112,6 +121,8 @@ CONFIG_SCHEMA = cv.Schema({
     cv.Optional(CONF_MQTT):                            cv.ensure_schema(WMBUS_MQTT_SCHEMA),
     cv.Optional(CONF_WMBUS_MQTT_RAW, default=False): cv.boolean,
     cv.Optional(CONF_WMBUS_MQTT_RAW_PREFIX, default=""): cv.string,
+    cv.Optional(CONF_WMBUS_MQTT_RAW_FORMAT, default="JSON"): cv.templatable(validate_raw_format),
+    cv.Optional(CONF_WMBUS_MQTT_RAW_PARSED, default=True): cv.boolean,
 })
 
 def safe_ip(ip):
@@ -167,6 +178,8 @@ async def to_code(config):
 
     cg.add(var.set_mqtt_raw(config[CONF_WMBUS_MQTT_RAW]))
     cg.add(var.set_mqtt_raw_prefix(config[CONF_WMBUS_MQTT_RAW_PREFIX]))
+    cg.add(var.set_mqtt_raw_format(config[CONF_WMBUS_MQTT_RAW_FORMAT]))
+    cg.add(var.set_mqtt_raw_parsed(config[CONF_WMBUS_MQTT_RAW_PARSED]))
 
     cg.add(var.set_log_all(config[CONF_LOG_ALL]))
 

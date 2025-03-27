@@ -41,6 +41,11 @@ namespace wmbus {
     FORMAT_RTLWMBUS = 1,
   };
 
+  enum RawFormat : uint8_t {
+    RAW_FORMAT_JSON     = 0,
+    RAW_FORMAT_RTLWMBUS = 1,
+  };
+
   enum Transport : uint8_t {
     TRANSPORT_TCP = 0,
     TRANSPORT_UDP = 1,
@@ -150,6 +155,8 @@ namespace wmbus {
 #endif
       void set_mqtt_raw(bool send_raw) { this->mqtt_raw = send_raw; }
       void set_mqtt_raw_prefix(std::string prefix) { this->mqtt_raw_prefix = prefix; }
+      void set_mqtt_raw_parsed(bool parsed) { this->mqtt_raw_parsed = parsed; }
+      void set_mqtt_raw_format(RawFormat format) { this->mqtt_raw_format = format; }
       void set_log_all(bool log_all) { this->log_all_ = log_all; }
       void add_client(const std::string name,
                       const network::IPAddress ip,
@@ -194,10 +201,10 @@ namespace wmbus {
 #elif defined(USE_MQTT)
       mqtt::MQTTClientComponent *mqtt_client_{nullptr};
 #endif
-// #if defined(USE_WMBUS_MQTT) || defined(USE_MQTT)
       bool mqtt_raw{false};
+      bool mqtt_raw_parsed{true};
+      bool mqtt_raw_format{RAW_FORMAT_JSON};
       std::string mqtt_raw_prefix{""};
-// #endif
       time_t frame_timestamp_;
   };
 

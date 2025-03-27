@@ -68,9 +68,6 @@ namespace wmbus {
         ESP_LOGE(TAG, "Address is empty! T: %s", telegram.c_str());
       }
       else {
-# if defined(USE_WMBUS_MQTT) || defined(USE_MQTT)
-        send_mqtt_raw(t, mbus_data);
-#endif
         uint32_t meter_id = (uint32_t)strtoul(t.addresses[0].id.c_str(), nullptr, 16);
         bool meter_in_config = (this->wmbus_listeners_.count(meter_id) == 1) ? true : false;
         
@@ -202,6 +199,11 @@ namespace wmbus {
           }
         }
       }
+# if defined(USE_WMBUS_MQTT) || defined(USE_MQTT)
+      if (this->mqtt_raw) {
+        send_mqtt_raw(t, mbus_data);
+      }
+#endif
     }
   }
 
@@ -236,39 +238,68 @@ namespace wmbus {
 
 #if defined(USE_WMBUS_MQTT) || defined(USE_MQTT)
   void WMBusComponent::send_mqtt_raw(Telegram &t, WMbusFrame &mbus_data) {
-    if (this->mqtt_raw) {
-      std::string json;
-      json += "{";
-      json += "\"id\": \"" + t.addresses[0].id + "\", ";
-      json += "\"mode\": \"" + std::string(1, mbus_data.mode) + "\", ";
-      json += "\"rssi\": " + std::to_string(mbus_data.rssi) + ", ";
-      json += "\"frame\": \"";
-      for (int i = 0; i < mbus_data.frame.size(); i++) {
-        char hex_byte[3]; // 2 characters for hex + 1 for null terminator
-        std::snprintf(hex_byte, sizeof(hex_byte), "%02X", mbus_data.frame[i]);
-        json += hex_byte;
-      }
-      json += "\"}";
-
-      std::string name = App.get_friendly_name().empty() ? App.get_name() : App.get_friendly_name();
-      std::string mqtt_topic = str_sanitize(name) + "/wmbus/raw";
-      if (this->mqtt_raw_prefix.size() > 0) {
-        mqtt_topic = this->mqtt_raw_prefix + "/" + mqtt_topic;
-      }
-#ifdef USE_WMBUS_MQTT
-      if (this->mqtt_client_.connect("", this->mqtt_->name.c_str(), this->mqtt_->password.c_str())) {
-        this->mqtt_client_.publish(mqtt_topic.c_str(), json.c_str(), this->mqtt_->retained);
-        ESP_LOGV(TAG, "Publishing raw(topic='%s' payload='%s' retain=%d)", mqtt_topic.c_str(), json.c_str(), this->mqtt_->retained);
-        this->mqtt_client_.disconnect();
-      }
-      else {
-        ESP_LOGV(TAG, "Publish failed raw for topic='%s' (len=%u).", mqtt_topic.c_str(), json.length());
-      }
-#elif defined(USE_MQTT)
-      this->mqtt_client_->publish(mqtt_topic, json);
-      // this->mqtt_client_->publish("meteringinternal/v1/wmbus/raw", "foo");
-#endif
+    bool is_parsed = !t.addresses.empty();
+    if (!is_parsed && !this->mqtt_raw_parsed) {
+      return;
     }
+
+    std::string payload;
+    std::string name = App.get_friendly_name().empty() ? App.get_name() : App.get_friendly_name();
+    std::string mqtt_topic = str_sanitize(name) + "/wmbus/raw";
+
+    if (this->mqtt_raw_prefix.size() > 0) {
+      mqtt_topic = this->mqtt_raw_prefix + "/" + mqtt_topic;
+    }
+
+    if (is_parsed && this->mqtt_raw_parsed) {
+      mqtt_topic += "/" + t.addresses[0].id;
+    }
+
+    switch(this->mqtt_raw_format) {
+      case RAW_FORMAT_RTLWMBUS: 
+        char telegram_time[24];
+        strftime(telegram_time, sizeof(telegram_time), "%Y-%m-%d %H:%M:%S.00Z", gmtime(&(this->frame_timestamp_)));
+
+        // Start building the payload
+        payload += std::string(1, mbus_data.mode) + "1;1;1;" + telegram_time + ";" + std::to_string(mbus_data.rssi) + ";;;0x";
+
+        // Add the formatted hex frame
+        for (int i = 0; i < mbus_data.frame.size(); i++) {
+          char hex_byte[3]; // 2 characters for hex + 1 for null terminator
+          std::snprintf(hex_byte, sizeof(hex_byte), "%02X", mbus_data.frame[i]);
+          payload += hex_byte;
+        }
+
+        break;
+      
+      default:
+        payload += "{";
+        if (is_parsed) {
+          payload += "\"address\": \"" + t.addresses[0].id + "\", ";
+        }
+        payload += "\"mode\": \"" + std::string(1, mbus_data.mode) + "\", ";
+        payload += "\"rssi\": " + std::to_string(mbus_data.rssi) + ", ";
+        payload += "\"frame\": \"";
+        for (int i = 0; i < mbus_data.frame.size(); i++) {
+          char hex_byte[3]; // 2 characters for hex + 1 for null terminator
+          std::snprintf(hex_byte, sizeof(hex_byte), "%02X", mbus_data.frame[i]);
+          payload += hex_byte;
+        }
+        payload += "\"}";
+  }
+
+#ifdef USE_WMBUS_MQTT
+    if (this->mqtt_client_.connect("", this->mqtt_->name.c_str(), this->mqtt_->password.c_str())) {
+      this->mqtt_client_.publish(mqtt_topic.c_str(), payload.c_str(), this->mqtt_->retained);
+      ESP_LOGV(TAG, "Publishing raw(topic='%s' payload='%s' retain=%d)", mqtt_topic.c_str(), payload.c_str(), this->mqtt_->retained);
+      this->mqtt_client_.disconnect();
+    }
+    else {
+      ESP_LOGV(TAG, "Publish failed raw for topic='%s' (len=%u).", mqtt_topic.c_str(), payload.length());
+    }
+#elif defined(USE_MQTT)
+    this->mqtt_client_->publish(mqtt_topic, payload);
+#endif
   }
 #endif
   
