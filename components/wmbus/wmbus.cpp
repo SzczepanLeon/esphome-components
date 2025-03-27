@@ -6,6 +6,8 @@
 #include "address.h"
 
 #include "esphome/core/application.h"
+#include "esphome/core/helpers.h"
+
 
 #ifdef USE_CAPTIVE_PORTAL
 #include "esphome/components/captive_portal/captive_portal.h"
@@ -66,6 +68,9 @@ namespace wmbus {
         ESP_LOGE(TAG, "Address is empty! T: %s", telegram.c_str());
       }
       else {
+# if defined(USE_WMBUS_MQTT) || defined(USE_MQTT)
+        send_mqtt_raw(t, mbus_data);
+#endif
         uint32_t meter_id = (uint32_t)strtoul(t.addresses[0].id.c_str(), nullptr, 16);
         bool meter_in_config = (this->wmbus_listeners_.count(meter_id) == 1) ? true : false;
         
@@ -228,6 +233,45 @@ namespace wmbus {
     }
   }
 
+
+#if defined(USE_WMBUS_MQTT) || defined(USE_MQTT)
+  void WMBusComponent::send_mqtt_raw(Telegram &t, WMbusFrame &mbus_data) {
+    if (this->mqtt_raw) {
+      std::string json;
+      json += "{";
+      json += "\"id\": \"" + t.addresses[0].id + "\", ";
+      json += "\"mode\": \"" + std::string(1, mbus_data.mode) + "\", ";
+      json += "\"rssi\": " + std::to_string(mbus_data.rssi) + ", ";
+      json += "\"frame\": \"";
+      for (int i = 0; i < mbus_data.frame.size(); i++) {
+        char hex_byte[3]; // 2 characters for hex + 1 for null terminator
+        std::snprintf(hex_byte, sizeof(hex_byte), "%02X", mbus_data.frame[i]);
+        json += hex_byte;
+      }
+      json += "\"}";
+
+      std::string name = App.get_friendly_name().empty() ? App.get_name() : App.get_friendly_name();
+      std::string mqtt_topic = str_sanitize(name) + "/wmbus/raw";
+      if (this->mqtt_raw_prefix.size() > 0) {
+        mqtt_topic = this->mqtt_raw_prefix + "/" + mqtt_topic;
+      }
+#ifdef USE_WMBUS_MQTT
+      if (this->mqtt_client_.connect("", this->mqtt_->name.c_str(), this->mqtt_->password.c_str())) {
+        this->mqtt_client_.publish(mqtt_topic.c_str(), json.c_str(), this->mqtt_->retained);
+        ESP_LOGV(TAG, "Publishing raw(topic='%s' payload='%s' retain=%d)", mqtt_topic.c_str(), json.c_str(), this->mqtt_->retained);
+        this->mqtt_client_.disconnect();
+      }
+      else {
+        ESP_LOGV(TAG, "Publish failed raw for topic='%s' (len=%u).", mqtt_topic.c_str(), json.length());
+      }
+#elif defined(USE_MQTT)
+      this->mqtt_client_->publish(mqtt_topic, json);
+      // this->mqtt_client_->publish("meteringinternal/v1/wmbus/raw", "foo");
+#endif
+    }
+  }
+#endif
+  
   void WMBusComponent::send_to_clients(WMbusFrame &mbus_data) {
     for (auto & client : this->clients_) {
       switch (client.format) {
