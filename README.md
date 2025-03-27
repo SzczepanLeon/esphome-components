@@ -254,8 +254,14 @@ In wmbus platform:
   - **password** (**Required**): password.
   - **port** (*Optional*): Port number. Defaults to ``1883``.
   - **retain** (*Optional*): If the published message should have a retain flag on or not. Defaults to ``False``.
+- **mqtt_raw** (*Optional*): Send raw telegrams over mqtt, even for non configured sensors. Defaults to ``False``.
+- **mqtt_raw_parsed** (*Optional*): Wheteher raw frames should be send after parsing header. If so, their address will be included in topic, and json data. If `True`, then address will be appended to topic: `(...)/raw/<address>`. Otherwise `(...)/raw`. Defaults to ``True``. 
+- **mqtt_raw_prefix** (*Optional*): Topic prefix for raw frames: `<mqtt_raw_prefix>(/)<app_name>/wmbus/raw[/<address>]`. Defaults to ``""``
+- **mqtt_raw_format** (*Optional*): Format of raw frames to send. `RTLWMBUS` or `JSON`. Defaults to `JSON`. 
 
 > **_NOTE:_**  MQTT can be defined in wmbus component or in [ESPHome level](https://esphome.io/components/mqtt.html).
+> The later will reuse connection managed by ESPHome, while former whill open and close connection on each packet. 
+> Bbroker defined on wmbus component level will take priority (event if both are defined).
 
 
 sensor:

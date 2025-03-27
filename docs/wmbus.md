@@ -32,6 +32,18 @@ wmbus:
   - **port**: port where telegrams will be sent
   - **format**: telegram format should be set to ``RTLWMBUS``
 
+MQTT example:
+```yaml
+mqtt:
+  broker: broker.local
+# (...)
+wmbus:
+  mqtt_raw: true
+  mqtt_raw_prefix: someprefix
+  mqtt_raw_format: RTLWMBUS
+  mqtt_raw_parsed: true
+  # mqtt broker can be also specified here
+```
 
 ## 2. `wmbus` addon configuration
 After instalation please go to addon configuration and enable port forwarding by clicking `Show disabled ports`:
@@ -51,6 +63,14 @@ TCP case:
 ```yaml
 device=rtlwmbus:CMD(/usr/bin/nc -lk 9022)
 ```
+
+MQTT case:
+```yaml
+device=rtlwmbus:CMD(mosquitto_sub -h broker.local -t someprefix/+/wmbus/raw/+)
+# or in case of mqtt_raw_parsed: false
+device=rtlwmbus:CMD(mosquitto_sub -h broker.local -t someprefix/+/wmbus/raw)
+```
+
 
 Add meters:
 ```yaml
