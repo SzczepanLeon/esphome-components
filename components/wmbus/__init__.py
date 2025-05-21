@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import pins
-from esphome.log import Fore, color
+from esphome.log import AnsiFore, color
 from esphome.components import time
 from esphome.components import mqtt
 from esphome.components import wifi
@@ -135,7 +135,7 @@ async def to_code(config):
     await cg.register_component(var_adv, {})
 
     if (config.get(CONF_MQTT_ID) and config.get(CONF_MQTT)):
-        print(color(Fore.RED, "Only one MQTT can be configured!"))
+        print(color(AnsiFore.RED, "Only one MQTT can be configured!"))
         exit()
 
     var = cg.new_Pvariable(config[CONF_ID])
