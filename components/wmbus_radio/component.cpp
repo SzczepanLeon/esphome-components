@@ -3,6 +3,11 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
+#ifdef USE_ESP32
+SET_LOOP_TASK_STACK_SIZE(32 * 1024);
+#pragma message ( "Loop task stack increased." )
+#endif
+
 #define ASSERT(expr, expected, before_exit)                       \
   {                                                               \
     auto result = (expr);                                         \
