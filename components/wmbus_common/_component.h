@@ -1,8 +1,6 @@
 #include "esphome/core/component.h"
 #include "esphome/core/log.h"
 
-#define CONFIG_ARDUINO_LOOP_STACK_SIZE 32*1024
-
 namespace esphome
 {
     namespace wmbus_common
