@@ -3,9 +3,9 @@
 This repository contains a collection of my custom components
 for [ESPHome](https://esphome.io/).
 
-[!["Buy Me A Coffee"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/buy_me_coffe.png)](https://www.buymeacoffee.com/szczepan)
+[!["Buy Me A Coffee"](https://github.com/SzczepanLeon/esphome-components/blob/version_4/docs/buy_me_coffe.png)](https://www.buymeacoffee.com/szczepan)
 \
-[!["Kup mi kawę"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/postaw_kawe.png)](https://buycoffee.to/szczepanleon)
+[!["Kup mi kawę"](https://github.com/SzczepanLeon/esphome-components/blob/version_4/docs/postaw_kawe.png)](https://buycoffee.to/szczepanleon)
 
 
 ## 1. Usage
@@ -15,7 +15,7 @@ with external components and add this to your `.yaml` definition:
 
 ```yaml
 external_components:
-  - source: github://SzczepanLeon/esphome-components@main
+  - source: github://SzczepanLeon/esphome-components@version_4
 ```
 
 ## 2. Components
@@ -24,11 +24,11 @@ external_components:
 
 Component to receive wMBus frame (via CC1101), create HA sensor and send decoded value.
 You can also use this component with wmbusmeters HA addon:
-https://github.com/SzczepanLeon/esphome-components/blob/main/docs/wmbus.md
+https://github.com/SzczepanLeon/esphome-components/blob/version_4/docs/wmbus.md
 
-[!["CC1101 to D1 mini PCB"](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/pcb_v2.png)](https://www.pcbway.com/project/shareproject/CC1101_to_ESP_D1_mini_277f34e1.html)
+[!["CC1101 to D1 mini PCB"](https://github.com/SzczepanLeon/esphome-components/blob/version_4/docs/pcb_v2.png)](https://www.pcbway.com/project/shareproject/CC1101_to_ESP_D1_mini_277f34e1.html)
 
-> **_NOTE:_**  Configuration for version 3.x is described [here](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/version_3.md)
+> **_NOTE:_**  Configuration for version 3.x is described [here](https://github.com/SzczepanLeon/esphome-components/blob/version_4/docs/version_3.md)
 
 #### 2.1.1. Fast start
 
@@ -75,7 +75,7 @@ You can decode that telegram on [wmbusmeters](https://wmbusmeters.org/analyze/4E
 
 - everything is known, let's find field and unit
 From decoded JSON:
-![decoded JSON](https://github.com/SzczepanLeon/esphome-components/blob/main/docs/decoded_telegram.png)
+![decoded JSON](https://github.com/SzczepanLeon/esphome-components/blob/version_4/docs/decoded_telegram.png)
 
 find interesting data (in that case total_m3), split it into field (total) and unit (m3) and create sensor in YAML. In YAML config please use units from HA (ie. "m³" not "m3", etc).
 
@@ -114,7 +114,7 @@ time:
     id: time_sntp
 
 external_components:
-  - source: github://SzczepanLeon/esphome-components@main
+  - source: github://SzczepanLeon/esphome-components@version_4
     refresh: 0d
     components: [ wmbus ]
 
