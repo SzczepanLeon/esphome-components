@@ -86,9 +86,9 @@ mqtt:
 
 wmbus_radio:
   radio_type: SX1276
-  cs_pin: GPIO15
-  reset_pin: GPIO18
-  irq_pin: GPIO26   #DIO1
+  cs_pin: GPIO18
+  reset_pin: GPIO14
+  irq_pin: GPIO35
   on_frame:
     - then:
         - repeat:
