@@ -52,11 +52,7 @@ CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(Meter),
         cv.GenerateID(CONF_RADIO_ID): cv.use_id(RadioComponent),
-        cv.Optional(CONF_METER_ID, default=""): cv.All(
-            cv.hex_int,
-            hex,
-            lambda s: str(s).removeprefix('0x'),
-        ),
+        cv.Optional(CONF_METER_ID, default=""): cv.hex_int,
         cv.Optional(CONF_TYPE, default="auto"): validate_driver,
         cv.Optional(CONF_KEY): cv.Any(
             cv.All(cv.string_strict, lambda s: s.encode().hex(), hex_key_validator),
@@ -77,10 +73,11 @@ CONFIG_SCHEMA = cv.Schema(
 async def to_code(config):
     meter = cg.new_Pvariable(config[CONF_ID])
     # format(0, '#04x')
-    print("CONF_METER_ID {}".format(config[CONF_METER_ID], '#04x'))
+    str_id = str(config[CONF_METER_ID]).removeprefix('0x')
+    print("CONF_METER_ID {}, {}".format(config[CONF_METER_ID], str_id))
     cg.add(
         meter.set_meter_params(
-            config[CONF_METER_ID],
+            str_id,
             config[CONF_TYPE],
             config.get(CONF_KEY, ""),
             config[CONF_MODE],
