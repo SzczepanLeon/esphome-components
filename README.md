@@ -91,9 +91,13 @@ wmbus_radio:
   irq_pin: GPIO35
   on_frame:
     - then:
+        - logger.log:
+            format: "RSSI: %ddBm T: %s (%d)"
+            args: [ frame->rssi(), frame->as_hex().c_str(), frame->data().size() ]
+    - then:
         - repeat:
             count: 3
-            then: 
+            then:
               - output.turn_on: status_led
               - delay: 100ms
               - output.turn_off: status_led
@@ -102,19 +106,22 @@ wmbus_radio:
       then:
         - mqtt.publish:
             topic: wmbus-test/telegram_rtl
-            payload: !lambda return frame.as_rtlwmbus();
+            payload: !lambda return frame->as_rtlwmbus();
     - mark_as_handled: True
       then:
-        - wmbus_radio.send_frame_with_socket:
-            format: hex
+        - socket_transmitter.send:
+            data: !lambda return frame->as_hex();
 
 wmbus_meter:
   - id: electricity_meter
     meter_id: 0x0101010101
     type: amiplus
-    key: SomeKey
+    key: 00000000000000000000000000000000
+    mode: 
+      - T1
+      - C1
   - id: heat_meter
-    meter_id: 0x101010101
+    meter_id: 12321
     type: hydrocalm3
     on_telegram:
       then:
@@ -163,8 +170,24 @@ sensor:
 
   - platform: wmbus_meter
     parent_id: electricity_meter
-    field: rssi
+    field: rssi_dbm
     name: Electricity Meter RSSI
+
+text_sensor:
+  - platform: wmbus_meter
+    parent_id: electricity_meter
+    field: timestamp
+    name: Electricity Meter timestamp
+
+  - platform: wmbus_meter
+    parent_id: electricity_meter
+    field: timestamp_zulu
+    name: Electricity Meter timestamp zulu
+
+  - platform: wmbus_meter
+    parent_id: electricity_meter
+    field: current_alarms
+    name: Electricity Meter alarms
 ```
 
 For SX1276 radio you need to configure SPI instance as usual in ESPHome and additionally specify reset pin and IRQ pin (as DIO1). Interrupts are triggered on non empty FIFO. 

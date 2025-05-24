@@ -18,12 +18,5 @@ namespace esphome
             this->parent_->on_telegram([this]()
                                        { this->handle_update(); });
         }
-
-        void BaseSensor::dump_config()
-        {
-            ESP_LOGCONFIG(TAG, "wM-Bus Sensor:");
-            ESP_LOGCONFIG(TAG, "  Field: %s", this->field_name.c_str());
-            ESP_LOGCONFIG(TAG, "  Parent meter ID: %s", this->parent_->get_id().c_str());
-        }
     }
 }

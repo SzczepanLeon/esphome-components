@@ -72,12 +72,9 @@ CONFIG_SCHEMA = cv.Schema(
 
 async def to_code(config):
     meter = cg.new_Pvariable(config[CONF_ID])
-    # format(0, '#04x')
-    str_id = str('{:08X}'.format(config[CONF_METER_ID]))
-    print("CONF_METER_ID {}, {}".format(config[CONF_METER_ID], str_id))
     cg.add(
         meter.set_meter_params(
-            str_id,
+            str('{:08x}'.format(config[CONF_METER_ID])),
             config[CONF_TYPE],
             config.get(CONF_KEY, ""),
             config[CONF_MODE],
