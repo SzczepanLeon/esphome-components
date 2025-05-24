@@ -48,7 +48,7 @@ LIST_OF_LINK_MODES
 
 const char *toString(LinkMode lm)
 {
-#define X(name,lcname,option,val) if (lm == LinkMode::name) return #lcname;
+#define X(name,lcname,option,val) if (lm == LinkMode::name) return #name;
 LIST_OF_LINK_MODES
 #undef X
 
