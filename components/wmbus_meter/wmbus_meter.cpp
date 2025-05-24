@@ -8,6 +8,7 @@ namespace esphome
 
         void Meter::set_meter_params(std::string id, std::string driver, std::string key, std::initializer_list<LinkMode> linkModes)
         {
+            ESP_LOGI(TAG, "set_meter_params: %s", id.c_str());
             MeterInfo meter_info;
             meter_info.parse(driver + '-' + id, driver, id + ",", key);
 
