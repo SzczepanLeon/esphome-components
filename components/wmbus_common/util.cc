@@ -373,13 +373,13 @@ void incrementIV(uchar *iv, size_t len) {
 void debugPayload(const string& intro, vector<uchar> &payload)
 {
     string msg = bin2hex(payload);
-    debug("%s \"%s\"\n", intro.c_str(), msg.c_str());
+    debug("%s \"%s\"", intro.c_str(), msg.c_str());
 }
 
 void debugPayload(const string& intro, vector<uchar> &payload, vector<uchar>::iterator &pos)
 {
     string msg = bin2hex(pos, payload.end(), 1024);
-    debug("%s \"%s\"\n", intro.c_str(), msg.c_str());
+    debug("%s \"%s\"", intro.c_str(), msg.c_str());
 }
 
 void logTelegram(vector<uchar> &original, vector<uchar> &parsed, int header_size, int suffix_size)
@@ -399,7 +399,7 @@ void logTelegram(vector<uchar> &original, vector<uchar> &parsed, int header_size
     string content = parsed_hex.substr(header_size*2);
     if (suffix_size == 0)
     {
-        notice("telegram=|%s_%s|+%ld\n",
+        notice("telegram=|%s_%s|+%ld",
                 header.c_str(), content.c_str(), diff);
     }
     else
@@ -407,7 +407,7 @@ void logTelegram(vector<uchar> &original, vector<uchar> &parsed, int header_size
         assert((suffix_size*2) < (int)content.size());
         string content2 = content.substr(0, content.size()-suffix_size*2);
         string suffix = content.substr(content.size()-suffix_size*2);
-        notice("telegram=|%s_%s_%s|+%ld\n",
+        notice("telegram=|%s_%s_%s|+%ld",
                 header.c_str(), content2.c_str(), suffix.c_str(), diff);
     }
 }
@@ -1019,7 +1019,7 @@ bool isInsideTimePeriod(time_t now, string periods)
 
     for (auto &tp : period_structs)
     {
-        //debug("period %d %d %d %d\n", tp.day_in_week_from, tp.day_in_week_to, tp.hour_from, tp.hour_to);
+        //debug("period %d %d %d %d", tp.day_in_week_from, tp.day_in_week_to, tp.hour_from, tp.hour_to);
         if (is_inside(&nowt, &tp)) return true;
     }
     return false;

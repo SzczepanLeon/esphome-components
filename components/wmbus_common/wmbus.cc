@@ -116,7 +116,7 @@ LinkModeSet parseLinkModes(string m)
         LinkMode lm = toLinkMode(tok);
         if (lm == LinkMode::UNKNOWN)
         {
-            error("(wmbus) not a valid link mode: %s\n", tok);
+            error("(wmbus) not a valid link mode: %s", tok);
         }
         lms.addLinkMode(lm);
         tok = strtok_r(NULL, ",", &saveptr);
@@ -257,33 +257,33 @@ void Telegram::print()
         enc = " encrypted";
     }
 
-    notice("Received telegram from: %02x%02x%02x%02x\n", a,b,c,d);
-    notice("          manufacturer: (%s) %s (0x%02x)\n",
+    notice("Received telegram from: %02x%02x%02x%02x", a,b,c,d);
+    notice("          manufacturer: (%s) %s (0x%02x)",
            manufacturerFlag(dll_mfct).c_str(),
            manufacturer(dll_mfct).c_str(),
            dll_mfct);
-    notice("                  type: %s (0x%02x)%s\n", mediaType(dll_type, dll_mfct).c_str(), dll_type, enc);
+    notice("                  type: %s (0x%02x)%s", mediaType(dll_type, dll_mfct).c_str(), dll_type, enc);
 
-    notice("                   ver: 0x%02x\n", dll_version);
+    notice("                   ver: 0x%02x", dll_version);
 
     if (tpl_id_found)
     {
-        notice("      Concerning meter: %02x%02x%02x%02x\n", tpl_id_b[3],tpl_id_b[2],tpl_id_b[1],tpl_id_b[0]);
-        notice("          manufacturer: (%s) %s (0x%02x)\n",
+        notice("      Concerning meter: %02x%02x%02x%02x", tpl_id_b[3],tpl_id_b[2],tpl_id_b[1],tpl_id_b[0]);
+        notice("          manufacturer: (%s) %s (0x%02x)",
            manufacturerFlag(tpl_mfct).c_str(),
            manufacturer(tpl_mfct).c_str(),
            tpl_mfct);
-        notice("                  type: %s (0x%02x)%s\n", mediaType(tpl_type, dll_mfct).c_str(), tpl_type, enc);
+        notice("                  type: %s (0x%02x)%s", mediaType(tpl_type, dll_mfct).c_str(), tpl_type, enc);
 
-        notice("                   ver: 0x%02x\n", tpl_version);
+        notice("                   ver: 0x%02x", tpl_version);
     }
     if (about.device != "")
     {
-        notice("                device: %s\n", about.device.c_str());
-        notice("                  rssi: %d dBm\n", about.rssi_dbm);
+        notice("                device: %s", about.device.c_str());
+        notice("                  rssi: %d dBm", about.rssi_dbm);
     }
     string possible_drivers = autoDetectPossibleDrivers();
-    notice("                driver: %s\n", possible_drivers.c_str());
+    notice("                driver: %s", possible_drivers.c_str());
 }
 
 void Telegram::printDLL()
@@ -293,7 +293,7 @@ void Telegram::printDLL()
         string possible_drivers = autoDetectPossibleDrivers();
 
         string man = manufacturerFlag(dll_mfct);
-        verbose("(telegram) DLL L=%02x C=%02x (%s) M=%04x (%s) A=%02x%02x%02x%02x VER=%02x TYPE=%02x (%s) (driver %s) DEV=%s RSSI=%d\n",
+        verbose("(telegram) DLL L=%02x C=%02x (%s) M=%04x (%s) A=%02x%02x%02x%02x VER=%02x TYPE=%02x (%s) (driver %s) DEV=%s RSSI=%d",
             dll_len,
             dll_c, cType(dll_c).c_str(),
             dll_mfct,
@@ -381,8 +381,6 @@ void Telegram::printTPL()
                 tpl_mfct_b[0], tpl_mfct_b[1],
                 tpl_version, tpl_type, info.c_str());
     }
-
-    verbose("\n");
 }
 
 

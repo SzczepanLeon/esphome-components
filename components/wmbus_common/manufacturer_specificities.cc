@@ -141,7 +141,7 @@ void transformDiehlAddress(vector<uchar>& frame, DiehlAddressTransformMethod tra
 {
     if (transform_method == DiehlAddressTransformMethod::SWAPPING)
     {
-        debug("(diehl) Pre-processing: swapping address field\n");
+        debug("(diehl) Pre-processing: swapping address field");
         uchar version = frame[4];
         uchar type    = frame[5];
         for (int i = 4; i < 8; i++)
@@ -153,13 +153,13 @@ void transformDiehlAddress(vector<uchar>& frame, DiehlAddressTransformMethod tra
     }
     else if (transform_method == DiehlAddressTransformMethod::SAP_PRIOS)
     {
-        debug("(diehl) Pre-processing: setting device type to water meter for SAP PRIOS\n");
+        debug("(diehl) Pre-processing: setting device type to water meter for SAP PRIOS");
         frame[8] = 0x00; // version field is used by IZAR as part of meter id on 5 bytes instead of 4
         frame[9] = 0x07; // water meter
     }
     else if (transform_method == DiehlAddressTransformMethod::SAP_PRIOS_STANDARD)
     {
-        warning("(diehl) Pre-processing: SAP PRIOS STANDARD transformation not implemented!\n"); // TODO
+        warning("(diehl) Pre-processing: SAP PRIOS STANDARD transformation not implemented!"); // TODO
     }
 }
 
@@ -252,7 +252,7 @@ void addDefaultManufacturerKeyIfAny(const vector<uchar> &frame, TPLSecurityMode 
         hex2bin(PRIOS_DEFAULT_KEY2, &half);
         meter_keys->confidentiality_key = vector<uchar>(half.begin(), half.end());
         meter_keys->confidentiality_key.insert(meter_keys->confidentiality_key.end(), half.begin(), half.end());
-        debug("(mfct) added default key\n");
+        debug("(mfct) added default key");
     }
 }
 
@@ -274,7 +274,7 @@ void initializeDiehlDefaultKeySupport(const vector<uchar> &confidentiality_key, 
 bool mustDecryptDiehlRealData(const vector<uchar>& frame)
 {
     DiehlFrameInterpretation fi = detectDiehlFrameInterpretation(frame);
-    debug("(diehl) frame %s\n", toString(fi));
+    debug("(diehl) frame %s", toString(fi));
     return fi == DiehlFrameInterpretation::REAL_DATA;
 }
 
@@ -297,23 +297,23 @@ bool decryptDielhRealData(Telegram *t, vector<uchar> &frame, vector<uchar>::iter
         {
             // Do not warn when decryption is not needed since we are running from a simulated file.
             // Or if the telegram cannot be decrypted when listening to all.
-            warning("(diehl) Decoding LFSR real data failed.\n");
+            warning("(diehl) Decoding LFSR real data failed.");
         }
         else
         {
             if (t->isSimulated())
             {
-                debug("(diehl) Decoding LFSR real data failed, probably already decoded since telegram is simulated.\n");
+                debug("(diehl) Decoding LFSR real data failed, probably already decoded since telegram is simulated.");
             }
             else
             {
-                debug("(diehl) Decoding LFSR real data failed.\n");
+                debug("(diehl) Decoding LFSR real data failed.");
             }
         }
         return false;
     }
 
-    debug("(diehl) Decoded LFSR real data: %s\n", bin2hex(decoded_content).c_str());
+    debug("(diehl) Decoded LFSR real data: %s", bin2hex(decoded_content).c_str());
 
     frame.erase(pos, frame.end());
     frame.insert(frame.end(), decoded_content.begin(), decoded_content.end());
@@ -366,7 +366,7 @@ void qdsExtractWalkByField(Telegram *t, Meter *driver, DVEntry &mfctEntry, int p
 
     FieldInfo *fieldInfo = driver->findFieldInfo(fieldName, quantity);
     if (fieldInfo == nullptr) {
-        error("(qds) field info not found: %s\n", fieldName.c_str());
+        error("(qds) field info not found: %s", fieldName.c_str());
     }
 
     fieldInfo->performExtraction(driver, t, &fieldEntry);

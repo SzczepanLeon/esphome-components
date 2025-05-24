@@ -117,7 +117,6 @@ namespace esphome
 
     void Radio::receiver_task(Radio *arg)
     {
-      ESP_LOGE(TAG, "Hello from radio task!");
       int counter = 0;
       while (true)
         arg->receive_frame();

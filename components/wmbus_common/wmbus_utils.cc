@@ -52,7 +52,7 @@ bool decrypt_ELL_AES_CTR(Telegram *t, vector<uchar> &frame, vector<uchar>::itera
 
     vector<uchar> ivv(iv, iv+16);
     string s = bin2hex(ivv);
-    debug("(ELL) IV %s\n", s.c_str());
+    debug("(ELL) IV %s", s.c_str());
 
     int block = 0;
     for (size_t offset = 0; offset < encrypted_bytes.size(); offset += 16)
@@ -73,7 +73,7 @@ bool decrypt_ELL_AES_CTR(Telegram *t, vector<uchar> &frame, vector<uchar>::itera
         uchar tmp[block_size];
         xorit(xordata, &encrypted_bytes[offset], tmp, block_size);
 
-        debug("(ELL) block %d block_size %d offset %zu\n", block, block_size, offset);
+        debug("(ELL) block %d block_size %d offset %zu", block, block_size, offset);
         block++;
 
         vector<uchar> tmpv(tmp, tmp+block_size);
@@ -121,7 +121,7 @@ bool decrypt_TPL_AES_CBC_IV(Telegram *t,
     if (buffer.size() < num_bytes_to_decrypt)
     {
         warning("(TPL) warning: aes-cbc-iv decryption received less bytes than expected for decryption! "
-                "Got %zu bytes but expected at least %zu bytes since num encr blocks was %d.\n",
+                "Got %zu bytes but expected at least %zu bytes since num encr blocks was %d.",
                 buffer.size(), num_bytes_to_decrypt,
                 t->tpl_num_encr_blocks);
         num_bytes_to_decrypt = buffer.size();
@@ -133,7 +133,7 @@ bool decrypt_TPL_AES_CBC_IV(Telegram *t,
 
     *num_not_encrypted_at_end = buffer.size()-num_bytes_to_decrypt;
 
-    debug("(TPL) num encrypted blocks %zu (%d bytes and remaining unencrypted %zu bytes)\n",
+    debug("(TPL) num encrypted blocks %zu (%d bytes and remaining unencrypted %zu bytes)",
           t->tpl_num_encr_blocks, num_bytes_to_decrypt, buffer.size()-num_bytes_to_decrypt);
 
     if (aeskey.size() == 0) return false;
@@ -144,7 +144,7 @@ bool decrypt_TPL_AES_CBC_IV(Telegram *t,
     if (num_bytes_to_decrypt % 16 != 0)
     {
         warning("(TPL) warning: decryption received non-multiple of 16 bytes! "
-                "Got %zu bytes shrinking message to %zu bytes.\n",
+                "Got %zu bytes shrinking message to %zu bytes.",
                 num_bytes_to_decrypt, num_bytes_to_decrypt - num_bytes_to_decrypt % 16);
         num_bytes_to_decrypt -= num_bytes_to_decrypt % 16;
         *num_encrypted_bytes = num_bytes_to_decrypt;
@@ -178,7 +178,7 @@ bool decrypt_TPL_AES_CBC_IV(Telegram *t,
 
     vector<uchar> ivv(iv, iv+16);
     string s = bin2hex(ivv);
-    debug("(TPL) IV %s\n", s.c_str());
+    debug("(TPL) IV %s", s.c_str());
 
     uchar buffer_data[num_bytes_to_decrypt];
     memcpy(buffer_data, safeButUnsafeVectorPtr(buffer), num_bytes_to_decrypt);
@@ -222,7 +222,7 @@ bool decrypt_TPL_AES_CBC_NO_IV(Telegram *t, vector<uchar> &frame, vector<uchar>:
     if (buffer.size() < num_bytes_to_decrypt)
     {
         warning("(TPL) warning: aes-cbc-no-iv decryption received less bytes than expected for decryption! "
-                "Got %zu bytes but expected at least %zu bytes since num encr blocks was %d.\n",
+                "Got %zu bytes but expected at least %zu bytes since num encr blocks was %d.",
                 buffer.size(), num_bytes_to_decrypt,
                 t->tpl_num_encr_blocks);
         num_bytes_to_decrypt = buffer.size();
@@ -230,7 +230,7 @@ bool decrypt_TPL_AES_CBC_NO_IV(Telegram *t, vector<uchar> &frame, vector<uchar>:
 
     *num_not_encrypted_at_end = buffer.size()-num_bytes_to_decrypt;
 
-    debug("(TPL) num encrypted blocks %d (%d bytes and remaining unencrypted %d bytes)\n",
+    debug("(TPL) num encrypted blocks %d (%d bytes and remaining unencrypted %d bytes)",
           t->tpl_num_encr_blocks, num_bytes_to_decrypt, buffer.size()-num_bytes_to_decrypt);
 
     if (aeskey.size() == 0) return false;
@@ -239,7 +239,7 @@ bool decrypt_TPL_AES_CBC_NO_IV(Telegram *t, vector<uchar> &frame, vector<uchar>:
     if (num_bytes_to_decrypt % 16 != 0)
     {
         warning("(TPL) warning: decryption received non-multiple of 16 bytes! "
-                "Got %zu bytes shrinking message to %zu bytes.\n",
+                "Got %zu bytes shrinking message to %zu bytes.",
                 num_bytes_to_decrypt, num_bytes_to_decrypt - num_bytes_to_decrypt % 16);
         num_bytes_to_decrypt -= num_bytes_to_decrypt % 16;
         assert (num_bytes_to_decrypt % 16 == 0);
@@ -250,7 +250,7 @@ bool decrypt_TPL_AES_CBC_NO_IV(Telegram *t, vector<uchar> &frame, vector<uchar>:
 
     vector<uchar> ivv(iv, iv+16);
     string s = bin2hex(ivv);
-    debug("(TPL) IV %s\n", s.c_str());
+    debug("(TPL) IV %s", s.c_str());
 
     uchar buffer_data[num_bytes_to_decrypt];
     memcpy(buffer_data, safeButUnsafeVectorPtr(buffer), num_bytes_to_decrypt);

@@ -191,7 +191,7 @@ LIST_OF_CONVERSIONS
     string from = unitToStringHR(ufrom);
     string to = unitToStringHR(uto);
 
-    fprintf(stderr, "Cannot convert between units! from %s to %s\n", from.c_str(), to.c_str());
+    fprintf(stderr, "Cannot convert between units! from %s to %s", from.c_str(), to.c_str());
     assert(0);
     return 0;
 }
@@ -442,7 +442,7 @@ void assertQuantity(Unit u, Quantity q)
 {
     if (!isQuantity(u, q))
     {
-        error("Internal error! Unit is not of this quantity.\n");
+        error("Internal error! Unit is not of this quantity.");
     }
 }
 

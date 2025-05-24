@@ -94,7 +94,7 @@ void addRegisteredDriver(DriverInfo di)
     verifyDriverLookupCreated();
     if (registered_drivers_->count(di.name().str()) != 0)
     {
-        error("Two drivers trying to register the name \"%s\"\n", di.name().str().c_str());
+        error("Two drivers trying to register the name \"%s\"", di.name().str().c_str());
         exit(1);
     }
 
@@ -154,7 +154,7 @@ bool forceRegisterDriver(function<void(DriverInfo&)> setup)
             bool foo = p->detect(d.mfct, d.type, d.version);
             if (foo)
             {
-                error("Internal error: driver %s tried to register the same auto detect combo as driver %s alread has taken!\n",
+                error("Internal error: driver %s tried to register the same auto detect combo as driver %s alread has taken!",
                       di.name().str().c_str(), p->name().str().c_str());
             }
         }
@@ -269,13 +269,13 @@ void MeterCommonImplementation::addExtraConstantField(string ecf)
 
 void MeterCommonImplementation::addExtraCalculatedField(string ecf)
 {
-    verbose("(meter) Adding calculated field: %s\n", ecf.c_str());
+    verbose("(meter) Adding calculated field: %s", ecf.c_str());
 
     vector<string> parts = splitString(ecf, '=');
 
     if (parts.size() != 2)
     {
-        warning("Invalid formula for calculated field. %s\n", ecf.c_str());
+        warning("Invalid formula for calculated field. %s", ecf.c_str());
         return;
     }
 
@@ -285,7 +285,7 @@ void MeterCommonImplementation::addExtraCalculatedField(string ecf)
     bool ok = extractUnit(parts[0], &vname, &unit);
     if (!ok)
     {
-        warning("Could not extract a valid unit from calculated field name %s\n", parts[0].c_str());
+        warning("Could not extract a valid unit from calculated field name %s", parts[0].c_str());
         return;
     }
 
@@ -296,7 +296,7 @@ void MeterCommonImplementation::addExtraCalculatedField(string ecf)
     {
         if (!canConvert(unit, existing->displayUnit()))
         {
-            warning("Warning! Cannot add the calculated field: %s since it would conflict with the already declared field %s for quantity %s.\n",
+            warning("Warning! Cannot add the calculated field: %s since it would conflict with the already declared field %s for quantity %s.",
                     parts[0].c_str(), vname.c_str(), toString(quantity));
             return;
         }
@@ -655,7 +655,7 @@ void MeterCommonImplementation::setPollInterval(time_t interval)
     if (usesPolling() && poll_interval_ == 0)
     {
         string aesc = AddressExpression::concat(addressExpressions());
-        warning("(meter) %s %s needs polling but has no pollinterval set!\n",
+        warning("(meter) %s %s needs polling but has no pollinterval set!",
                 name().c_str(),
                 aesc.c_str());
     }
@@ -734,7 +734,7 @@ bool MeterCommonImplementation::isTelegramForMeter(Telegram *t, Meter *meter, Me
     string t_idsc = Address::concat(t->addresses);
     // Meter/MeterInfo address expressions
     string m_idsc = AddressExpression::concat(address_expressions);
-    debug("(meter) %s: for me? %s in %s\n", name.c_str(), t_idsc.c_str(), m_idsc.c_str());
+    debug("(meter) %s: for me? %s in %s", name.c_str(), t_idsc.c_str(), m_idsc.c_str());
 
 
     bool used_wildcard = false;
@@ -745,7 +745,7 @@ bool MeterCommonImplementation::isTelegramForMeter(Telegram *t, Meter *meter, Me
     if (!match)
     {
         // The id must match.
-        debug("(meter) %s: not for me: no match\n", name.c_str());
+        debug("(meter) %s: not for me: no match", name.c_str());
         return false;
     }
 
@@ -755,7 +755,7 @@ bool MeterCommonImplementation::isTelegramForMeter(Telegram *t, Meter *meter, Me
         valid_driver = isMeterDriverValid(driver_name, t->tpl_mfct, t->tpl_type, t->tpl_version);
     }
 
-    debug("(meter) %s: yes for me\n", name.c_str());
+    debug("(meter) %s: yes for me", name.c_str());
     t->meter = meter;
     return true;
 }
@@ -994,14 +994,14 @@ bool MeterCommonImplementation::handleTelegram(AboutTelegram &about, vector<ucha
 
     *id_match = true;
 
-    verbose("(meter) %s(%d) %s  handling telegram from %s\n",
+    verbose("(meter) %s(%d) %s  handling telegram from %s",
             name().c_str(),
             index(),
             driverName().str().c_str(),
             t.addresses.back().str().c_str());
     
     string msg = bin2hex(input_frame);
-    debug("(meter) %s %s \"%s\"\n", name().c_str(), t.addresses.back().str().c_str(), msg.c_str());
+    debug("(meter) %s %s \"%s\"", name().c_str(), t.addresses.back().str().c_str(), msg.c_str());
 
     // For older meters with manufacturer specific data without a nice 0f dif marker.
     if (force_mfct_index_ != -1)
@@ -1066,14 +1066,14 @@ void MeterCommonImplementation::processFieldExtractors(Telegram *t)
         if (!fi.hasMatcher())
         {
             // This field_info has not been matched to a dv_entry before!
-            debug("(meters) skipping field without matcher %s(%s)[%d]...\n",
+            debug("(meters) skipping field without matcher %s(%s)[%d]...",
                   fi.vname().c_str(),
                   toString(fi.xuantity()),
                   fi.index());
             continue;
         }
 
-        debug("(meters) trying field info %s(%s)[%d]...\n",
+        debug("(meters) trying field info %s(%s)[%d]...",
               fi.vname().c_str(),
               toString(fi.xuantity()),
               fi.index());
@@ -1092,7 +1092,7 @@ void MeterCommonImplementation::processFieldExtractors(Telegram *t)
                 }
                 else if (founds[&fi].count(dve) == 0 || fi.matcher().expectedToMatchAgainstMultipleEntries())
                 {
-                    debug("(meters) using field info %s(%s)[%d] to extract %s at offset %d\n",
+                    debug("(meters) using field info %s(%s)[%d] to extract %s at offset %d",
                           fi.vname().c_str(),
                           toString(fi.xuantity()),
                           fi.index(),
@@ -1114,7 +1114,7 @@ void MeterCommonImplementation::processFieldExtractors(Telegram *t)
                     olds.pop_back();
 
                     verbose("(meter) while processing field extractors ignoring dventry %s at offset %d matching since "
-                            "field %s was already matched against offsets %s !\n",
+                            "field %s was already matched against offsets %s !",
                             dve->dif_vif_key.str().c_str(),
                             dve->offset,
                             fi.vname().c_str(),
@@ -1149,7 +1149,7 @@ void MeterCommonImplementation::processFieldCalculators()
     {
         if (fi.hasFormula() && !fi.hasMatcher())
         {
-            debug("(meters) calculating field %s(%s)[%d]\n",
+            debug("(meters) calculating field %s(%s)[%d]",
                   fi.vname().c_str(),
                   toString(fi.xuantity()),
                   fi.index());
@@ -1292,7 +1292,7 @@ void MeterCommonImplementation::setStringValue(string vname, string v, DVEntry *
 
     if (fi == NULL)
     {
-        warning("(meter) cannot set string value %s for non-existant field \"%s\"\n", v.c_str(), vname.c_str());
+        warning("(meter) cannot set string value %s for non-existant field \"%s\"", v.c_str(), vname.c_str());
         return;
     }
     setStringValue(fi, v, dve);
@@ -1429,7 +1429,7 @@ FieldInfo::FieldInfo(int index,
 {
     if (!valid_field_name_)
     {
-        warning("(meter) field template \"%s\" could not be parsed!\n", vname.c_str());
+        warning("(meter) field template \"%s\" could not be parsed!", vname.c_str());
     }
 }
 
@@ -1825,7 +1825,7 @@ shared_ptr<Meter> createMeter(MeterInfo *mi)
         }
         
         string aesc = AddressExpression::concat(mi->address_expressions);
-        verbose("(meter) created %s %s %s %s\n",
+        verbose("(meter) created %s %s %s %s",
                 mi->name.c_str(),
                 di->name().str().c_str(),
                 aesc.c_str(),
@@ -2107,7 +2107,7 @@ bool FieldInfo::extractNumeric(Meter *m, Telegram *t, DVEntry *dve)
             decoded_unit = toDefaultUnit(matcher_.vif_range);
         }
 
-        debug("(meter) %s %s decoded %s default %s value %g (scale %g)\n",
+        debug("(meter) %s %s decoded %s default %s value %g (scale %g)",
               toString(matcher_.vif_range),
               field_name.c_str(),
               unitToStringLowerCase(decoded_unit).c_str(),
@@ -2296,7 +2296,7 @@ bool FieldInfo::extractString(Meter *m, Telegram *t, DVEntry *dve)
     }
     else
     {
-        error("Internal error: Cannot extract text string from vif %s in %s:%d\n",
+        error("Internal error: Cannot extract text string from vif %s in %s:%d",
               toString(matcher_.vif_range),
               __FILE__, __LINE__);
 
@@ -2322,7 +2322,7 @@ bool checkFieldsEmpty(set<string> &fields, string driver_name)
         string info;
         for (auto &s : fields) { info += s+" "; }
 
-        warning("(meter) when adding common fields to driver %s, these fields were not found: %s\n",
+        warning("(meter) when adding common fields to driver %s, these fields were not found: %s",
                 driver_name.c_str(),
                 info.c_str());
         return false;

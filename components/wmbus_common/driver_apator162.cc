@@ -101,14 +101,14 @@ namespace
                     {
                         warning("(apator162) telegram contains a register (%02x) with unknown size.\n"
                                 "Please open an issue at https://github.com/wmbusmeters/wmbusmeters/\n"
-                                "and report this telegram: %s\n", c, hex.c_str());
+                                "and report this telegram: %s", c, hex.c_str());
                     }
                     else
                     {
                         warning("(apator162) telegram decoding fails since last register (%02x size %d) does not\n"
                                 "align with telegram size %zu > %zu.\n"
                                 "Please open an issue at https://github.com/wmbusmeters/wmbusmeters/\n"
-                                "and report this telegram: %s\n", c, size, i+size, content.size(), hex.c_str());
+                                "and report this telegram: %s", c, size, i+size, content.size(), hex.c_str());
                     }
                 }
                 break;
@@ -256,7 +256,7 @@ namespace
         bool ok = parseExtras(miExtras, &extras);
         if (!ok)
         {
-            error("(apator162) invalid extra parameters (%s)\n", miExtras.c_str());
+            error("(apator162) invalid extra parameters (%s)", miExtras.c_str());
         }
     }
 

@@ -91,12 +91,12 @@ void xorit(uchar *srca, uchar *srcb, uchar *dest, int len);
 void shiftLeft(uchar *srca, uchar *srcb, int len);
 std::string format3fdot3f(double v);
 
-#define trace(...) //esph_log_vv("wmbusmeters", __VA_ARGS__)
-#define verbose(...) //esph_log_v("wmbusmeters", __VA_ARGS__)
-#define debug(...) //esph_log_d("wmbusmeters", __VA_ARGS__)
-#define notice(...) //esph_log_i("wmbusmeters", __VA_ARGS__)
-#define warning(...) //esph_log_w("wmbusmeters", __VA_ARGS__)
-#define error(...) //esph_log_e("wmbusmeters", __VA_ARGS__)
+#define trace(...) esph_log_d("wmbusmeters", __VA_ARGS__)
+#define verbose(...) esph_log_d("wmbusmeters", __VA_ARGS__)
+#define debug(...) esph_log_v("wmbusmeters", __VA_ARGS__)
+#define notice(...) esph_log_i("wmbusmeters", __VA_ARGS__)
+#define warning(...) esph_log_w("wmbusmeters", __VA_ARGS__)
+#define error(...) esph_log_e("wmbusmeters", __VA_ARGS__)
 
 void debugPayload(const std::string &intro, std::vector<uchar> &payload);
 void debugPayload(const std::string &intro, std::vector<uchar> &payload, std::vector<uchar>::iterator &pos);
