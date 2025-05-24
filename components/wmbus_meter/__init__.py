@@ -76,6 +76,7 @@ CONFIG_SCHEMA = cv.Schema(
 
 async def to_code(config):
     meter = cg.new_Pvariable(config[CONF_ID])
+    print("CONF_METER_ID {}".format(config[CONF_METER_ID]))
     cg.add(
         meter.set_meter_params(
             config[CONF_METER_ID],
