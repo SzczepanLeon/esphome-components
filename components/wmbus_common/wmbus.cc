@@ -309,7 +309,7 @@ void Telegram::printDLL()
 
     if (about.type == FrameType::MBUS)
     {
-        verbose("(telegram) DLL L=%02x C=%02x (%s) A=%02x\n",
+        verbose("(telegram) DLL L=%02x C=%02x (%s) A=%02x",
                 dll_len,
                 dll_c, cType(dll_c).c_str(),
                 mbus_primary_address);
@@ -340,14 +340,13 @@ void Telegram::printELL()
                 ell_mfct_b[0], ell_mfct_b[1], man.c_str(),
                 ell_id_b[0], ell_id_b[1], ell_id_b[2], ell_id_b[3]);
     }
-    verbose("\n");
 }
 
 void Telegram::printNWL()
 {
     if (nwl_ci == 0) return;
 
-    verbose("(telegram) NWL CI=%02x\n",
+    verbose("(telegram) NWL CI=%02x",
             nwl_ci);
 }
 
@@ -355,7 +354,7 @@ void Telegram::printAFL()
 {
     if (afl_ci == 0) return;
 
-    verbose("(telegram) AFL CI=%02x\n",
+    verbose("(telegram) AFL CI=%02x",
             afl_ci);
 
 }
@@ -771,7 +770,7 @@ void Telegram::addMoreExplanation(int pos, const char* fmt, ...)
     // }
 
     // if (!found) {
-    //     debug("(wmbus) warning: cannot find offset %d to add more explanation \"%s\"\n", pos, buf);
+    //     debug("(wmbus) warning: cannot find offset %d to add more explanation \"%s\"", pos, buf);
     // }
 }
 
@@ -790,7 +789,7 @@ void Telegram::addSpecialExplanation(int offset, int len, KindOfData k, Understa
 
 bool expectedMore(int line)
 {
-    verbose("(wmbus) parser expected more data! (%d)\n", line);
+    verbose("(wmbus) parser expected more data! (%d)", line);
     return false;
 }
 
@@ -808,7 +807,7 @@ bool Telegram::parseMBusDLLandTPL(vector<uchar>::iterator &pos)
         return expectedMore(__LINE__);
     }
 
-    debug("(mbus) parse MBUS DLL @%d %d\n", distance(frame.begin(), pos), remaining);
+    debug("(mbus) parse MBUS DLL @%d %d", distance(frame.begin(), pos), remaining);
     debugPayload("(mbus) ", frame);
 
     if (*pos != 0x68) return false;
@@ -867,7 +866,7 @@ bool Telegram::parseDLL(vector<uchar>::iterator &pos)
     int remaining = distance(pos, frame.end());
     if (remaining == 0) return expectedMore(__LINE__);
 
-    debug("(wmbus) parseDLL @%d %d\n", distance(frame.begin(), pos), remaining);
+    debug("(wmbus) parseDLL @%d %d", distance(frame.begin(), pos), remaining);
     dll_len = *pos;
     if (remaining < dll_len) return expectedMore(__LINE__);
     addExplanationAndIncrementPos(pos, 1, KindOfData::PROTOCOL, Understanding::FULL, "%02x length (%d bytes)", dll_len, dll_len);
@@ -929,7 +928,7 @@ bool Telegram::parseELL(vector<uchar>::iterator &pos)
     int remaining = distance(pos, frame.end());
     if (remaining == 0) return false;
 
-    debug("(wmbus) parseELL @%d %d\n", distance(frame.begin(), pos), remaining);
+    debug("(wmbus) parseELL @%d %d", distance(frame.begin(), pos), remaining);
     int ci_field = *pos;
     if (!isCiFieldOfType(ci_field, CI_TYPE::ELL)) return true;
     addExplanationAndIncrementPos(pos, 1, KindOfData::PROTOCOL, Understanding::FULL, "%02x ell-ci-field (%s)",
@@ -966,7 +965,7 @@ bool Telegram::parseELL(vector<uchar>::iterator &pos)
         has_target_mft_address = true;
         break;
     case CI_Field_Values::ELL_V:
-        verbose("ELL V not yet handled\n");
+        verbose("ELL V not yet handled");
         return false;
     }
 
@@ -1062,7 +1061,7 @@ bool Telegram::parseELL(vector<uchar>::iterator &pos)
                     // Print this warning only once! Unless you are using verbose or debug.
                     verbose("(wmbus) WARNING! decrypted payload crc failed check, did you use the correct decryption key? "
                             "%02x%02x payload crc (calculated %02x%02x) "
-                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x\n",
+                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x",
                             ell_pl_crc_b[0], ell_pl_crc_b[1],
                             check  & 0xff, check >> 8,
                             dll_id_b[3], dll_id_b[2], dll_id_b[1], dll_id_b[0],
@@ -1084,7 +1083,7 @@ bool Telegram::parseNWL(vector<uchar>::iterator &pos)
     int remaining = distance(pos, frame.end());
     if (remaining == 0) return false;
 
-    debug("(wmbus) parseNWL @%d %d\n", distance(frame.begin(), pos), remaining);
+    debug("(wmbus) parseNWL @%d %d", distance(frame.begin(), pos), remaining);
     int ci_field = *pos;
     if (!isCiFieldOfType(ci_field, CI_TYPE::NWL)) return true;
     addExplanationAndIncrementPos(pos, 1, KindOfData::PROTOCOL, Understanding::FULL, "%02x nwl-ci-field (%s)",
@@ -1109,7 +1108,7 @@ bool Telegram::parseAFL(vector<uchar>::iterator &pos)
     int remaining = distance(pos, frame.end());
     if (remaining == 0) return false;
 
-    debug("(wmbus) parseAFL @%d %d\n", distance(frame.begin(), pos), remaining);
+    debug("(wmbus) parseAFL @%d %d", distance(frame.begin(), pos), remaining);
 
     int ci_field = *pos;
     if (!isCiFieldOfType(ci_field, CI_TYPE::AFL)) return true;
@@ -1186,7 +1185,7 @@ bool Telegram::parseAFL(vector<uchar>::iterator &pos)
         {
             if (parser_warns_)
             {
-                warning("(wmbus) WARNING! bad length of mac\n");
+                warning("(wmbus) WARNING! bad length of mac");
             }
             return false;
         }
@@ -1332,17 +1331,17 @@ bool Telegram::parseTPLConfig(std::vector<uchar>::iterator &pos)
             {
                 if (isSimulated())
                 {
-                    debug("(wmbus) simulation without keys, not generating Kmac and Kenc.\n");
+                    debug("(wmbus) simulation without keys, not generating Kmac and Kenc.");
                     return true;
                 }
-                debug("(wmbus) no key, thus cannot execute kdf.\n");
+                debug("(wmbus) no key, thus cannot execute kdf.");
                 return false;
             }
             AES_CMAC(safeButUnsafeVectorPtr(meter_keys->confidentiality_key),
                      safeButUnsafeVectorPtr(input), 16,
                      safeButUnsafeVectorPtr(mac));
             string s = bin2hex(mac);
-            debug("(wmbus) ephemereal Kenc %s\n", s.c_str());
+            debug("(wmbus) ephemereal Kenc %s", s.c_str());
             tpl_generated_key.clear();
             tpl_generated_key.insert(tpl_generated_key.end(), mac.begin(), mac.end());
 
@@ -1354,7 +1353,7 @@ bool Telegram::parseTPLConfig(std::vector<uchar>::iterator &pos)
                      safeButUnsafeVectorPtr(input), 16,
                      safeButUnsafeVectorPtr(mac));
             s = bin2hex(mac);
-            debug("(wmbus) ephemereal Kmac %s\n", s.c_str());
+            debug("(wmbus) ephemereal Kmac %s", s.c_str());
             tpl_generated_mac_key.clear();
             tpl_generated_mac_key.insert(tpl_generated_mac_key.end(), mac.begin(), mac.end());
         }
@@ -1447,23 +1446,23 @@ bool Telegram::checkMAC(std::vector<uchar> &frame,
     input.insert(input.end(), afl_counter_b, afl_counter_b+4);
     input.insert(input.end(), from, to);
     string s = bin2hex(input);
-    debug("(wmbus) input to mac %s\n", s.c_str());
+    debug("(wmbus) input to mac %s", s.c_str());
     AES_CMAC(safeButUnsafeVectorPtr(mackey),
              safeButUnsafeVectorPtr(input), input.size(),
              safeButUnsafeVectorPtr(mac));
     string calculated = bin2hex(mac);
-    debug("(wmbus) calculated mac %s\n", calculated.c_str());
+    debug("(wmbus) calculated mac %s", calculated.c_str());
     string received = bin2hex(inmac);
-    debug("(wmbus) received   mac %s\n", received.c_str());
+    debug("(wmbus) received   mac %s", received.c_str());
     string truncated = calculated.substr(0, received.length());
     bool ok = truncated == received;
     if (ok)
     {
-        debug("(wmbus) mac ok!\n");
+        debug("(wmbus) mac ok!");
     }
     else
     {
-        debug("(wmbus) mac NOT ok!\n");
+        debug("(wmbus) mac NOT ok!");
         explainParse("BADMAC", 0);
     }
     return ok;
@@ -1491,7 +1490,7 @@ bool Telegram::potentiallyDecrypt(vector<uchar>::iterator &pos)
                 // this is probably a replay telegram from --logtelegrams.
                 // But since we have specified a key! Do not accept this telegram!
                 warning("(wmbus) WARNING!! telegram should have been fully encrypted, but was not! "
-                        "id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x\n",
+                        "id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x",
                             dll_id_b[3], dll_id_b[2], dll_id_b[1], dll_id_b[0],
                             manufacturerFlag(dll_mfct).c_str(),
                             manufacturer(dll_mfct).c_str(),
@@ -1524,7 +1523,7 @@ bool Telegram::potentiallyDecrypt(vector<uchar>::iterator &pos)
                 {
                     // Print this warning only once! Unless you are using verbose or debug.
                     warning("(wmbus) WARNING! no key to decrypt payload! "
-                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x\n",
+                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x",
                             dll_id_b[3], dll_id_b[2], dll_id_b[1], dll_id_b[0],
                             manufacturerFlag(dll_mfct).c_str(),
                             manufacturer(dll_mfct).c_str(),
@@ -1559,7 +1558,7 @@ bool Telegram::potentiallyDecrypt(vector<uchar>::iterator &pos)
                 {
                     // Print this warning only once! Unless you are using verbose or debug.
                     warning("(wmbus) WARNING!! decrypted content failed check, did you use the correct decryption key? "
-                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x\n",
+                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x",
                             dll_id_b[3], dll_id_b[2], dll_id_b[1], dll_id_b[0],
                             manufacturerFlag(dll_mfct).c_str(),
                             manufacturer(dll_mfct).c_str(),
@@ -1581,7 +1580,7 @@ bool Telegram::potentiallyDecrypt(vector<uchar>::iterator &pos)
                 // this is probably a replay telegram from --logtelegrams.
                 // But since we have specified a key! Do not accept this telegram!
                 warning("(wmbus) WARNING! telegram should have been fully encrypted, but was not! "
-                        "id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x\n",
+                        "id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x",
                             dll_id_b[3], dll_id_b[2], dll_id_b[1], dll_id_b[0],
                             manufacturerFlag(dll_mfct).c_str(),
                             manufacturer(dll_mfct).c_str(),
@@ -1604,7 +1603,7 @@ bool Telegram::potentiallyDecrypt(vector<uchar>::iterator &pos)
                 {
                     // Print this warning only once! Unless you are using verbose or debug.
                     warning("(wmbus) WARNING! telegram mac check failed, did you use the correct decryption key? "
-                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x\n",
+                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x",
                             dll_id_b[3], dll_id_b[2], dll_id_b[1], dll_id_b[0],
                             manufacturerFlag(dll_mfct).c_str(),
                             manufacturer(dll_mfct).c_str(),
@@ -1660,7 +1659,7 @@ bool Telegram::potentiallyDecrypt(vector<uchar>::iterator &pos)
                 {
                     // Print this warning only once! Unless you are using verbose or debug.
                     warning("(wmbus) WARNING!!! decrypted content failed check, did you use the correct decryption key? "
-                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x\n",
+                            "Permanently ignoring telegrams from id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x",
                             dll_id_b[3], dll_id_b[2], dll_id_b[1], dll_id_b[0],
                             manufacturerFlag(dll_mfct).c_str(),
                             manufacturer(dll_mfct).c_str(),
@@ -1674,10 +1673,10 @@ bool Telegram::potentiallyDecrypt(vector<uchar>::iterator &pos)
     }
     else if (tpl_sec_mode == TPLSecurityMode::SPECIFIC_16_31)
     {
-        debug("(wmbus) non-standard security mode 16_31\n");
+        debug("(wmbus) non-standard security mode 16_31");
         if (mustDecryptDiehlRealData(frame))
         {
-            debug("(diehl) must decode frame\n");
+            debug("(diehl) must decode frame");
             if (!meter_keys) return false;
             bool ok = decryptDielhRealData(this, frame, pos, meter_keys->confidentiality_key);
             // If this telegram is simulated, the content might already be decrypted and the
@@ -1685,7 +1684,7 @@ bool Telegram::potentiallyDecrypt(vector<uchar>::iterator &pos)
             if (!ok && isSimulated()) return true;
             if (!ok) return false;
             // Now the frame from pos and onwards has been decrypted.
-            debug("(diehl) decryption successful\n");
+            debug("(diehl) decryption successful");
         }
     }
     else
@@ -1694,7 +1693,7 @@ bool Telegram::potentiallyDecrypt(vector<uchar>::iterator &pos)
         // Oups! This telegram is NOT encrypted, but we have specified a key!
         // Do not accept this telegram!
         warning("(wmbus) WARNING!!! telegram should have been encrypted, but was not! "
-                "id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x\n",
+                "id: %02x%02x%02x%02x mfct: (%s) %s (0x%02x) type: %s (0x%02x) ver: 0x%02x",
                 dll_id_b[3], dll_id_b[2], dll_id_b[1], dll_id_b[0],
                 manufacturerFlag(dll_mfct).c_str(),
                 manufacturer(dll_mfct).c_str(),
@@ -1766,7 +1765,7 @@ bool Telegram::parse_TPL_79(vector<uchar>::iterator &pos)
             verbose("(wmbus) ignoring compressed telegram since format signature hash 0x%02x is yet unknown.\n"
                     "     this is not a problem, since you only need wait for at most 8 telegrams\n"
                     "     (8*16 seconds) until an full length telegram arrives and then we know\n"
-                    "     the format giving this hash and start decoding the telegrams properly.\n",
+                    "     the format giving this hash and start decoding the telegrams properly.",
                     format_signature);
             return false;
         }
@@ -1814,7 +1813,7 @@ bool Telegram::parseTPL(vector<uchar>::iterator &pos)
     int remaining = distance(pos, frame.end());
     if (remaining == 0) return false;
 
-    debug("(wmbus) parseTPL @%d %d\n", distance(frame.begin(), pos), remaining);
+    debug("(wmbus) parseTPL @%d %d", distance(frame.begin(), pos), remaining);
     CHECK(1);
     int ci_field = *pos;
     int mfct_specific = isCiFieldManufacturerSpecific(ci_field);
@@ -1826,7 +1825,7 @@ bool Telegram::parseTPL(vector<uchar>::iterator &pos)
                                       ci_field);
         if (parser_warns_)
         {
-            warning("(wmbus) Unknown tpl-ci-field %02x\n", ci_field);
+            warning("(wmbus) Unknown tpl-ci-field %02x", ci_field);
         }
         return false;
     }
@@ -1862,7 +1861,7 @@ bool Telegram::parseTPL(vector<uchar>::iterator &pos)
     header_size = distance(frame.begin(), pos);
     if (parser_warns_)
     {
-        warning("(wmbus) Not implemented tpl-ci %02x\n", tpl_ci);
+        warning("(wmbus) Not implemented tpl-ci %02x", tpl_ci);
     }
     return false;
 }
@@ -1872,7 +1871,7 @@ void Telegram::preProcess()
     DiehlAddressTransformMethod diehl_method = mustTransformDiehlAddress(frame);
     if (diehl_method != DiehlAddressTransformMethod::NONE)
     {
-        debug("(diehl) preprocess necessary %s\n", toString(diehl_method));
+        debug("(diehl) preprocess necessary %s", toString(diehl_method));
         original = vector<uchar>(frame.begin(), frame.begin() + 10);
         transformDiehlAddress(frame, diehl_method);
     }
@@ -2100,7 +2099,7 @@ void Telegram::explainParse(string intro, int from)
     //     // However if a protocol is not full understood then print p or ?.
     //     if (p.kind == KindOfData::PROTOCOL && p.understanding == Understanding::FULL) u = " ";
 
-    //     debug("%s %03d %s%s: %s\n", intro.c_str(), p.pos, c, u, p.info.c_str());
+    //     debug("%s %03d %s%s: %s", intro.c_str(), p.pos, c, u, p.info.c_str());
     // }
 }
 
@@ -2740,7 +2739,7 @@ double vifScale(int vif)
     case 0x6C: return 1.0; // Date type G
     case 0x6D: return 1.0; // Date&Time type F
     case 0x6E: return 1.0; // Units for H.C.A. are never scaled
-    case 0x6F: warning("(wmbus) warning: do not scale a reserved type!\n"); return -1.0; // Reserved
+    case 0x6F: warning("(wmbus) warning: do not scale a reserved type!"); return -1.0; // Reserved
 
         // wmbusmeters always returns time in hours
     case 0x70: return 3600.0; // Averaging duration seconds
@@ -2831,7 +2830,7 @@ double vifScale(int vif)
     case 0x7F: // Manufacturer specific
         */
 
-    default: warning("(wmbus) warning: type 0x%x cannot be scaled!\n", vif);
+    default: warning("(wmbus) warning: type 0x%x cannot be scaled!", vif);
         return -1;
     }
 }
@@ -2988,7 +2987,7 @@ string vifKey(int vif)
     case 0x7E: // Any VIF
     case 0x7F: // Manufacturer specific
 
-    default: warning("(wmbus) warning: generic type %d cannot be scaled!\n", t);
+    default: warning("(wmbus) warning: generic type %d cannot be scaled!", t);
         return "unknown";
     }
 }
@@ -3145,7 +3144,7 @@ string vifUnit(int vif)
     case 0x7E: // Any VIF
     case 0x7F: // Manufacturer specific
 
-    default: warning("(wmbus) warning: generic type %d cannot be scaled!\n", t);
+    default: warning("(wmbus) warning: generic type %d cannot be scaled!", t);
         return "unknown";
     }
 }
@@ -3954,32 +3953,32 @@ bool Telegram::findFormatBytesFromKnownMeterSignatures(vector<uchar> *format_byt
     if (format_signature == 0xa8ed)
     {
         hex2bin("02FF2004134413615B6167", format_bytes);
-        debug("(wmbus) using hard coded format for hash a8ed\n");
+        debug("(wmbus) using hard coded format for hash a8ed");
     }
     else if (format_signature == 0xc412)
     {
         hex2bin("02FF20041392013BA1015B8101E7FF0F", format_bytes);
-        debug("(wmbus) using hard coded format for hash c412\n");
+        debug("(wmbus) using hard coded format for hash c412");
     }
     else if (format_signature == 0x61eb)
     {
         hex2bin("02FF2004134413A1015B8101E7FF0F", format_bytes);
-        debug("(wmbus) using hard coded format for hash 61eb\n");
+        debug("(wmbus) using hard coded format for hash 61eb");
     }
     else if (format_signature == 0xd2f7)
     {
         hex2bin("02FF2004134413615B5167", format_bytes);
-        debug("(wmbus) using hard coded format for hash d2f7\n");
+        debug("(wmbus) using hard coded format for hash d2f7");
     }
     else if (format_signature == 0xdd34)
     {
         hex2bin("02FF2004134413", format_bytes);
-        debug("(wmbus) using hard coded format for hash dd34\n");
+        debug("(wmbus) using hard coded format for hash dd34");
     }
     else if (format_signature == 0x7c0e)
     {
         hex2bin("02FF200413523B", format_bytes);
-        debug("(wmbus) using hard coded format for hash 7c0e\n");
+        debug("(wmbus) using hard coded format for hash 7c0e");
     }
     else
     {
@@ -4155,7 +4154,7 @@ bool trimCRCsFrameFormatAInternal(std::vector<uchar> &payload, bool fail_is_ok)
     if (payload.size() < 12) {
         if (!fail_is_ok)
         {
-            debug("(wmbus) not enough bytes! expected at least 12 but got (%zu)!\n", payload.size());
+            debug("(wmbus) not enough bytes! expected at least 12 but got (%zu)!", payload.size());
         }
         return false;
     }
@@ -4174,14 +4173,14 @@ bool trimCRCsFrameFormatAInternal(std::vector<uchar> &payload, bool fail_is_ok)
     {
         if (!fail_is_ok)
         {
-            debug("(wmbus) ff a dll crc first (calculated %04x) did not match (expected %04x) for bytes 0-%zu!\n", calc_crc, check_crc, 10);
+            debug("(wmbus) ff a dll crc first (calculated %04x) did not match (expected %04x) for bytes 0-%zu!", calc_crc, check_crc, 10);
         }
         return false;
     }
     out.insert(out.end(), payload.begin(), payload.begin()+10);
     if (!fail_is_ok)
     {
-        debug("(wmbus) ff a dll crc 0-%zu %04x ok\n", 10-1, calc_crc);
+        debug("(wmbus) ff a dll crc 0-%zu %04x ok", 10-1, calc_crc);
     }
 
     size_t pos = 12;
@@ -4194,7 +4193,7 @@ bool trimCRCsFrameFormatAInternal(std::vector<uchar> &payload, bool fail_is_ok)
         {
             if (!fail_is_ok)
             {
-                debug("(wmbus) ff a dll crc mid (calculated %04x) did not match (expected %04x) for bytes %zu-%zu!\n",
+                debug("(wmbus) ff a dll crc mid (calculated %04x) did not match (expected %04x) for bytes %zu-%zu!",
                       calc_crc, check_crc, pos, to-1);
             }
             return false;
@@ -4202,7 +4201,7 @@ bool trimCRCsFrameFormatAInternal(std::vector<uchar> &payload, bool fail_is_ok)
         out.insert(out.end(), payload.begin()+pos, payload.begin()+pos+16);
         if (!fail_is_ok)
         {
-            debug("(wmbus) ff a dll crc mid %zu-%zu %04x ok\n", pos, to-1, calc_crc);
+            debug("(wmbus) ff a dll crc mid %zu-%zu %04x ok", pos, to-1, calc_crc);
         }
     }
 
@@ -4216,7 +4215,7 @@ bool trimCRCsFrameFormatAInternal(std::vector<uchar> &payload, bool fail_is_ok)
         {
             if (!fail_is_ok)
             {
-                debug("(wmbus) ff a dll crc final (calculated %04x) did not match (expected %04x) for bytes %zu-%zu!\n",
+                debug("(wmbus) ff a dll crc final (calculated %04x) did not match (expected %04x) for bytes %zu-%zu!",
                       calc_crc, check_crc, pos, tto-1);
             }
             return false;
@@ -4224,7 +4223,7 @@ bool trimCRCsFrameFormatAInternal(std::vector<uchar> &payload, bool fail_is_ok)
         out.insert(out.end(), payload.begin()+pos, payload.begin()+tto);
         if (!fail_is_ok)
         {
-            debug("(wmbus) ff a dll crc final %zu-%zu %04x ok\n", pos, tto-1, calc_crc);
+            debug("(wmbus) ff a dll crc final %zu-%zu %04x ok", pos, tto-1, calc_crc);
         }
     }
 
@@ -4236,7 +4235,7 @@ bool trimCRCsFrameFormatAInternal(std::vector<uchar> &payload, bool fail_is_ok)
     payload = out;
     size_t new_size = payload.size();
 
-    debug("(wmbus) trimmed %zu dll crc bytes from frame a and ignored %zu suffix bytes.\n", (len-new_len), (old_size-new_size)-(len-new_len));
+    debug("(wmbus) trimmed %zu dll crc bytes from frame a and ignored %zu suffix bytes.", (len-new_len), (old_size-new_size)-(len-new_len));
     debugPayload("(wmbus) trimmed frame A", payload);
 
     return true;
@@ -4247,7 +4246,7 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload, bool fail_is_ok)
     if (payload.size() < 12) {
         if (!fail_is_ok)
         {
-            debug("(wmbus) not enough bytes! expected at least 12 but got (%zu)!\n", payload.size());
+            debug("(wmbus) not enough bytes! expected at least 12 but got (%zu)!", payload.size());
         }
         return false;
     }
@@ -4277,7 +4276,7 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload, bool fail_is_ok)
     {
         if (!fail_is_ok)
         {
-            debug("(wmbus) ff b dll crc (calculated %04x) did not match (expected %04x) for bytes 0-%zu!\n", calc_crc, check_crc, crc1_pos);
+            debug("(wmbus) ff b dll crc (calculated %04x) did not match (expected %04x) for bytes 0-%zu!", calc_crc, check_crc, crc1_pos);
         }
         return false;
     }
@@ -4285,7 +4284,7 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload, bool fail_is_ok)
     out.insert(out.end(), payload.begin(), payload.begin()+crc1_pos);
     if (!fail_is_ok)
     {
-        debug("(wmbus) ff b dll crc first 0-%zu %04x ok\n", crc1_pos, calc_crc);
+        debug("(wmbus) ff b dll crc first 0-%zu %04x ok", crc1_pos, calc_crc);
     }
 
     if (crc2_pos > 0)
@@ -4297,7 +4296,7 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload, bool fail_is_ok)
         {
             if (!fail_is_ok)
             {
-                debug("(wmbus) ff b dll crc (calculated %04x) did not match (expected %04x) for bytes %zu-%zu!\n",
+                debug("(wmbus) ff b dll crc (calculated %04x) did not match (expected %04x) for bytes %zu-%zu!",
                       calc_crc, check_crc, crc1_pos+2, crc2_pos);
             }
             return false;
@@ -4306,7 +4305,7 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload, bool fail_is_ok)
         out.insert(out.end(), payload.begin()+crc1_pos+2, payload.begin()+crc2_pos);
         if (!fail_is_ok)
         {
-            debug("(wmbus) ff b dll crc final %zu-%zu %04x ok\n", crc1_pos+2, crc2_pos, calc_crc);
+            debug("(wmbus) ff b dll crc final %zu-%zu %04x ok", crc1_pos+2, crc2_pos, calc_crc);
         }
     }
 
@@ -4318,7 +4317,7 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload, bool fail_is_ok)
     payload = out;
     size_t new_size = payload.size();
 
-    debug("(wmbus) trimmed %zu dll crc bytes from frame b and ignored %zu suffix bytes.\n", (len-new_len), (old_size-new_size)-(len-new_len));
+    debug("(wmbus) trimmed %zu dll crc bytes from frame b and ignored %zu suffix bytes.", (len-new_len), (old_size-new_size)-(len-new_len));
     debugPayload("(wmbus) trimmed frame B", payload);
 
     return true;
@@ -4354,7 +4353,7 @@ FrameStatus checkWMBusFrame(vector<uchar> &data,
 
     if (data.size() < 11)
     {
-        debug("(wmbus) less than 11 bytes, partial frame\n");
+        debug("(wmbus) less than 11 bytes, partial frame");
         return PartialFrame;
     }
     int payload_len = data[0];
@@ -4384,7 +4383,7 @@ FrameStatus checkWMBusFrame(vector<uchar> &data,
                 {
                     found = true;
                     offset = i+1;
-                    verbose("(wmbus) out of sync, skipping %d bytes.\n", (int)i);
+                    verbose("(wmbus) out of sync, skipping %d bytes.", (int)i);
                     break;
                 }
             }
@@ -4394,12 +4393,12 @@ FrameStatus checkWMBusFrame(vector<uchar> &data,
             // No sensible telegram in the buffer. Flush it!
             if (!only_test)
             {
-                verbose("(wmbus) no sensible telegram found, clearing buffer.\n");
+                verbose("(wmbus) no sensible telegram found, clearing buffer.");
                 data.clear();
             }
             else
             {
-                debug("(wmbus) not a proper wmbus frame.\n");
+                debug("(wmbus) not a proper wmbus frame.");
             }
             return ErrorInFrame;
         }
@@ -4417,20 +4416,20 @@ FrameStatus checkWMBusFrame(vector<uchar> &data,
             payload_len = data.size() - offset;
             *payload_len_out = payload_len;
             *frame_length = payload_len+offset;
-            warning("(wmbus) not enough bytes, frame length byte changed from %d(%02x) to %d(%02x)!\n",
+            warning("(wmbus) not enough bytes, frame length byte changed from %d(%02x) to %d(%02x)!",
                     data[offset-1], data[offset-1],
                     payload_len, payload_len);
             data[offset-1] = payload_len;
 
             return FullFrame;
         }
-        debug("(wmbus) not enough bytes, partial frame %d %d\n", data.size(), *frame_length);
+        debug("(wmbus) not enough bytes, partial frame %d %d", data.size(), *frame_length);
         return PartialFrame;
     }
 
     if (!only_test)
     {
-        debug("(wmbus) received full frame.\n");
+        debug("(wmbus) received full frame.");
     }
     return FullFrame;
 }
@@ -4449,7 +4448,7 @@ FrameStatus checkMBusFrame(vector<uchar> &data,
     // 5E checksum
     // 16 stop
 
-    debugPayload("(mbus) checkMBUSFrame\n", data);
+    debugPayload("(mbus) checkMBUSFrame", data);
 
     if (data.size() > 0 && data[0] == 0xe5)
     {
@@ -4471,7 +4470,7 @@ FrameStatus checkMBusFrame(vector<uchar> &data,
         *frame_length = 1;
         if (!only_test)
         {
-            debug("(mbus) received E5 single byte frame.\n");
+            debug("(mbus) received E5 single byte frame.");
         }
         return FullFrame;
     }
@@ -4480,7 +4479,7 @@ FrameStatus checkMBusFrame(vector<uchar> &data,
         // 4 byte start, 1 checksum, 1 stop
         if (!only_test)
         {
-            debug("(mbus) less than 6 bytes, partial frame\n");
+            debug("(mbus) less than 6 bytes, partial frame");
         }
         return PartialFrame;
     }
@@ -4488,7 +4487,7 @@ FrameStatus checkMBusFrame(vector<uchar> &data,
     {
         if (!only_test)
         {
-            verbose("(mbus) no 0x68 byte found, clearing buffer.\n");
+            verbose("(mbus) no 0x68 byte found, clearing buffer.");
             data.clear();
         }
         return ErrorInFrame;
@@ -4498,7 +4497,7 @@ FrameStatus checkMBusFrame(vector<uchar> &data,
     {
         if (!only_test)
         {
-            verbose("(mbus) lengths not matching, clearing buffer.\n");
+            verbose("(mbus) lengths not matching, clearing buffer.");
             data.clear();
         }
         return ErrorInFrame;
@@ -4509,14 +4508,14 @@ FrameStatus checkMBusFrame(vector<uchar> &data,
     {
         if (!only_test)
         {
-            debug("(mbus) not enough bytes, partial frame %d %d\n", data.size(), *frame_length);
+            debug("(mbus) not enough bytes, partial frame %d %d", data.size(), *frame_length);
         }
         return PartialFrame;
     }
     uchar stop = data[*frame_length-1];
     if (stop != 0x16)
     {
-        warning("(mbus) stop byte (0x%02x) at pos %d is not 0x16, clearing buffer.\n", stop, *frame_length-1);
+        warning("(mbus) stop byte (0x%02x) at pos %d is not 0x16, clearing buffer.", stop, *frame_length-1);
         data.clear();
         return ErrorInFrame;
     }
@@ -4525,7 +4524,7 @@ FrameStatus checkMBusFrame(vector<uchar> &data,
     uchar cs = data[*frame_length-2];
     if (cs != csc)
     {
-        warning("(mbus) expected checksum 0x%02x but got 0x%02x, clearing buffer.\n", csc, cs);
+        warning("(mbus) expected checksum 0x%02x but got 0x%02x, clearing buffer.", csc, cs);
         data.clear();
         return ErrorInFrame;
     }
@@ -4534,7 +4533,7 @@ FrameStatus checkMBusFrame(vector<uchar> &data,
     *payload_offset = 0;
     if (!only_test)
     {
-        debug("(mbus) received full frame.\n");
+        debug("(mbus) received full frame.");
     }
     return FullFrame;
 }

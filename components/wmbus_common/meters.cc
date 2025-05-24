@@ -186,7 +186,7 @@ bool registerDriver(function<void(DriverInfo&)> setup)
             bool foo = p->detect(d.mfct, d.type, d.version);
             if (foo)
             {
-                error("Internal error: driver %s tried to register the same auto detect combo as driver %s alread has taken!\n",
+                error("Internal error: driver %s tried to register the same auto detect combo as driver %s alread has taken!",
                       di.name().str().c_str(), p->name().str().c_str());
             }
         }
@@ -1224,7 +1224,7 @@ void MeterCommonImplementation::setNumericValue(string vname, Unit u, double v)
 
     if (fi == NULL)
     {
-        warning("(meter) cannot set numeric value %g %s for non-existant field \"%s\" %s\n", v, unitToStringLowerCase(u).c_str(), vname.c_str(), toString(q));
+        warning("(meter) cannot set numeric value %g %s for non-existant field \"%s\" %s", v, unitToStringLowerCase(u).c_str(), vname.c_str(), toString(q));
         return;
     }
     setNumericValue(fi, NULL, u, v);
