@@ -102,11 +102,11 @@ wmbus_radio:
       then:
         - mqtt.publish:
             topic: wmbus-test/telegram_rtl
-            payload: !lambda return frame.as_rtlwmbus();
+            payload: !lambda return frame->as_rtlwmbus();
     - mark_as_handled: True
       then:
-        - wmbus_radio.send_frame_with_socket:
-            format: hex
+        - socket_transmitter.send:
+            data: !lambda return frame->as_hex();
 
 wmbus_meter:
   - id: electricity_meter
