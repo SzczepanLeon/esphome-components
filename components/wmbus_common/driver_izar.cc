@@ -197,13 +197,13 @@ namespace
                 break;
         }
 
-        debug("(izar) Decoded PRIOS data: %s", bin2hex(decoded_content).c_str());
+        debug("(izar) Decoded PRIOS data: %s\n", bin2hex(decoded_content).c_str());
 
         if (decoded_content.empty())
         {
             if (t->beingAnalyzed() == false)
             {
-                warning("(izar) Decoding PRIOS data failed. Ignoring telegram.");
+                warning("(izar) Decoding PRIOS data failed. Ignoring telegram.\n");
             }
             return;
         }
