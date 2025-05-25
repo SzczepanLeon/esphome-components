@@ -12,5 +12,14 @@ namespace esphome
             if (val.has_value())
                 this->publish_state(*val);
         }
+
+
+        void Sensor::dump_config()
+        {
+            ESP_LOGCONFIG(TAG, "wM-Bus Sensor:");
+            ESP_LOGCONFIG(TAG, "  Parent meter ID: 0x%s", this->parent_->get_id().c_str());
+            ESP_LOGCONFIG(TAG, "  Field: '%s'", this->field_name.c_str());
+            LOG_SENSOR("  ", "Name:", this);
+        }
     }
 }

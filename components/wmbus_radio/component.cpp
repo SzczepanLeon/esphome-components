@@ -50,7 +50,7 @@ namespace esphome
       if (!frame)
         return;
 
-      ESP_LOGI(TAG, "Have data from radio (%zu bytes) [RSSI: %d, mode:%s]", frame->data().size(), frame->rssi(), toString(frame->link_mode()));
+      ESP_LOGI(TAG, "Have data from radio (%zu bytes) [RSSI: %ddBm, mode: %s]", frame->data().size(), frame->rssi(), toString(frame->link_mode()));
 
       uint8_t packet_handled = 0;
       for (auto &handler : this->handlers_)
@@ -117,7 +117,6 @@ namespace esphome
 
     void Radio::receiver_task(Radio *arg)
     {
-      ESP_LOGE(TAG, "Hello from radio task!");
       int counter = 0;
       while (true)
         arg->receive_frame();

@@ -11,6 +11,7 @@ namespace esphome
         {
         public:
             void handle_update();
+            void dump_config() override;
         };
     }
 }

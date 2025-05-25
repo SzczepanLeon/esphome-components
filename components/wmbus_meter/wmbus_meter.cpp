@@ -29,7 +29,7 @@ namespace esphome
             std::string key = this->get_key();
 
             ESP_LOGCONFIG(TAG, "wM-Bus Meter:");
-            ESP_LOGCONFIG(TAG, "  ID: %s", id.c_str());
+            ESP_LOGCONFIG(TAG, "  ID: 0x%s", id.c_str());
             ESP_LOGCONFIG(TAG, "  Driver: %s", driver.c_str());
             ESP_LOGCONFIG(TAG, "  Key: %s", key.c_str());
         }
@@ -48,7 +48,7 @@ namespace esphome
         std::string Meter::get_key()
         {
             MeterKeys *keys = this->meter->meterKeys();
-            return keys->hasConfidentialityKey() ? "***" : "not-encrypted";
+            return keys->hasConfidentialityKey() ? bin2hex(keys->confidentiality_key) : "not-encrypted";
         }
 
         void Meter::handle_frame(wmbus_radio::Frame *frame)
@@ -89,6 +89,13 @@ namespace esphome
 
         optional<std::string> Meter::get_string_field(std::string field_name)
         {
+            
+            if (field_name == "timestamp")
+                return this->meter->datetimeOfUpdateHumanReadable();
+
+            if (field_name == "timestamp_zulu")
+                return this->meter->datetimeOfUpdateRobot();
+
             auto field_info = this->meter->findFieldInfo(field_name, Quantity::Text);
             if (field_info)
                 return this->meter->getStringValue(field_info);
