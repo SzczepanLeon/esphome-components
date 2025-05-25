@@ -32,6 +32,7 @@ namespace
         di.setDefaultFields("name,id,total_m3,target_m3,timestamp");
         di.setMeterType(MeterType::WaterMeter);
         di.addLinkMode(LinkMode::T1);
+        di.addLinkMode(LinkMode::C1);
         di.addDetection(MANUFACTURER_TCH, 0x62,  0x95);
         di.addDetection(MANUFACTURER_TCH, 0x62,  0x70);
         di.addDetection(MANUFACTURER_TCH, 0x72,  0x95);

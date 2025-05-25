@@ -38,6 +38,8 @@ namespace
         di.setMeterType(MeterType::HeatCostAllocationMeter);
         di.addDetection(MANUFACTURER_APA, 0x08,  0x04);
         di.addDetection(MANUFACTURER_APT, 0x08,  0x04);
+        di.addDetection(0x8614 /* APT? */, 0x08,  0x04);
+        di.addDetection(0x8601 /* APA? */, 0x08,  0x04);
         di.usesProcessContent();
         di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
     });
