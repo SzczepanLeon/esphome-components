@@ -33,7 +33,7 @@ namespace
         di.setMeterType(MeterType::WaterMeter);
         di.addDetection(MANUFACTURER_GWF, 0x0e,  0x01);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -66,7 +66,7 @@ namespace
 
     void Driver::processContent(Telegram *t)
     {
-        vector<uchar> bytes;
+        std::vector<uchar> bytes;
         t->extractMfctData(&bytes); // Extract raw frame data after the DIF 0x0F.
 
         if (bytes.size() < 3) return;
@@ -81,7 +81,7 @@ namespace
             return;
         }
 
-        string info;
+        std::string info;
 
         if (a & 0x02) info += "CONTINUOUS_FLOW ";
         if (a & 0x08) info += "BROKEN_PIPE ";

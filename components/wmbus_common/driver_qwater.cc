@@ -52,7 +52,7 @@ namespace
         di.addDetection(MANUFACTURER_QDS, 0x07,  0x35);
         di.usesProcessContent();
 
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) :

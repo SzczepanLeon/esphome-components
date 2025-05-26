@@ -35,7 +35,7 @@ namespace
         di.addLinkMode(LinkMode::T1);
         di.addDetection(MANUFACTURER_BMP, 0x08,  0x53);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -106,14 +106,14 @@ namespace
     {
         int offset = t->header_size+t->mfct_0f_index;
 
-        vector<uchar> bytes;
+        std::vector<uchar> bytes;
         t->extractMfctData(&bytes); // Extract raw frame data after the DIF 0x0F.
 
         debugPayload("(hydroclima mfct)", bytes);
 
         int i = 0;
         int len = bytes.size();
-        string info;
+        std::string info;
 
         if (i >= len) return;
         uchar frame_identifier = bytes[i];
@@ -203,14 +203,14 @@ namespace
     {
         int offset = t->header_size+t->mfct_0f_index;
 
-        vector<uchar> bytes;
+        std::vector<uchar> bytes;
         t->extractMfctData(&bytes); // Extract raw frame data after the DIF 0x0F.
 
         debugPayload("(hydroclima mfct)", bytes);
 
         int i = 0;
         int len = bytes.size();
-        string info;
+        std::string info;
 
         double last_x_month_uc {};
         for (int m = 1; m <= 12; ++m)

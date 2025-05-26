@@ -29,7 +29,7 @@ namespace
         di.setName("munia");
         di.setDefaultFields("name,id,current_temperature_c,current_relative_humidity_rh,timestamp");
         di.setMeterType(MeterType::TempHygroMeter);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
         di.addDetection(MANUFACTURER_WEP, 0x1b,  0x02);
         di.addDetection(MANUFACTURER_WEP, 0x1b,  0x04);
     });

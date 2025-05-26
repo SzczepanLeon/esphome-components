@@ -32,7 +32,7 @@ namespace
         di.addLinkMode(LinkMode::T1);
         di.addDetection(MANUFACTURER_BMT, 0x0d,  0x0b);
         di.addDetection(MANUFACTURER_BMT, 0x0d,  0x1a); // HYDROCAL-M4
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) :  MeterCommonImplementation(mi, di)

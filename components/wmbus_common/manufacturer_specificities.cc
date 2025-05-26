@@ -118,7 +118,7 @@ DiehlFrameInterpretation detectDiehlFrameInterpretation(uchar c_field, int m_fie
 }
 
 // Diehl: Determines how to interpret frame
-DiehlFrameInterpretation detectDiehlFrameInterpretation(const vector<uchar>& frame)
+DiehlFrameInterpretation detectDiehlFrameInterpretation(const std::vector<uchar>& frame)
 {
     if (frame.size() < 15)
         return DiehlFrameInterpretation::NA;
@@ -131,13 +131,13 @@ DiehlFrameInterpretation detectDiehlFrameInterpretation(const vector<uchar>& fra
 }
 
 // Diehl: Is "A field" coded differently from standard?
-DiehlAddressTransformMethod mustTransformDiehlAddress(const vector<uchar>& frame)
+DiehlAddressTransformMethod mustTransformDiehlAddress(const std::vector<uchar>& frame)
 {
     return mustTransformDiehlAddress(detectDiehlFrameInterpretation(frame));
 }
 
 // Diehl: transform "A field" to make it compliant to standard
-void transformDiehlAddress(vector<uchar>& frame, DiehlAddressTransformMethod transform_method)
+void transformDiehlAddress(std::vector<uchar>& frame, DiehlAddressTransformMethod transform_method)
 {
     if (transform_method == DiehlAddressTransformMethod::SWAPPING)
     {
@@ -164,7 +164,7 @@ void transformDiehlAddress(vector<uchar>& frame, DiehlAddressTransformMethod tra
 }
 
 // Diehl: decode LFSR encrypted data used in Izar/PRIOS and Sharky meters
-vector<uchar> decodeDiehlLfsr(const vector<uchar> &origin, const vector<uchar> &frame, uint32_t key, DiehlLfsrCheckMethod check_method, uint32_t check_value)
+std::vector<uchar> decodeDiehlLfsr(const std::vector<uchar> &origin, const std::vector<uchar> &frame, uint32_t key, DiehlLfsrCheckMethod check_method, uint32_t check_value)
 {
     // modify seed key with header values
     key ^= uint32FromBytes(origin, 2); // manufacturer + address[0-1]
@@ -172,7 +172,7 @@ vector<uchar> decodeDiehlLfsr(const vector<uchar> &origin, const vector<uchar> &
     key ^= uint32FromBytes(frame, 10); // ci + some more bytes from the telegram...
 
     int size = frame.size() - 15;
-    vector<uchar> decoded(size);
+    std::vector<uchar> decoded(size);
 
     for (int i = 0; i < size; ++i) {
         // calculate new key (LFSR)
@@ -212,7 +212,7 @@ vector<uchar> decodeDiehlLfsr(const vector<uchar> &origin, const vector<uchar> &
     return decoded;
 }
 
-uint32_t uint32FromBytes(const vector<uchar> &data, int offset, bool reverse)
+uint32_t uint32FromBytes(const std::vector<uchar> &data, int offset, bool reverse)
 {
     if (reverse)
         return ((uint32_t)data[offset + 3] << 24) |
@@ -226,7 +226,7 @@ uint32_t uint32FromBytes(const vector<uchar> &data, int offset, bool reverse)
             (uint32_t)data[offset + 3];
 }
 
-uint32_t convertKey(const vector<uchar> &bytes)
+uint32_t convertKey(const std::vector<uchar> &bytes)
 {
     uint32_t key1 = uint32FromBytes(bytes, 0);
     uint32_t key2 = uint32FromBytes(bytes, 4);
@@ -236,28 +236,28 @@ uint32_t convertKey(const vector<uchar> &bytes)
 
 uint32_t convertKey(const char *hex)
 {
-    vector<uchar> bytes;
+    std::vector<uchar> bytes;
     hex2bin(hex, &bytes);
     return convertKey(bytes);
 }
 
 // Common: add default manufacturers key if none specified and we know one for the given frame
-void addDefaultManufacturerKeyIfAny(const vector<uchar> &frame, TPLSecurityMode tpl_sec_mode, MeterKeys *meter_keys)
+void addDefaultManufacturerKeyIfAny(const std::vector<uchar> &frame, TPLSecurityMode tpl_sec_mode, MeterKeys *meter_keys)
 {
     if (!meter_keys->hasConfidentialityKey()
         && tpl_sec_mode == TPLSecurityMode::AES_CBC_IV
         && detectDiehlFrameInterpretation(frame) == DiehlFrameInterpretation::OMS)
     {
-        vector<uchar> half;
+        std::vector<uchar> half;
         hex2bin(PRIOS_DEFAULT_KEY2, &half);
-        meter_keys->confidentiality_key = vector<uchar>(half.begin(), half.end());
+        meter_keys->confidentiality_key = std::vector<uchar>(half.begin(), half.end());
         meter_keys->confidentiality_key.insert(meter_keys->confidentiality_key.end(), half.begin(), half.end());
         debug("(mfct) added default key\n");
     }
 }
 
 // Diehl: initialize support of default keys in a meter
-void initializeDiehlDefaultKeySupport(const vector<uchar> &confidentiality_key, vector<uint32_t>& keys)
+void initializeDiehlDefaultKeySupport(const std::vector<uchar> &confidentiality_key, std::vector<uint32_t>& keys)
 {
     if (!confidentiality_key.empty())
         keys.push_back(convertKey(confidentiality_key));
@@ -271,7 +271,7 @@ void initializeDiehlDefaultKeySupport(const vector<uchar> &confidentiality_key, 
 }
 
 // Diehl: Is payload real data crypted (LFSR)?
-bool mustDecryptDiehlRealData(const vector<uchar>& frame)
+bool mustDecryptDiehlRealData(const std::vector<uchar>& frame)
 {
     DiehlFrameInterpretation fi = detectDiehlFrameInterpretation(frame);
     debug("(diehl) frame %s\n", toString(fi));
@@ -279,12 +279,12 @@ bool mustDecryptDiehlRealData(const vector<uchar>& frame)
 }
 
 // Diehl: decrypt real data payload (LFSR)
-bool decryptDielhRealData(Telegram *t, vector<uchar> &frame, vector<uchar>::iterator &pos, const vector<uchar> &confidentiality_key)
+bool decryptDielhRealData(Telegram *t, std::vector<uchar> &frame, std::vector<uchar>::iterator &pos, const std::vector<uchar> &confidentiality_key)
 {
-    vector<uint32_t> keys;
+    std::vector<uint32_t> keys;
     initializeDiehlDefaultKeySupport(confidentiality_key, keys);
 
-    vector<uchar> decoded_content;
+    std::vector<uchar> decoded_content;
     for (auto& key : keys) {
         decoded_content = decodeDiehlLfsr(t->original.empty() ? frame : t->original, frame, key, DiehlLfsrCheckMethod::CHECKSUM_AND_0XEF, frame[14] & 0xEF);
         if (!decoded_content.empty())
@@ -349,16 +349,16 @@ const char *toString(DiehlAddressTransformMethod m)
     return "?";
 }
 
-void qdsExtractWalkByField(Telegram *t, Meter *driver, DVEntry &mfctEntry, int pos, int n, const string &key_s, const string &fieldName, Quantity quantity) {
-    string bytes = mfctEntry.value.substr(pos, n);
+void qdsExtractWalkByField(Telegram *t, Meter *driver, DVEntry &mfctEntry, int pos, int n, const std::string &key_s, const std::string &fieldName, Quantity quantity) {
+    std::string bytes = mfctEntry.value.substr(pos, n);
 
     DifVifKey key(key_s);
     DVEntry fieldEntry(0,
                        key,
                        MeasurementType::Instantaneous,
                        key.vif(),
-                       set<VIFCombinable>(),
-                       set<uint16_t>(),
+                       std::set<VIFCombinable>(),
+                       std::set<uint16_t>(),
                        AnyStorageNr,
                        AnyTariffNr,
                        SubUnitNr(0),
@@ -370,7 +370,7 @@ void qdsExtractWalkByField(Telegram *t, Meter *driver, DVEntry &mfctEntry, int p
     }
 
     fieldInfo->performExtraction(driver, t, &fieldEntry);
-    string info = "*** " + bytes + " (" + fieldInfo->renderJson(driver, &fieldEntry) + ")";
+    std::string info = "*** " + bytes + " (" + fieldInfo->renderJson(driver, &fieldEntry) + ")";
 
     t->addSpecialExplanation(mfctEntry.offset + pos / 2, n / 2, KindOfData::CONTENT, Understanding::FULL, info.c_str());
 }

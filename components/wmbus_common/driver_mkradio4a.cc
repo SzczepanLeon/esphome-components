@@ -34,7 +34,7 @@ namespace
         di.addLinkMode(LinkMode::C1);
         di.addDetection(MANUFACTURER_HYD, 0x06,  0xfe);
         di.addDetection(MANUFACTURER_TCH, 0x37,  0x95);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)

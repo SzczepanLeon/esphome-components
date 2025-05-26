@@ -60,7 +60,7 @@ namespace
         di.addDetection(MANUFACTURER_ZRI, 0x0d, 0x88); // Telegram type T1A1
         di.addDetection(MANUFACTURER_ZRI, 0x07, 0x88); // Telegram type T1A2
         di.addDetection(MANUFACTURER_ZRI, 0x04, 0x88); // Telegram type T1B
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)

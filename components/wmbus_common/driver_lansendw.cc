@@ -30,7 +30,7 @@ namespace
         di.setDefaultFields("name,id,status,timestamp");
         di.setMeterType(MeterType::DoorWindowDetector);
         di.addLinkMode(LinkMode::T1);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
         di.addDetection(MANUFACTURER_LAS,  0x1d,  0x07);
     });
 

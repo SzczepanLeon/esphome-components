@@ -34,7 +34,7 @@ namespace
         di.addLinkMode(LinkMode::T1);
         di.addDetection(MANUFACTURER_QDS, 0x07, 0x1a);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -55,7 +55,7 @@ namespace
 
     void Driver::processContent(Telegram *t)
     {
-        string content;
+        std::string content;
         int offset;
         bool ok = extractDVHexString(&t->dv_entries,
                                      "0DFF5F",
@@ -67,7 +67,7 @@ namespace
         // 00826100 _ 35AE6A130B8A8CF07C0C6F9EA35C8C5274671347D73DA9810CD664F2F9616388CE7B4835BD06D7E2253741F2667DC5D8C
         if (content.length() >= 8)
         {
-            vector<uchar> bytes;
+            std::vector<uchar> bytes;
             content = content.substr(0, 8);
             ok = hex2bin(content, &bytes);
             if (!ok) return;

@@ -35,7 +35,7 @@ namespace
         di.addDetection(MANUFACTURER_BFW,0x08,  0x02);
         di.forceMfctIndex(2); // First two bytes are 2f2f after that its completely mfct specific.
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -52,8 +52,8 @@ namespace
 
         for (int i=0; i<18; ++i)
         {
-            string info = tostrprintf("prev_%02d", i+1);
-            string about = tostrprintf("Energy consumption %d months ago.", i+1);
+            std::string info = tostrprintf("prev_%02d", i+1);
+            std::string about = tostrprintf("Energy consumption %d months ago.", i+1);
 
             addNumericField(info,
                             Quantity::HCA,
@@ -67,7 +67,7 @@ namespace
     }
 
 
-    int getHistoric(int n, vector<uchar> &content)
+    int getHistoric(int n, std::vector<uchar> &content)
     {
         assert(n >= 0 && n < 18);
         assert(content.size() >= 40);
@@ -107,7 +107,7 @@ namespace
     */
     void Driver::processContent(Telegram *t)
     {
-        vector<uchar> content;
+        std::vector<uchar> content;
         t->extractPayload(&content);
 
         if (content.size() < 40) return;
@@ -115,7 +115,7 @@ namespace
         double current_hca = content[6]*256 + content[7];
         setNumericValue("current", Unit::HCA, current_hca);
 
-        string msg = tostrprintf("*** %02X%02X \"current_hca\":%g", content[6], content[7], current_hca);
+        std::string msg = tostrprintf("*** %02X%02X \"current_hca\":%g", content[6], content[7], current_hca);
         t->addSpecialExplanation(6+t->header_size, 2, KindOfData::CONTENT, Understanding::FULL, msg.c_str());
 
         double prev_hca = content[4]*256 + content[5];
@@ -124,7 +124,7 @@ namespace
         msg = tostrprintf("*** %02X%02X \"prev_hca\":%g", content[4], content[5], prev_hca);
         t->addSpecialExplanation(4+t->header_size, 2, KindOfData::CONTENT, Understanding::FULL, msg.c_str());
 
-        string device_date = tostrprintf("20%02x-%02x-%02x", content[39], content[39-1], content[39-2]);
+        std::string device_date = tostrprintf("20%02x-%02x-%02x", content[39], content[39-1], content[39-2]);
         setStringValue("device_date", device_date, NULL);
 
         msg = tostrprintf("*** %02X%02X%02X \"device_date\":\"%s\"", content[39-2], content[39-1], content[39],
@@ -134,7 +134,7 @@ namespace
 
         for (int i=0; i<18; ++i)
         {
-            string info = tostrprintf("prev_%02d", i+1);
+            std::string info = tostrprintf("prev_%02d", i+1);
             double historic_hca = getHistoric(i, content);
             setNumericValue(info, Unit::HCA, historic_hca);
         }

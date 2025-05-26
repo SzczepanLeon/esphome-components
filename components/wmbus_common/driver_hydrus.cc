@@ -39,7 +39,7 @@ namespace
         di.addDetection(MANUFACTURER_DME,  0x06,  0x70);
         di.addDetection(MANUFACTURER_DME,  0x16,  0x70);
 
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)

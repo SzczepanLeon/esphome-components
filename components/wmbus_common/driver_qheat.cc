@@ -38,7 +38,7 @@ namespace
         di.addDetection(MANUFACTURER_QDS, 0x04,  0x46);
         di.addDetection(MANUFACTURER_QDS, 0x37,  0x23);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) :  MeterCommonImplementation(mi, di)
@@ -157,7 +157,7 @@ namespace
     void Driver::processContent(Telegram *t) {
         auto it = t->dv_entries.find("0779");
         if (it != t->dv_entries.end()) {
-            vector<uchar> v;
+            std::vector<uchar> v;
             auto entry = it->second.second;
             hex2bin(entry.value.substr(0, 8), &v);
             // FIXME PROBLEM

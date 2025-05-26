@@ -44,7 +44,7 @@ namespace
             di.addLinkMode(LinkMode::C1);
             di.addDetection(MANUFACTURER_LUG, 0x04,  0x07);
             di.addDetection(MANUFACTURER_LUG, 0x04,  0x0a);
-            di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+            di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
         });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -112,7 +112,7 @@ namespace
 
         for (int i = 1; i <= 13; ++i)
         {
-            string key, info;
+            std::string key, info;
             strprintf(&key, "prev_%d_month", i);
             strprintf(&info, "Energy consumption %d months back.", i);
 

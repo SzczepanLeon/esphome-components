@@ -36,9 +36,6 @@
 #include<sys/types.h>
 #include<time.h>
 
-using namespace std;
-
-
 int char2int(char input)
 {
     if(input >= '0' && input <= '9')
@@ -104,7 +101,7 @@ bool isHexStringFlex(const char* txt, bool *invalid)
     return isHexString(txt, invalid, false);
 }
 
-bool isHexStringFlex(const string &txt, bool *invalid)
+bool isHexStringFlex(const std::string &txt, bool *invalid)
 {
     return isHexString(txt.c_str(), invalid, false);
 }
@@ -114,12 +111,12 @@ bool isHexStringStrict(const char* txt, bool *invalid)
     return isHexString(txt, invalid, true);
 }
 
-bool isHexStringStrict(const string &txt, bool *invalid)
+bool isHexStringStrict(const std::string &txt, bool *invalid)
 {
     return isHexString(txt.c_str(), invalid, true);
 }
 
-bool hex2bin(const char* src, vector<uchar> *target)
+bool hex2bin(const char* src, std::vector<uchar> *target)
 {
     if (!src) return false;
     while(*src && src[1]) {
@@ -137,12 +134,12 @@ bool hex2bin(const char* src, vector<uchar> *target)
     return true;
 }
 
-bool hex2bin(const string &src, vector<uchar> *target)
+bool hex2bin(const std::string &src, std::vector<uchar> *target)
 {
     return hex2bin(src.c_str(), target);
 }
 
-bool hex2bin(vector<uchar> &src, vector<uchar> *target)
+bool hex2bin(std::vector<uchar> &src, std::vector<uchar> *target)
 {
     if (src.size() % 2 == 1) return false;
     for (size_t i=0; i<src.size(); i+=2) {
@@ -158,8 +155,8 @@ bool hex2bin(vector<uchar> &src, vector<uchar> *target)
 
 char const hexChar[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A','B','C','D','E','F'};
 
-string bin2hex(const vector<uchar> &target) {
-    string str;
+std::string bin2hex(const std::vector<uchar> &target) {
+    std::string str;
     for (size_t i = 0; i < target.size(); ++i) {
         const char ch = target[i];
         str.append(&hexChar[(ch  & 0xF0) >> 4], 1);
@@ -168,8 +165,8 @@ string bin2hex(const vector<uchar> &target) {
     return str;
 }
 
-string bin2hex(vector<uchar>::iterator data, vector<uchar>::iterator end, int len) {
-    string str;
+std::string bin2hex(std::vector<uchar>::iterator data, std::vector<uchar>::iterator end, int len) {
+    std::string str;
     while (data != end && len-- > 0) {
         const char ch = *data;
         data++;
@@ -179,9 +176,9 @@ string bin2hex(vector<uchar>::iterator data, vector<uchar>::iterator end, int le
     return str;
 }
 
-string bin2hex(vector<uchar> &data, int offset, int len) {
-    string str;
-    vector<uchar>::iterator i = data.begin();
+std::string bin2hex(std::vector<uchar> &data, int offset, int len) {
+    std::string str;
+    std::vector<uchar>::iterator i = data.begin();
     i += offset;
     while (i != data.end() && len-- > 0) {
         const char ch = *i;
@@ -192,8 +189,8 @@ string bin2hex(vector<uchar> &data, int offset, int len) {
     return str;
 }
 
-string safeString(vector<uchar> &target) {
-    string str;
+std::string safeString(std::vector<uchar> &target) {
+    std::string str;
     for (size_t i = 0; i < target.size(); ++i) {
         const char ch = target[i];
         if (ch >= 32 && ch < 127 && ch != '<' && ch != '>') {
@@ -208,9 +205,9 @@ string safeString(vector<uchar> &target) {
     return str;
 }
 
-string tostrprintf(const char* fmt, ...)
+std::string tostrprintf(const char* fmt, ...)
 {
-    string s;
+    std::string s;
     char buf[4096];
     va_list args;
     va_start(args, fmt);
@@ -224,9 +221,9 @@ string tostrprintf(const char* fmt, ...)
 
 // Why a pointer here? To avoid the compiler warning:
 // warning: passing an object of reference type to 'va_start' has undefined behavior [-Wvarargs]
-string tostrprintf(const string *fmt, ...)
+std::string tostrprintf(const std::string *fmt, ...)
 {
-    string s;
+    std::string s;
     char buf[4096];
     va_list args;
     va_start(args, fmt); // <<<<< here fmt must be a native type.
@@ -237,7 +234,7 @@ string tostrprintf(const string *fmt, ...)
     return s;
 }
 
-void strprintf(string *s, const char* fmt, ...)
+void strprintf(std::string *s, const char* fmt, ...)
 {
     char buf[4096];
     va_list args;
@@ -266,9 +263,9 @@ void shiftLeft(uchar *srca, uchar *srcb, int len)
     return;
 }
 
-string format3fdot3f(double v)
+std::string format3fdot3f(double v)
 {
-    string r;
+    std::string r;
     strprintf(&r, "%3.3f", v);
     return r;
 }
@@ -320,7 +317,7 @@ bool is_ascii(char c)
     return false;
 }
 
-bool isValidAlias(const string& alias)
+bool isValidAlias(const std::string& alias)
 {
     if (alias.length() == 0) return false;
 
@@ -334,7 +331,7 @@ bool isValidAlias(const string& alias)
     return true;
 }
 
-bool isFrequency(const string& fq)
+bool isFrequency(const std::string& fq)
 {
     int len = fq.length();
     if (len == 0) return false;
@@ -346,7 +343,7 @@ bool isFrequency(const string& fq)
     return true;
 }
 
-bool isNumber(const string& fq)
+bool isNumber(const std::string& fq)
 {
     int len = fq.length();
     if (len == 0) return false;
@@ -370,33 +367,33 @@ void incrementIV(uchar *iv, size_t len) {
     }
 }
 
-void debugPayload(const string& intro, vector<uchar> &payload)
+void debugPayload(const std::string& intro, std::vector<uchar> &payload)
 {
-    string msg = bin2hex(payload);
+    std::string msg = bin2hex(payload);
     debug("%s \"%s\"\n", intro.c_str(), msg.c_str());
 }
 
-void debugPayload(const string& intro, vector<uchar> &payload, vector<uchar>::iterator &pos)
+void debugPayload(const std::string& intro, std::vector<uchar> &payload, std::vector<uchar>::iterator &pos)
 {
-    string msg = bin2hex(pos, payload.end(), 1024);
+    std::string msg = bin2hex(pos, payload.end(), 1024);
     debug("%s \"%s\"\n", intro.c_str(), msg.c_str());
 }
 
-void logTelegram(vector<uchar> &original, vector<uchar> &parsed, int header_size, int suffix_size)
+void logTelegram(std::vector<uchar> &original, std::vector<uchar> &parsed, int header_size, int suffix_size)
 {
-    vector<uchar> logged = parsed;
+    std::vector<uchar> logged = parsed;
     if (!original.empty())
     {
-        logged = vector<uchar>(parsed);
+        logged = std::vector<uchar>(parsed);
         for (unsigned int i = 0; i < original.size(); i++)
         {
             logged[i] = original[i];
         }
     }
     time_t diff = time(NULL)-telegrams_start_time_;
-    string parsed_hex = bin2hex(logged);
-    string header = parsed_hex.substr(0, header_size*2);
-    string content = parsed_hex.substr(header_size*2);
+    std::string parsed_hex = bin2hex(logged);
+    std::string header = parsed_hex.substr(0, header_size*2);
+    std::string content = parsed_hex.substr(header_size*2);
     if (suffix_size == 0)
     {
         notice("telegram=|%s_%s|+%ld\n",
@@ -405,16 +402,16 @@ void logTelegram(vector<uchar> &original, vector<uchar> &parsed, int header_size
     else
     {
         assert((suffix_size*2) < (int)content.size());
-        string content2 = content.substr(0, content.size()-suffix_size*2);
-        string suffix = content.substr(content.size()-suffix_size*2);
+        std::string content2 = content.substr(0, content.size()-suffix_size*2);
+        std::string suffix = content.substr(content.size()-suffix_size*2);
         notice("telegram=|%s_%s_%s|+%ld\n",
                 header.c_str(), content2.c_str(), suffix.c_str(), diff);
     }
 }
 
-string eatTo(vector<uchar> &v, vector<uchar>::iterator &i, int c, size_t max, bool *eof, bool *err)
+std::string eatTo(std::vector<uchar> &v, std::vector<uchar>::iterator &i, int c, size_t max, bool *eof, bool *err)
 {
-    string s;
+    std::string s;
 
     *eof = false;
     *err = false;
@@ -438,7 +435,7 @@ string eatTo(vector<uchar> &v, vector<uchar>::iterator &i, int c, size_t max, bo
     return s;
 }
 
-void padWithZeroesTo(vector<uchar> *content, size_t len, vector<uchar> *full_content)
+void padWithZeroesTo(std::vector<uchar> *content, size_t len, std::vector<uchar> *full_content)
 {
     if (content->size() < len) {
         warning("Padded with zeroes.", (int)len);
@@ -451,8 +448,8 @@ void padWithZeroesTo(vector<uchar> *content, size_t len, vector<uchar> *full_con
     }
 }
 
-static string space = "                                                                                                                                                               ";
-string padLeft(const string& input, int width)
+static std::string space = "                                                                                                                                                               ";
+std::string padLeft(const std::string& input, int width)
 {
     int w = width-input.size();
     if (w < 0) return input;
@@ -460,9 +457,9 @@ string padLeft(const string& input, int width)
     return space.substr(0, w)+input;
 }
 
-int parseTime(const string& s)
+int parseTime(const std::string& s)
 {
-    string time = s;
+    std::string time = s;
     int mul = 1;
     if (time.back() == 'h') {
         time.pop_back();
@@ -546,7 +543,7 @@ bool crc16_CCITT_check(uchar *data, uint16_t length)
     return crc == CRC16_GOOD_VALUE;
 }
 
-string eatToSkipWhitespace(vector<char> &v, vector<char>::iterator &i, int c, size_t max, bool *eof, bool *err)
+std::string eatToSkipWhitespace(std::vector<char> &v, std::vector<char>::iterator &i, int c, size_t max, bool *eof, bool *err)
 {
     eatWhitespace(v, i, eof);
     if (*eof) {
@@ -555,14 +552,14 @@ string eatToSkipWhitespace(vector<char> &v, vector<char>::iterator &i, int c, si
         }
         return "";
     }
-    string s = eatTo(v,i,c,max,eof,err);
+    std::string s = eatTo(v,i,c,max,eof,err);
     trimWhitespace(&s);
     return s;
 }
 
-string eatTo(vector<char> &v, vector<char>::iterator &i, int c, size_t max, bool *eof, bool *err)
+std::string eatTo(std::vector<char> &v, std::vector<char>::iterator &i, int c, size_t max, bool *eof, bool *err)
 {
-    string s;
+    std::string s;
 
     *eof = false;
     *err = false;
@@ -586,7 +583,7 @@ string eatTo(vector<char> &v, vector<char>::iterator &i, int c, size_t max, bool
     return s;
 }
 
-void eatWhitespace(vector<char> &v, vector<char>::iterator &i, bool *eof)
+void eatWhitespace(std::vector<char> &v, std::vector<char>::iterator &i, bool *eof)
 {
     *eof = false;
     while (i != v.end() && (*i == ' ' || *i == '\t'))
@@ -598,21 +595,21 @@ void eatWhitespace(vector<char> &v, vector<char>::iterator &i, bool *eof)
     }
 }
 
-void trimWhitespace(string *s)
+void trimWhitespace(std::string *s)
 {
     const char *ws = " \t";
     s->erase(0, s->find_first_not_of(ws));
     s->erase(s->find_last_not_of(ws) + 1);
 }
 
-string strdate(struct tm *date)
+std::string strdate(struct tm *date)
 {
     char buf[256];
     strftime(buf, sizeof(buf), "%Y-%m-%d", date);
-    return string(buf);
+    return std::string(buf);
 }
 
-string strdate(double v)
+std::string strdate(double v)
 {
     if (::isnan(v)) return "null";
     struct tm date;
@@ -621,14 +618,14 @@ string strdate(double v)
     return strdate(&date);
 }
 
-string strdatetime(struct tm *datetime)
+std::string strdatetime(struct tm *datetime)
 {
     char buf[256];
     strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M", datetime);
-    return string(buf);
+    return std::string(buf);
 }
 
-string strdatetime(double v)
+std::string strdatetime(double v)
 {
     if (::isnan(v)) return "null";
     struct tm datetime;
@@ -637,14 +634,14 @@ string strdatetime(double v)
     return strdatetime(&datetime);
 }
 
-string strdatetimesec(struct tm *datetime)
+std::string strdatetimesec(struct tm *datetime)
 {
     char buf[256];
     strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", datetime);
-    return string(buf);
+    return std::string(buf);
 }
 
-string strdatetimesec(double v)
+std::string strdatetimesec(double v)
 {
     struct tm datetime;
     time_t t = v;
@@ -717,7 +714,7 @@ void addMonths(struct tm *date, int months)
     }
     else
     {
-        day = min(date->tm_mday, get_days_in_month(year, month));
+        day = std::min(date->tm_mday, get_days_in_month(year, month));
     }
 
     date->tm_year = year;
@@ -736,12 +733,12 @@ int countSetBits(int v)
     return n;
 }
 
-bool startsWith(const string& s, string &prefix)
+bool startsWith(const std::string& s, std::string &prefix)
 {
     return startsWith(s, prefix.c_str());
 }
 
-bool startsWith(const string& s, const char *prefix)
+bool startsWith(const std::string& s, const char *prefix)
 {
     size_t len = strlen(prefix);
     if (s.length() < len) return false;
@@ -749,11 +746,11 @@ bool startsWith(const string& s, const char *prefix)
     return !strncmp(&s[0], prefix, len);
 }
 
-string makeQuotedJson(const string& s)
+std::string makeQuotedJson(const std::string& s)
 {
     size_t p = s.find('=');
-    string key, value;
-    if (p != string::npos)
+    std::string key, value;
+    if (p != std::string::npos)
     {
         key = s.substr(0,p);
         value = s.substr(p+1);
@@ -764,10 +761,10 @@ string makeQuotedJson(const string& s)
         value = "";
     }
 
-    return string("\"")+key+"\":\""+value+"\"";
+    return std::string("\"")+key+"\":\""+value+"\"";
 }
 
-string currentYear()
+std::string currentYear()
 {
     char datetime[40];
     memset(datetime, 0, sizeof(datetime));
@@ -776,10 +773,10 @@ string currentYear()
     gettimeofday(&tv, NULL);
 
     strftime(datetime, 20, "%Y", localtime(&tv.tv_sec));
-    return string(datetime);
+    return std::string(datetime);
 }
 
-string currentYearMonth()
+std::string currentYearMonth()
 {
     char datetime[40];
     memset(datetime, 0, sizeof(datetime));
@@ -788,10 +785,10 @@ string currentYearMonth()
     gettimeofday(&tv, NULL);
 
     strftime(datetime, 20, "%Y-%m", localtime(&tv.tv_sec));
-    return string(datetime);
+    return std::string(datetime);
 }
 
-string currentYearMonthDay()
+std::string currentYearMonthDay()
 {
     char datetime[40];
     memset(datetime, 0, sizeof(datetime));
@@ -800,10 +797,10 @@ string currentYearMonthDay()
     gettimeofday(&tv, NULL);
 
     strftime(datetime, 20, "%Y-%m-%d", localtime(&tv.tv_sec));
-    return string(datetime);
+    return std::string(datetime);
 }
 
-string currentHour()
+std::string currentHour()
 {
     char datetime[40];
     memset(datetime, 0, sizeof(datetime));
@@ -812,10 +809,10 @@ string currentHour()
     gettimeofday(&tv, NULL);
 
     strftime(datetime, 20, "%Y-%m-%d_%H", localtime(&tv.tv_sec));
-    return string(datetime);
+    return std::string(datetime);
 }
 
-string currentMinute()
+std::string currentMinute()
 {
     char datetime[40];
     memset(datetime, 0, sizeof(datetime));
@@ -824,10 +821,10 @@ string currentMinute()
     gettimeofday(&tv, NULL);
 
     strftime(datetime, 20, "%Y-%m-%d_%H:%M", localtime(&tv.tv_sec));
-    return string(datetime);
+    return std::string(datetime);
 }
 
-string currentSeconds()
+std::string currentSeconds()
 {
     char datetime[40];
     memset(datetime, 0, sizeof(datetime));
@@ -836,10 +833,10 @@ string currentSeconds()
     gettimeofday(&tv, NULL);
 
     strftime(datetime, 20, "%Y-%m-%d_%H:%M:%S", localtime(&tv.tv_sec));
-    return string(datetime);
+    return std::string(datetime);
 }
 
-string currentMicros()
+std::string currentMicros()
 {
     char datetime[40];
     memset(datetime, 0, sizeof(datetime));
@@ -848,17 +845,17 @@ string currentMicros()
     gettimeofday(&tv, NULL);
 
     strftime(datetime, 20, "%Y-%m-%d_%H:%M:%S", localtime(&tv.tv_sec));
-    return string(datetime)+"."+to_string(tv.tv_usec);
+    return std::string(datetime)+"."+std::to_string(tv.tv_usec);
 }
 
-bool hasBytes(int n, vector<uchar>::iterator &pos, vector<uchar> &frame)
+bool hasBytes(int n, std::vector<uchar>::iterator &pos, std::vector<uchar> &frame)
 {
-    int remaining = distance(pos, frame.end());
+    int remaining = std::distance(pos, frame.end());
     if (remaining < n) return false;
     return true;
 }
 
-bool startsWith(const string& s, vector<uchar> &data)
+bool startsWith(const std::string& s, std::vector<uchar> &data)
 {
     if (s.length() > data.size()) return false;
 
@@ -913,7 +910,7 @@ bool extract_times(const char *p, TimePeriod *tp)
     return true;
 }
 
-int day_name_to_nr(const string& name)
+int day_name_to_nr(const std::string& name)
 {
     if (name == "mon") return 0;
     if (name == "tue") return 1;
@@ -929,7 +926,7 @@ bool extract_days(char *p, TimePeriod *tp)
 {
     if (strlen(p) == 3)
     {
-        string s = p;
+        std::string s = p;
         int d = day_name_to_nr(s);
         if (d == -1) return false;
         tp->day_in_week_from = d;
@@ -939,8 +936,8 @@ bool extract_days(char *p, TimePeriod *tp)
 
     if (strlen(p) != 7) return false; // Expect mon-fri
     if (p[3] != '-') return false; // Must have - in middle.
-    string from = string(p, p+3);
-    string to = string(p+4, p+7);
+    std::string from = std::string(p, p+3);
+    std::string to = std::string(p+4, p+7);
 
     int f = day_name_to_nr(from);
     int t = day_name_to_nr(to);
@@ -969,7 +966,7 @@ bool extract_single_period(char *tok, TimePeriod *tp)
     return true;
 }
 
-bool extract_periods(const string& periods, vector<TimePeriod> *period_structs)
+bool extract_periods(const std::string& periods, std::vector<TimePeriod> *period_structs)
 {
     if (periods.length() == 0) return false;
 
@@ -1000,19 +997,19 @@ bool extract_periods(const string& periods, vector<TimePeriod> *period_structs)
     return true;
 }
 
-bool isValidTimePeriod(const string& periods)
+bool isValidTimePeriod(const std::string& periods)
 {
-    vector<TimePeriod> period_structs;
+    std::vector<TimePeriod> period_structs;
     bool ok = extract_periods(periods, &period_structs);
     return ok;
 }
 
-bool isInsideTimePeriod(time_t now, string periods)
+bool isInsideTimePeriod(time_t now, std::string periods)
 {
     struct tm nowt {};
     localtime_r(&now, &nowt);
 
-    vector<TimePeriod> period_structs;
+    std::vector<TimePeriod> period_structs;
 
     bool ok = extract_periods(periods, &period_structs);
     if (!ok) return false;
@@ -1030,7 +1027,7 @@ size_t memoryUsage()
     return 0;
 }
 
-vector<string> alarm_shells_;
+std::vector<std::string> alarm_shells_;
 
 const char* toString(Alarm type)
 {
@@ -1046,15 +1043,15 @@ const char* toString(Alarm type)
 
 
 
-void setAlarmShells(vector<string> &alarm_shells)
+void setAlarmShells(std::vector<std::string> &alarm_shells)
 {
     alarm_shells_ = alarm_shells;
 }
 
-bool stringFoundCaseIgnored(const string& h, const string& n)
+bool stringFoundCaseIgnored(const std::string& h, const std::string& n)
 {
-    string haystack = h;
-    string needle = n;
+    std::string haystack = h;
+    std::string needle = n;
     // Modify haystack and needle, in place, to become lowercase.
     for_each(haystack.begin(), haystack.end(), [](char & c) {
         c = ::tolower(c);
@@ -1064,15 +1061,15 @@ bool stringFoundCaseIgnored(const string& h, const string& n)
     });
 
     // Now use default c++ find, return true if needle was found in haystack.
-    return haystack.find(needle) != string::npos;
+    return haystack.find(needle) != std::string::npos;
 }
 
-vector<string> splitString(const string &s, char c)
+std::vector<std::string> splitString(const std::string &s, char c)
 {
     auto end = s.cend();
     auto start = end;
 
-    vector<string> v;
+    std::vector<std::string> v;
     for (auto i = s.cbegin(); i != end; ++i)
     {
         if (*i != c)
@@ -1096,29 +1093,29 @@ vector<string> splitString(const string &s, char c)
     return v;
 }
 
-set<string> splitStringIntoSet(const string &s, char c)
+std::set<std::string> splitStringIntoSet(const std::string &s, char c)
 {
-    vector<string> v = splitString(s, c);
-    set<string> words(v.begin(), v.end());
+    std::vector<std::string> v = splitString(s, c);
+    std::set<std::string> words(v.begin(), v.end());
     return words;
 }
 
-vector<string> splitDeviceString(const string& ds)
+std::vector<std::string> splitDeviceString(const std::string& ds)
 {
-    string s = ds;
-    string cmd;
+    std::string s = ds;
+    std::string cmd;
 
     // The CMD(...) might have colons inside.
     // Check this first.
     size_t p = s.rfind(":CMD(");
-    if (s.back() == ')' && p != string::npos)
+    if (s.back() == ')' && p != std::string::npos)
     {
         cmd = s.substr(p+1);
         s = s.substr(0,p);
     }
 
     // Now we can split.
-    vector<string> r = splitString(s, ':');
+    std::vector<std::string> r = splitString(s, ':');
 
     if (cmd != "")
     {
@@ -1128,33 +1125,33 @@ vector<string> splitDeviceString(const string& ds)
     return r;
 }
 
-uint32_t indexFromRtlSdrName(const string& s)
+uint32_t indexFromRtlSdrName(const std::string& s)
 {
     size_t p = s.find('_');
-    if (p == string::npos) return -1;
-    string n = s.substr(0, p);
+    if (p == std::string::npos) return -1;
+    std::string n = s.substr(0, p);
     return (uint32_t)atoi(n.c_str());
 }
 
 #define KB 1024ull
 
-string helper(size_t scale, size_t s, string suffix)
+std::string helper(size_t scale, size_t s, std::string suffix)
 {
     size_t o = s;
     s /= scale;
     size_t diff = o-(s*scale);
     if (diff == 0) {
-        return to_string(s) + ".00"+suffix;
+        return std::to_string(s) + ".00"+suffix;
     }
     size_t dec = (int)(100*(diff+1) / scale);
-    return to_string(s) + ((dec<10)?".0":".") + to_string(dec) + suffix;
+    return std::to_string(s) + ((dec<10)?".0":".") + std::to_string(dec) + suffix;
 }
 
-string humanReadableTwoDecimals(size_t s)
+std::string humanReadableTwoDecimals(size_t s)
 {
     if (s < KB)
     {
-        return to_string(s) + " B";
+        return std::to_string(s) + " B";
     }
     if (s < KB * KB)
     {
@@ -1179,27 +1176,27 @@ string humanReadableTwoDecimals(size_t s)
 #endif
 }
 
-string dirname(const string& p)
+std::string dirname(const std::string& p)
 {
     size_t s = p.rfind('/');
-    if (s == string::npos) return "";
+    if (s == std::string::npos) return "";
     return p.substr(0, s);
 }
 
-bool parseExtras(const string& s, map<string,string> *extras)
+bool parseExtras(const std::string& s, std::map<std::string,std::string> *extras)
 {
-    vector<string> parts = splitString(s, ' ');
+    std::vector<std::string> parts = splitString(s, ' ');
 
     for (auto &p : parts)
     {
-        vector<string> kv = splitString(p, '=');
+        std::vector<std::string> kv = splitString(p, '=');
         if (kv.size() != 2) return false;
         (*extras)[kv[0]] = kv[1];
     }
     return true;
 }
 
-bool isValidBps(const string& b)
+bool isValidBps(const std::string& b)
 {
     if (b == "300") return true;
     if (b == "600") return true;
@@ -1215,7 +1212,7 @@ bool isValidBps(const string& b)
     return false;
 }
 
-bool findBytes(vector<uchar> &v, uchar a, uchar b, uchar c, size_t *out)
+bool findBytes(std::vector<uchar> &v, uchar a, uchar b, uchar c, size_t *out)
 {
     size_t p = 0;
 
@@ -1234,7 +1231,7 @@ bool findBytes(vector<uchar> &v, uchar a, uchar b, uchar c, size_t *out)
     return false;
 }
 
-string reverseBCD(const string& v)
+std::string reverseBCD(const std::string& v)
 {
     int vlen = v.length();
     if (vlen % 2 != 0)
@@ -1242,7 +1239,7 @@ string reverseBCD(const string& v)
         return "BADHEX:"+v;
     }
 
-    string n = "";
+    std::string n = "";
     for (int i=0; i<vlen; i+=2)
     {
         n += v[vlen-2-i];
@@ -1251,9 +1248,9 @@ string reverseBCD(const string& v)
     return n;
 }
 
-string reverseBinaryAsciiSafeToString(const string& v)
+std::string reverseBinaryAsciiSafeToString(const std::string& v)
 {
-    vector<uchar> bytes;
+    std::vector<uchar> bytes;
     bool ok = hex2bin(v, &bytes);
     if (!ok) return "BADHEX:"+v;
     reverse(bytes.begin(), bytes.end());
@@ -1265,7 +1262,7 @@ string reverseBinaryAsciiSafeToString(const string& v)
 #define SLIP_ESC_END         0xdc    /* ESC ESC_END means END data byte */
 #define SLIP_ESC_ESC         0xdd    /* ESC ESC_ESC means ESC data byte */
 
-void addSlipFraming(vector<uchar>& from, vector<uchar> &to)
+void addSlipFraming(std::vector<uchar>& from, std::vector<uchar> &to)
 {
     to.push_back(SLIP_END);
     for (uchar c : from)
@@ -1288,7 +1285,7 @@ void addSlipFraming(vector<uchar>& from, vector<uchar> &to)
     to.push_back(SLIP_END);
 }
 
-void removeSlipFraming(vector<uchar>& from, size_t *frame_length, vector<uchar> &to)
+void removeSlipFraming(std::vector<uchar>& from, size_t *frame_length, std::vector<uchar> &to)
 {
     *frame_length = 0;
     to.clear();
@@ -1339,9 +1336,9 @@ void removeSlipFraming(vector<uchar>& from, size_t *frame_length, vector<uchar> 
 }
 
 // Check if hex string is likely to be ascii
-bool isLikelyAscii(const string& v)
+bool isLikelyAscii(const std::string& v)
 {
-    vector<uchar> val;
+    std::vector<uchar> val;
     bool ok = hex2bin(v, &val);
 
     // For example 64 bits:
@@ -1370,11 +1367,11 @@ bool isLikelyAscii(const string& v)
     return true;
 }
 
-string joinStatusOKStrings(const string &aa, const string &bb)
+std::string joinStatusOKStrings(const std::string &aa, const std::string &bb)
 {
-    string a = aa;
+    std::string a = aa;
     while (a.length() > 0 && a.back() == ' ') a.pop_back();
-    string b = bb;
+    std::string b = bb;
     while (b.length() > 0 && b.back() == ' ') b.pop_back();
 
     if (a == "" || a == "OK" || a == "null")
@@ -1391,11 +1388,11 @@ string joinStatusOKStrings(const string &aa, const string &bb)
     return a+" "+b;
 }
 
-string joinStatusEmptyStrings(const string &aa, const string &bb)
+std::string joinStatusEmptyStrings(const std::string &aa, const std::string &bb)
 {
-    string a = aa;
+    std::string a = aa;
     while (a.length() > 0 && a.back() == ' ') a.pop_back();
-    string b = bb;
+    std::string b = bb;
     while (b.length() > 0 && b.back() == ' ') b.pop_back();
 
     if (a == "" || a == "null")
@@ -1417,10 +1414,10 @@ string joinStatusEmptyStrings(const string &aa, const string &bb)
 }
 
 
-string sortStatusString(const string &a)
+std::string sortStatusString(const std::string &a)
 {
-    set<string> flags;
-    string curr;
+    std::set<std::string> flags;
+    std::string curr;
 
     for (size_t i=0; i<a.length(); ++i)
     {
@@ -1445,7 +1442,7 @@ string sortStatusString(const string &a)
         curr = "";
     }
 
-    string result;
+    std::string result;
     for (auto &s : flags)
     {
         result += s+" ";
@@ -1460,7 +1457,7 @@ string sortStatusString(const string &a)
     return result;
 }
 
-uchar *safeButUnsafeVectorPtr(vector<uchar> &v)
+uchar *safeButUnsafeVectorPtr(std::vector<uchar> &v)
 {
     if (v.size() == 0) return NULL;
     return &v[0];
@@ -1473,7 +1470,7 @@ int strlen_utf8(const char *s)
     return len;
 }
 
-string strTimestampUTC(double v)
+std::string strTimestampUTC(double v)
 {
     char datetime[40];
     memset(datetime, 0, sizeof(datetime));
@@ -1481,7 +1478,7 @@ string strTimestampUTC(double v)
     struct tm ts;
     gmtime_r(&d, &ts);
     strftime(datetime, sizeof(datetime), "%FT%TZ", &ts);
-    return string(datetime);
+    return std::string(datetime);
 }
 
 int toMfctCode(char a, char b, char c)
@@ -1510,7 +1507,7 @@ bool endsWith(const std::string& str, const std::string& suffix)
     return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
 }
 
-string lang_;
+std::string lang_;
 
 const std::string &language()
 {
@@ -1525,7 +1522,7 @@ const std::string &language()
     {
         if (la[2] == '_' || la[2] == 0)
         {
-            lang_ = string(la, la+2);
+            lang_ = std::string(la, la+2);
         }
         else
         {

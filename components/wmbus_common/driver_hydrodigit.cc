@@ -36,7 +36,7 @@ namespace {
         di.addDetection(MANUFACTURER_BMT, 0x07, 0x15);
         di.usesProcessContent();
         di.setConstructor([](MeterInfo &mi, DriverInfo &di) {
-            return shared_ptr<Meter>(new Driver(mi, di));
+            return std::shared_ptr<Meter>(new Driver(mi, di));
         });
     });
 
@@ -112,7 +112,7 @@ namespace {
                 | second_byte << 8 | first_byte)) / 1000.0;
     }
 
-    string getMonth(int month) {
+    std::string getMonth(int month) {
         switch (month) {
             case 1:
                 return "January";
@@ -182,7 +182,7 @@ namespace {
         if (t->mfct_0f_index == -1) return; // Check that there is mfct data.
         int offset = t->header_size + t->mfct_0f_index;
 
-        vector<uchar> bytes;
+        std::vector<uchar> bytes;
         t->extractMfctData(&bytes); // Extract raw frame data after the DIF 0x0F.
 
         debugPayload("(hydrodigit mfct)", bytes);
@@ -265,7 +265,7 @@ namespace {
         i += 4;
 
         double monthData;
-        string month_field_name;
+        std::string month_field_name;
         for (int month = 1; month <= 12; ++month) {
             if (i + 2 >= len) return;
             month_field_name.clear();

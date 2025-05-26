@@ -31,8 +31,6 @@
 //#define DEBUG_PARSER(...) fprintf(stdout, __VA_ARGS__)
 #define DEBUG_PARSER(...)
 
-using namespace std;
-
 union RealConversion
 {
     uint32_t i;
@@ -151,9 +149,9 @@ LIST_OF_VIF_RANGES
     return false;
 }
 
-map<uint16_t,string> hash_to_format_;
+std::map<uint16_t,std::string> hash_to_format_;
 
-bool loadFormatBytesFromSignature(uint16_t format_signature, vector<uchar> *format_bytes)
+bool loadFormatBytesFromSignature(uint16_t format_signature, std::vector<uchar> *format_bytes)
 {
     if (hash_to_format_.count(format_signature) > 0) {
         debug("(dvparser) found remembered format for hash %x\n", format_signature);
@@ -166,23 +164,23 @@ bool loadFormatBytesFromSignature(uint16_t format_signature, vector<uchar> *form
 }
 
 bool parseDV(Telegram *t,
-             vector<uchar> &databytes,
-             vector<uchar>::iterator data,
+             std::vector<uchar> &databytes,
+             std::vector<uchar>::iterator data,
              size_t data_len,
-             map<string,pair<int,DVEntry>> *dv_entries,
-             vector<uchar>::iterator *format,
+             std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+             std::vector<uchar>::iterator *format,
              size_t format_len,
              uint16_t *format_hash)
 {
-    map<string,int> dv_count;
-    vector<uchar> format_bytes;
-    vector<uchar> id_bytes;
-    vector<uchar> data_bytes;
-    string dv, key;
+    std::map<std::string,int> dv_count;
+    std::vector<uchar> format_bytes;
+    std::vector<uchar> id_bytes;
+    std::vector<uchar> data_bytes;
+    std::string dv, key;
     size_t start_parse_here = t->parsed.size();
-    vector<uchar>::iterator data_start = data;
-    vector<uchar>::iterator data_end = data+data_len;
-    vector<uchar>::iterator format_end;
+    std::vector<uchar>::iterator data_start = data;
+    std::vector<uchar>::iterator data_end = data+data_len;
+    std::vector<uchar>::iterator format_end;
     bool data_has_difvifs = true;
     bool variable_length = false;
     int force_mfct_index = t->force_mfct_index;
@@ -199,7 +197,7 @@ bool parseDV(Telegram *t,
         // Since the data does not have the difvifs.
         data_has_difvifs = false;
         format_end = *format+format_len;
-        string s = bin2hex(*format, format_end, format_len);
+        std::string s = bin2hex(*format, format_end, format_len);
         debug("(dvparser) using format \"%s\"\n", s.c_str());
     }
 
@@ -245,7 +243,7 @@ bool parseDV(Telegram *t,
             {
                 DEBUG_PARSER("(dvparser) manufacturer specific data, parsing is done.\n", dif);
                 size_t datalen = std::distance(data, data_end);
-                string value = bin2hex(data, data_end, datalen);
+                std::string value = bin2hex(data, data_end, datalen);
                 t->addExplanationAndIncrementPos(data, datalen, KindOfData::CONTENT, Understanding::NONE, "manufacturer specific data %s", value.c_str());
                 break;
             }
@@ -264,7 +262,7 @@ bool parseDV(Telegram *t,
             {
                 DEBUG_PARSER("(dvparser) reached dif %02x manufacturer specific data, parsing is done.\n", dif);
                 datalen = std::distance(data,data_end);
-                string value = bin2hex(data+1, data_end, datalen-1);
+                std::string value = bin2hex(data+1, data_end, datalen-1);
                 t->mfct_0f_index = 1+std::distance(data_start, data);
                 assert(t->mfct_0f_index >= 0);
                 t->addExplanationAndIncrementPos(data, datalen, KindOfData::CONTENT, Understanding::NONE, "%02X manufacturer specific data %s", dif, value.c_str());
@@ -274,7 +272,7 @@ bool parseDV(Telegram *t,
             {
                 DEBUG_PARSER("(dvparser) reached dif %02x more records in next telegram.\n", dif);
                 datalen = std::distance(data,data_end);
-                string value = bin2hex(data+1, data_end, datalen-1);
+                std::string value = bin2hex(data+1, data_end, datalen-1);
                 t->mfct_0f_index = 1+std::distance(data_start, data);
                 t->mfct_1f_index = 1+std::distance(data_start, data);
                 assert(t->mfct_0f_index >= 0);
@@ -283,7 +281,7 @@ bool parseDV(Telegram *t,
             }
             DEBUG_PARSER("(dvparser) reached unknown dif %02x treating remaining data as manufacturer specific, parsing is done.\n", dif);
             datalen = std::distance(data,data_end);
-            string value = bin2hex(data+1, data_end, datalen-1);
+            std::string value = bin2hex(data+1, data_end, datalen-1);
             t->mfct_0f_index = 1+std::distance(data_start, data);
             assert(t->mfct_0f_index >= 0);
             t->addExplanationAndIncrementPos(data, datalen, KindOfData::CONTENT, Understanding::NONE, "%02X unknown dif treating remaining data as mfct specific %s", dif, value.c_str());
@@ -359,8 +357,8 @@ bool parseDV(Telegram *t,
         bool extension_vif = false;
         int combinable_full_vif = 0;
         bool combinable_extension_vif = false;
-        set<VIFCombinable> found_combinable_vifs;
-        set<uint16_t> found_combinable_vifs_raw;
+        std::set<VIFCombinable> found_combinable_vifs;
+        std::set<uint16_t> found_combinable_vifs_raw;
 
         DEBUG_PARSER("(dvparser debug) vif=%04x \"%s\"\n", vif, vifType(vif).c_str());
 
@@ -533,7 +531,7 @@ bool parseDV(Telegram *t,
             datalen = remaining-1;
         }
 
-        string value = bin2hex(data, data_end, datalen);
+        std::string value = bin2hex(data, data_end, datalen);
         int offset = start_parse_here+data-data_start;
 
         (*dv_entries)[key] = { offset, DVEntry(offset,
@@ -564,7 +562,7 @@ bool parseDV(Telegram *t,
         }
     }
 
-    string format_string = bin2hex(format_bytes);
+    std::string format_string = bin2hex(format_bytes);
     uint16_t hash = crc16_EN13757(safeButUnsafeVectorPtr(format_bytes), format_bytes.size());
 
     if (data_has_difvifs) {
@@ -623,13 +621,13 @@ bool findKeyWithNr(MeasurementType mit, VIFRange vif_range, StorageNr storagenr,
 
 void extractDV(DifVifKey &dvk, uchar *dif, int *vif, bool *has_difes, bool *has_vifes)
 {
-    string tmp = dvk.str();
+    std::string tmp = dvk.str();
     extractDV(tmp, dif, vif, has_difes, has_vifes);
 }
 
-void extractDV(string &s, uchar *dif, int *vif, bool *has_difes, bool *has_vifes)
+void extractDV(std::string &s, uchar *dif, int *vif, bool *has_difes, bool *has_vifes)
 {
-    vector<uchar> bytes;
+    std::vector<uchar> bytes;
     hex2bin(s, &bytes);
     size_t i = 0;
     *has_difes = false;
@@ -676,8 +674,8 @@ void extractDV(string &s, uchar *dif, int *vif, bool *has_difes, bool *has_vifes
     }
 }
 
-bool extractDVuint8(map<string,pair<int,DVEntry>> *dv_entries,
-                    string key,
+bool extractDVuint8(std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+                    std::string key,
                     int *offset,
                     uchar *value)
 {
@@ -688,17 +686,17 @@ bool extractDVuint8(map<string,pair<int,DVEntry>> *dv_entries,
         return false;
     }
 
-    pair<int,DVEntry>&  p = (*dv_entries)[key];
+    std::pair<int,DVEntry>&  p = (*dv_entries)[key];
     *offset = p.first;
-    vector<uchar> v;
+    std::vector<uchar> v;
     hex2bin(p.second.value, &v);
 
     *value = v[0];
     return true;
 }
 
-bool extractDVuint16(map<string,pair<int,DVEntry>> *dv_entries,
-                     string key,
+bool extractDVuint16(std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+                     std::string key,
                      int *offset,
                      uint16_t *value)
 {
@@ -709,17 +707,17 @@ bool extractDVuint16(map<string,pair<int,DVEntry>> *dv_entries,
         return false;
     }
 
-    pair<int,DVEntry>&  p = (*dv_entries)[key];
+    std::pair<int,DVEntry>&  p = (*dv_entries)[key];
     *offset = p.first;
-    vector<uchar> v;
+    std::vector<uchar> v;
     hex2bin(p.second.value, &v);
 
     *value = v[1]<<8 | v[0];
     return true;
 }
 
-bool extractDVuint24(map<string,pair<int,DVEntry>> *dv_entries,
-                     string key,
+bool extractDVuint24(std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+                     std::string key,
                      int *offset,
                      uint32_t *value)
 {
@@ -730,17 +728,17 @@ bool extractDVuint24(map<string,pair<int,DVEntry>> *dv_entries,
         return false;
     }
 
-    pair<int,DVEntry>&  p = (*dv_entries)[key];
+    std::pair<int,DVEntry>&  p = (*dv_entries)[key];
     *offset = p.first;
-    vector<uchar> v;
+    std::vector<uchar> v;
     hex2bin(p.second.value, &v);
 
     *value = v[2] << 16 | v[1]<<8 | v[0];
     return true;
 }
 
-bool extractDVuint32(map<string,pair<int,DVEntry>> *dv_entries,
-                     string key,
+bool extractDVuint32(std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+                     std::string key,
                      int *offset,
                      uint32_t *value)
 {
@@ -751,17 +749,17 @@ bool extractDVuint32(map<string,pair<int,DVEntry>> *dv_entries,
         return false;
     }
 
-    pair<int,DVEntry>&  p = (*dv_entries)[key];
+    std::pair<int,DVEntry>&  p = (*dv_entries)[key];
     *offset = p.first;
-    vector<uchar> v;
+    std::vector<uchar> v;
     hex2bin(p.second.value, &v);
 
     *value = (uint32_t(v[3]) << 24) |  (uint32_t(v[2]) << 16) | (uint32_t(v[1])<<8) | uint32_t(v[0]);
     return true;
 }
 
-bool extractDVdouble(map<string,pair<int,DVEntry>> *dv_entries,
-                     string key,
+bool extractDVdouble(std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+                     std::string key,
                      int *offset,
                      double *value,
                      bool auto_scale,
@@ -773,7 +771,7 @@ bool extractDVdouble(map<string,pair<int,DVEntry>> *dv_entries,
         *value = 0;
         return false;
     }
-    pair<int,DVEntry>&  p = (*dv_entries)[key];
+    std::pair<int,DVEntry>&  p = (*dv_entries)[key];
     *offset = p.first;
 
     if (p.second.value.length() == 0) {
@@ -786,7 +784,7 @@ bool extractDVdouble(map<string,pair<int,DVEntry>> *dv_entries,
     return p.second.extractDouble(value, auto_scale, force_unsigned);
 }
 
-bool checkSizeHex(size_t expected_len, DifVifKey &dvk, string &v)
+bool checkSizeHex(size_t expected_len, DifVifKey &dvk, std::string &v)
 {
     if (v.length() == expected_len) return true;
 
@@ -795,7 +793,7 @@ bool checkSizeHex(size_t expected_len, DifVifKey &dvk, string &v)
     return false;
 }
 
-bool is_all_F(string &v)
+bool is_all_F(std::string &v)
 {
     for (size_t i = 0; i < v.length(); ++i)
     {
@@ -824,7 +822,7 @@ bool DVEntry::extractDouble(double *out, bool auto_scale, bool force_unsigned)
         t == 0x6 || // 48 Bit Integer/Binary
         t == 0x7)   // 64 Bit Integer/Binary
     {
-        vector<uchar> v;
+        std::vector<uchar> v;
         hex2bin(value, &v);
         uint64_t raw = 0;
         bool negate = false;
@@ -894,7 +892,7 @@ bool DVEntry::extractDouble(double *out, bool auto_scale, bool force_unsigned)
         // Negative BCD values are always visible in bcd. I.e. they are always signed.
         // Ignore assumption on signedness.
         // 74140000 -> 00001474
-        string& v = value;
+        std::string& v = value;
         uint64_t raw = 0;
         bool negate = false;
 
@@ -947,7 +945,7 @@ bool DVEntry::extractDouble(double *out, bool auto_scale, bool force_unsigned)
     else
     if (t == 0x5) // 32 Bit Real
     {
-        vector<uchar> v;
+        std::vector<uchar> v;
         hex2bin(value, &v);
         if (!checkSizeHex(8, dif_vif_key, value)) return false;
         assert(v.size() == 4);
@@ -972,8 +970,8 @@ bool DVEntry::extractDouble(double *out, bool auto_scale, bool force_unsigned)
     return true;
 }
 
-bool extractDVlong(map<string,pair<int,DVEntry>> *dv_entries,
-                   string key,
+bool extractDVlong(std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+                   std::string key,
                    int *offset,
                    uint64_t *out)
 {
@@ -984,7 +982,7 @@ bool extractDVlong(map<string,pair<int,DVEntry>> *dv_entries,
         return false;
     }
 
-    pair<int,DVEntry>&  p = (*dv_entries)[key];
+    std::pair<int,DVEntry>&  p = (*dv_entries)[key];
     *offset = p.first;
 
     if (p.second.value.length() == 0) {
@@ -1007,7 +1005,7 @@ bool DVEntry::extractLong(uint64_t *out)
         t == 0x6 || // 48 Bit Integer/Binary
         t == 0x7)   // 64 Bit Integer/Binary
     {
-        vector<uchar> v;
+        std::vector<uchar> v;
         hex2bin(value, &v);
         uint64_t raw = 0;
         if (t == 0x1) {
@@ -1060,7 +1058,7 @@ bool DVEntry::extractLong(uint64_t *out)
         t == 0xE)   // 12 digit BCD
     {
         // 74140000 -> 00001474
-        string& v = value;
+        std::string& v = value;
         if (is_all_F(v))
         {
             return false;
@@ -1120,17 +1118,17 @@ bool DVEntry::extractLong(uint64_t *out)
     return true;
 }
 
-bool extractDVHexString(map<string,pair<int,DVEntry>> *dv_entries,
-                        string key,
+bool extractDVHexString(std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+                        std::string key,
                         int *offset,
-                        string *value)
+                        std::string *value)
 {
     if ((*dv_entries).count(key) == 0) {
-        verbose("(dvparser) warning: cannot extract string from non-existant key \"%s\"\n", key.c_str());
+        verbose("(dvparser) warning: cannot extract std::string from non-existant key \"%s\"\n", key.c_str());
         *offset = -1;
         return false;
     }
-    pair<int,DVEntry>&  p = (*dv_entries)[key];
+    std::pair<int,DVEntry>&  p = (*dv_entries)[key];
     *offset = p.first;
     *value = p.second.value;
 
@@ -1138,27 +1136,27 @@ bool extractDVHexString(map<string,pair<int,DVEntry>> *dv_entries,
 }
 
 
-bool extractDVReadableString(map<string,pair<int,DVEntry>> *dv_entries,
-                             string key,
+bool extractDVReadableString(std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+                             std::string key,
                              int *offset,
-                             string *out)
+                             std::string *out)
 {
     if ((*dv_entries).count(key) == 0) {
-        verbose("(dvparser) warning: cannot extract string from non-existant key \"%s\"\n", key.c_str());
+        verbose("(dvparser) warning: cannot extract std::string from non-existant key \"%s\"\n", key.c_str());
         *offset = -1;
         return false;
     }
-    pair<int,DVEntry>&  p = (*dv_entries)[key];
+    std::pair<int,DVEntry>&  p = (*dv_entries)[key];
     *offset = p.first;
 
     return p.second.extractReadableString(out);
 }
 
-bool DVEntry::extractReadableString(string *out)
+bool DVEntry::extractReadableString(std::string *out)
 {
     int t = dif_vif_key.dif() & 0xf;
 
-    string v = value;
+    std::string v = value;
 
     if (t == 0x1 || // 8 Bit Integer/Binary
         t == 0x2 || // 16 Bit Integer/Binary
@@ -1208,9 +1206,9 @@ double DVEntry::getCounter(DVEntryCounterType ct)
     return std::numeric_limits<double>::quiet_NaN();
 }
 
-string DVEntry::str()
+std::string DVEntry::str()
 {
-    string s =
+    std::string s =
         tostrprintf("%d: %s %s vif=%x %s%s st=%d ta=%d su=%d",
                     offset,
                     dif_vif_key.str().c_str(),
@@ -1260,8 +1258,8 @@ bool extractTime(uchar hi, uchar lo, struct tm *date)
     return true;
 }
 
-bool extractDVdate(map<string,pair<int,DVEntry>> *dv_entries,
-                   string key,
+bool extractDVdate(std::map<std::string,std::pair<int,DVEntry>> *dv_entries,
+                   std::string key,
                    int *offset,
                    struct tm *out)
 {
@@ -1272,7 +1270,7 @@ bool extractDVdate(map<string,pair<int,DVEntry>> *dv_entries,
         memset(out, 0, sizeof(struct tm));
         return false;
     }
-    pair<int,DVEntry>&  p = (*dv_entries)[key];
+    std::pair<int,DVEntry>&  p = (*dv_entries)[key];
     *offset = p.first;
 
     return p.second.extractDate(out);
@@ -1283,7 +1281,7 @@ bool DVEntry::extractDate(struct tm *out)
     memset(out, 0, sizeof(*out));
     out->tm_isdst = -1; // Figure out the dst automatically!
 
-    vector<uchar> v;
+    std::vector<uchar> v;
     hex2bin(value, &v);
 
     bool ok = true;
@@ -1426,9 +1424,9 @@ MeasurementType toMeasurementType(const char *s)
     return MeasurementType::Unknown;
 }
 
-string FieldMatcher::str()
+std::string FieldMatcher::str()
 {
-    string s = "";
+    std::string s = "";
 
     if (match_dif_vif_key)
     {
@@ -1447,7 +1445,7 @@ string FieldMatcher::str()
 
     if (match_vif_raw)
     {
-        s = s+"VRR("+to_string(vif_raw)+") ";
+        s = s+"VRR("+std::to_string(vif_raw)+") ";
     }
 
     if (vif_combinables.size() > 0)
@@ -1465,22 +1463,22 @@ string FieldMatcher::str()
 
     if (match_storage_nr)
     {
-        s = s+"S("+to_string(storage_nr_from.intValue())+"-"+to_string(storage_nr_to.intValue())+") ";
+        s = s+"S("+std::to_string(storage_nr_from.intValue())+"-"+std::to_string(storage_nr_to.intValue())+") ";
     }
 
     if (match_tariff_nr)
     {
-        s = s+"T("+to_string(tariff_nr_from.intValue())+"-"+to_string(tariff_nr_to.intValue())+") ";
+        s = s+"T("+std::to_string(tariff_nr_from.intValue())+"-"+std::to_string(tariff_nr_to.intValue())+") ";
     }
 
     if (match_subunit_nr)
     {
-        s += "U("+to_string(subunit_nr_from.intValue())+"-"+to_string(subunit_nr_to.intValue())+") ";
+        s += "U("+std::to_string(subunit_nr_from.intValue())+"-"+std::to_string(subunit_nr_to.intValue())+") ";
     }
 
     if (index_nr.intValue() != 1)
     {
-        s += "I("+to_string(index_nr.intValue())+")";
+        s += "I("+std::to_string(index_nr.intValue())+")";
     }
 
     if (s.size() > 0)
@@ -1512,13 +1510,13 @@ const char *toString(DVEntryCounterType ct)
     return "unknown";
 }
 
-string available_vif_ranges_;
+std::string available_vif_ranges_;
 
-const string &availableVIFRanges()
+const std::string &availableVIFRanges()
 {
     if (available_vif_ranges_ != "") return available_vif_ranges_;
 
-#define X(n,from,to,q,u) available_vif_ranges_ += string(#n) + "\n";
+#define X(n,from,to,q,u) available_vif_ranges_ += std::string(#n) + "\n";
 LIST_OF_VIF_RANGES
 #undef X
 
@@ -1527,13 +1525,13 @@ LIST_OF_VIF_RANGES
     return available_vif_ranges_;
 }
 
-string available_vif_combinables_;
+std::string available_vif_combinables_;
 
-const string &availableVIFCombinables()
+const std::string &availableVIFCombinables()
 {
     if (available_vif_combinables_ != "") return available_vif_combinables_;
 
-#define X(n,from,to) available_vif_combinables_ += string(#n) + "\n";
+#define X(n,from,to) available_vif_combinables_ += std::string(#n) + "\n";
 LIST_OF_VIF_COMBINABLES
 #undef X
 

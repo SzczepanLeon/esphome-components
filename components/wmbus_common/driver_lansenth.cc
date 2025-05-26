@@ -31,7 +31,7 @@ namespace
         di.setMeterType(MeterType::TempHygroMeter);
         di.addDetection(MANUFACTURER_LAS,  0x1b,  0x07);
         di.addDetection(MANUFACTURER_LAS,  0x1b,  0x09);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)

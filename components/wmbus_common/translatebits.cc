@@ -22,14 +22,13 @@
 #include<string.h>
 
 using namespace Translate;
-using namespace std;
 
 TriggerBits AlwaysTrigger(~(uint64_t)0);
 MaskBits AutoMask(0);
 
-void handleBitToString(Rule& rule, string &out_s, uint64_t bits)
+void handleBitToString(Rule& rule, std::string &out_s, uint64_t bits)
 {
-    string s;
+    std::string s;
 
     if (rule.trigger != AlwaysTrigger && (bits & rule.trigger.intValue()) == 0 )
     {
@@ -56,7 +55,7 @@ void handleBitToString(Rule& rule, string &out_s, uint64_t bits)
         {
             // Check that the match rule does not extend outside of the mask!
             // If mask is 0xff then a match for 0x100 will trigger this bad warning!
-            string tmp = tostrprintf("BAD_RULE_%s(from=0x%x mask=0x%x)", rule.name.c_str(), m.from, mask);
+            std::string tmp = tostrprintf("BAD_RULE_%s(from=0x%x mask=0x%x)", rule.name.c_str(), m.from, mask);
             s += tmp+" ";
         }
 
@@ -86,7 +85,7 @@ void handleBitToString(Rule& rule, string &out_s, uint64_t bits)
     if (bits != 0)
     {
         // Oups, there are set bits that we have not handled....
-        string tmp;
+        std::string tmp;
         strprintf(&tmp, "%s_%X", rule.name.c_str(), bits);
         s += tmp+" ";
     }
@@ -99,9 +98,9 @@ void handleBitToString(Rule& rule, string &out_s, uint64_t bits)
     out_s += s;
 }
 
-void handleIndexToString(Rule& rule, string &out_s, uint64_t bits)
+void handleIndexToString(Rule& rule, std::string &out_s, uint64_t bits)
 {
-    string s;
+    std::string s;
 
     if (rule.trigger != AlwaysTrigger && (bits & rule.trigger.intValue()) == 0 )
     {
@@ -129,7 +128,7 @@ void handleIndexToString(Rule& rule, string &out_s, uint64_t bits)
 
         if ((~mask & m.from) != 0)
         {
-            string tmp;
+            std::string tmp;
             strprintf(&tmp, "BAD_RULE_%s(from=0x%x mask=0x%x)", rule.name.c_str(), m.from, rule.mask);
             s += tmp+" ";
         }
@@ -143,7 +142,7 @@ void handleIndexToString(Rule& rule, string &out_s, uint64_t bits)
     if (!found)
     {
         // Oups, this index has not been found.
-        string tmp;
+        std::string tmp;
         strprintf(&tmp, "%s_%X", rule.name.c_str(), bits);
         s += tmp+" ";
     }
@@ -151,9 +150,9 @@ void handleIndexToString(Rule& rule, string &out_s, uint64_t bits)
     out_s += s;
 }
 
-void handleDecimalsToString(Rule& rule, string &out_s, uint64_t bits)
+void handleDecimalsToString(Rule& rule, std::string &out_s, uint64_t bits)
 {
-    string s;
+    std::string s;
 
     if (rule.trigger != AlwaysTrigger && (bits & rule.trigger.intValue()) == 0 )
     {
@@ -185,7 +184,7 @@ void handleDecimalsToString(Rule& rule, string &out_s, uint64_t bits)
 
         if ((m.from - (m.from % mask)) != 0)
         {
-            string tmp;
+            std::string tmp;
             strprintf(&tmp, "BAD_RULE_%s(from=%d modulomask=%d)", rule.name.c_str(), m.from, rule.mask);
             s += tmp+" ";
         }
@@ -199,7 +198,7 @@ void handleDecimalsToString(Rule& rule, string &out_s, uint64_t bits)
     if (number > 0)
     {
         // Oups, this number has not been fully understood.
-        string tmp;
+        std::string tmp;
         strprintf(&tmp, "%s_%d", rule.name.c_str(), number);
         s += tmp+" ";
     }
@@ -207,7 +206,7 @@ void handleDecimalsToString(Rule& rule, string &out_s, uint64_t bits)
     out_s += s;
 }
 
-void handleRule(Rule& rule, string &s, uint64_t bits)
+void handleRule(Rule& rule, std::string &s, uint64_t bits)
 {
     switch (rule.type)
     {
@@ -228,13 +227,13 @@ void handleRule(Rule& rule, string &s, uint64_t bits)
     }
 }
 
-string Lookup::translate(uint64_t bits)
+std::string Lookup::translate(uint64_t bits)
 {
-    string total = "";
+    std::string total = "";
 
     for (Rule& r : rules)
     {
-        string s;
+        std::string s;
         handleRule(r, s, bits);
         total = joinStatusEmptyStrings(total, s);
     }
@@ -244,9 +243,9 @@ string Lookup::translate(uint64_t bits)
     return sortStatusString(total);
 }
 
-string Lookup::str()
+std::string Lookup::str()
 {
-    string x = " Lookup {\n";
+    std::string x = " Lookup {\n";
 
     for (Rule& r : rules)
     {
@@ -272,7 +271,7 @@ Lookup NoLookup = {};
 
 
 Map m = { 123, "howdy" };
-vector<Map> vm = { { 123, "howdy" } };
+std::vector<Map> vm = { { 123, "howdy" } };
 
 Rule r = { "name", Translate::MapType::IndexToString,
     AlwaysTrigger, MaskBits(0xe000),  "", { } };

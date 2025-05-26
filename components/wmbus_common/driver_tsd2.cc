@@ -34,7 +34,7 @@ namespace
         di.addLinkMode(LinkMode::T1);
         di.addDetection(MANUFACTURER_TCH, 0xf0,  0x76);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -52,7 +52,7 @@ namespace
 
     void Driver::processContent(Telegram *t)
     {
-        vector<uchar> data;
+        std::vector<uchar> data;
         t->extractPayload(&data);
 
         if(data.size() < 3)

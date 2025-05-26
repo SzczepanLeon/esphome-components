@@ -39,7 +39,7 @@ namespace
         // Frames with APT are not - and their content is unknown - perhaps it broadcasts two data formats?
         di.addDetection(MANUFACTURER_APA,  0x02,  0x01);
         //di.addDetection(MANUFACTURER_APT,  0x02,  0x01);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)

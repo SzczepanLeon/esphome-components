@@ -35,7 +35,7 @@ namespace
         di.setMeterType(MeterType::ElectricityMeter);
         di.addLinkMode(LinkMode::MBUS);
         di.addDetection(MANUFACTURER_IME,  0x02,  0x1d);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     // Telegram 1 /////////////////////////////////////////////////////////////////////

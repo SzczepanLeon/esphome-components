@@ -24,7 +24,7 @@ namespace
         Driver(MeterInfo &mi, DriverInfo &di);
 
         void processContent(Telegram *t);
-        void processExtras(string miExtras);
+        void processExtras(std::string miExtras);
         int registerSize(int c);
     };
 
@@ -39,7 +39,7 @@ namespace
         di.addDetection(MANUFACTURER_APA,  0x07,  0x05);
         di.addDetection(0x8614 /*APT?*/, 0x07,  0x05); // Older version of telegram that is not understood!
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -69,10 +69,10 @@ namespace
         // Each register is identified with a single byte after which the content follows.
         // For example, the total volume is marked by 0x10 followed by 4 bytes.
 
-        vector<uchar> content;
+        std::vector<uchar> content;
         t->extractPayload(&content);
 
-        map<string,pair<int,DVEntry>> vendor_values;
+        std::map<std::string,std::pair<int,DVEntry>> vendor_values;
 
         // The first 8 bytes are error flags and a date time.
         // E.g. 0F005B5996000000 therefore we skip the first 8 bytes.
@@ -91,9 +91,9 @@ namespace
             i++;
             if (size == -1 || i+size > content.size())
             {
-                vector<uchar> frame;
+                std::vector<uchar> frame;
                 t->extractFrame(&frame);
-                string hex = bin2hex(frame);
+                std::string hex = bin2hex(frame);
 
                 if (t->beingAnalyzed() == false)
                 {
@@ -116,7 +116,7 @@ namespace
             if (c == 0x10 && size == 4 && i+size < content.size())
             {
                 // We found the register representing the total
-                string total;
+                std::string total;
                 strprintf(&total, "%02x%02x%02x%02x", content[i+0], content[i+1], content[i+2], content[i+3]);
                 int offset = i-1+t->header_size;
                 vendor_values["0413"] = {offset, DVEntry(offset, DifVifKey("0413"), MeasurementType::Instantaneous, 0x13, {}, {}, 0, 0, 0, total) };
@@ -129,7 +129,7 @@ namespace
             }
             else
             {
-                string msg = "*** ";
+                std::string msg = "*** ";
                 msg += bin2hex(content, i-1, 1)+"-"+bin2hex(content, i, size);
                 t->addSpecialExplanation(i-1+t->header_size, size, KindOfData::CONTENT, Understanding::NONE, msg.c_str());
             }
@@ -250,9 +250,9 @@ namespace
         return -1;
     }
 
-    void Driver::processExtras(string miExtras)
+    void Driver::processExtras(std::string miExtras)
     {
-        map<string,string> extras;
+        std::map<std::string,std::string> extras;
         bool ok = parseExtras(miExtras, &extras);
         if (!ok)
         {

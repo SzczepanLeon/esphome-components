@@ -47,12 +47,12 @@ namespace
 
     private:
 
-        string currentAlarmsText(IzarAlarms &alarms);
-        string previousAlarmsText(IzarAlarms &alarms);
+        std::string currentAlarmsText(IzarAlarms &alarms);
+        std::string previousAlarmsText(IzarAlarms &alarms);
 
-        vector<uchar> decodePrios(const vector<uchar> &origin, const vector<uchar> &payload, uint32_t key);
+        std::vector<uchar> decodePrios(const std::vector<uchar> &origin, const std::vector<uchar> &payload, uint32_t key);
 
-        vector<uint32_t> keys;
+        std::vector<uint32_t> keys;
     };
 
     static bool ok = registerDriver([](DriverInfo&di)
@@ -76,7 +76,7 @@ namespace
         di.addDetection(MANUFACTURER_HYD,  0x07,  0x86);
         di.usesProcessContent();
 
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -128,9 +128,9 @@ namespace
                        DEFAULT_PRINT_PROPERTIES);
     }
 
-    string Driver::currentAlarmsText(IzarAlarms &alarms)
+    std::string Driver::currentAlarmsText(IzarAlarms &alarms)
     {
-        string s;
+        std::string s;
         if (alarms.leakage_currently) {
             s.append("leakage,");
         }
@@ -165,9 +165,9 @@ namespace
         return "no_alarm";
     }
 
-    string Driver::previousAlarmsText(IzarAlarms &alarms)
+    std::string Driver::previousAlarmsText(IzarAlarms &alarms)
     {
-        string s;
+        std::string s;
         if (alarms.leakage_previously) {
             s.append("leakage,");
         }
@@ -186,11 +186,11 @@ namespace
 
     void Driver::processContent(Telegram *t)
     {
-        vector<uchar> frame;
+        std::vector<uchar> frame;
         t->extractFrame(&frame);
-        vector<uchar> origin = t->original.empty() ? frame : t->original;
+        std::vector<uchar> origin = t->original.empty() ? frame : t->original;
 
-        vector<uchar> decoded_content;
+        std::vector<uchar> decoded_content;
         for (auto& key : keys) {
             decoded_content = decodePrios(origin, frame, key);
             if (!decoded_content.empty())
@@ -210,7 +210,7 @@ namespace
 
         if (detectDiehlFrameInterpretation(frame) == DiehlFrameInterpretation::SAP_PRIOS)
         {
-            string digits = to_string((origin[7] & 0x03) << 24 | origin[6] << 16 | origin[5] << 8 | origin[4]);
+            std::string digits = std::to_string((origin[7] & 0x03) << 24 | origin[6] << 16 | origin[5] << 8 | origin[4]);
             digits = tostrprintf("%08d", atoi(digits.c_str())); // Make sure we are on 8 digits for 200x years
             // get the manufacture year
             uint8_t yy = atoi(digits.substr(0, 2).c_str());
@@ -226,7 +226,7 @@ namespace
             uchar meter_type = '@' + ((origin[8] & 0x7C) >> 2);
             uchar diameter = '@' + (((origin[8] & 0x03) << 3) | (origin[7] >> 5));
             // build the prefix
-            string prefix = tostrprintf("%c%02d%c%c", supplier_code, yy, meter_type, diameter);
+            std::string prefix = tostrprintf("%c%02d%c%c", supplier_code, yy, meter_type, diameter);
             setStringValue("prefix", prefix, NULL);
         }
 
@@ -279,7 +279,7 @@ namespace
         setStringValue("previous_alarms", previousAlarmsText(alarms));
     }
 
-    vector<uchar> Driver::decodePrios(const vector<uchar> &origin, const vector<uchar> &frame, uint32_t key)
+    std::vector<uchar> Driver::decodePrios(const std::vector<uchar> &origin, const std::vector<uchar> &frame, uint32_t key)
     {
         return decodeDiehlLfsr(origin, frame, key, DiehlLfsrCheckMethod::HEADER_1_BYTE, 0x4B);
     }

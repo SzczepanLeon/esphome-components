@@ -26,7 +26,7 @@ namespace
     private:
 
         void processContent(Telegram *t);
-        string leadingZeroString(int num);
+        std::string leadingZeroString(int num);
     };
 
     static bool ok = registerDriver([](DriverInfo&di)
@@ -38,7 +38,7 @@ namespace
         di.addDetection(MANUFACTURER_TCH, 0x80,  0x69);
         di.addDetection(MANUFACTURER_TCH, 0x80,  0x94);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -78,7 +78,7 @@ namespace
         // simple wrapped inside a wmbus telegram since the ci-field is 0xa0.
         // Which means that the entire payload is manufacturer specific.
 
-        vector<uchar> content;
+        std::vector<uchar> content;
 
         t->extractPayload(&content);
 
@@ -100,15 +100,15 @@ namespace
         int month_prev = (date_prev >> 5) & 0x0F;
         int year_prev = 2000 + ((date_prev >> 9) & 0x3F);
 
-        string previous_date =
+        std::string previous_date =
             std::to_string(year_prev) + "-" +
             leadingZeroString(month_prev) + "-" +
             leadingZeroString(day_prev) + "T02:00:00Z";
 
         setStringValue("previous_date", previous_date, NULL);
 
-        string bytes = tostrprintf("%02x%02x", content[1], content[2]);
-        string info = "*** "+bytes+" previous_date = %s";
+        std::string bytes = tostrprintf("%02x%02x", content[1], content[2]);
+        std::string info = "*** "+bytes+" previous_date = %s";
 
         t->addSpecialExplanation(t->header_size+1, 2, KindOfData::CONTENT, Understanding::FULL,
                                  info.c_str(), previous_date.c_str());
@@ -142,7 +142,7 @@ namespace
             year_curr++;
         }
 
-        string current_date =
+        std::string current_date =
             std::to_string(year_curr) + "-" +
             leadingZeroString(month_curr) + "-" +
             leadingZeroString(day_curr) + "T02:00:00Z";
@@ -210,8 +210,8 @@ namespace
                                  info.c_str(), temp_radiator_c);
     }
 
-    string Driver::leadingZeroString(int num) {
-        string new_num = (num < 10 ? "0": "") + std::to_string(num);
+    std::string Driver::leadingZeroString(int num) {
+        std::string new_num = (num < 10 ? "0": "") + std::to_string(num);
         return new_num;
     }
 }

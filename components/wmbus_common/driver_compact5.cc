@@ -39,7 +39,7 @@ namespace
         di.addDetection(MANUFACTURER_TCH,  0x43,  0x45);
         di.addDetection(MANUFACTURER_TCH,  0x43,  0x39);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -66,8 +66,8 @@ namespace
         // simple wrapped inside a wmbus telegram since the ci-field is 0xa2.
         // Which means that the entire payload is manufacturer specific.
 
-        map<string,pair<int,DVEntry>> vendor_values;
-        vector<uchar> content;
+        std::map<std::string,std::pair<int,DVEntry>> vendor_values;
+        std::vector<uchar> content;
 
         t->extractPayload(&content);
 
@@ -77,7 +77,7 @@ namespace
         uchar prev_hi = content[4];
         double prev = (256.0*prev_hi+prev_lo);
 
-        string prevs;
+        std::string prevs;
         strprintf(&prevs, "%02x%02x", prev_lo, prev_hi);
         int offset = t->parsed.size()+3;
         vendor_values["0215"] = { offset, DVEntry(offset, DifVifKey("0215"), MeasurementType::Instantaneous, 0x15, {}, {}, 0, 0, 0, prevs) };
@@ -89,7 +89,7 @@ namespace
         uchar curr_hi = content[8];
         double curr = (256.0*curr_hi+curr_lo);
 
-        string currs;
+        std::string currs;
         strprintf(&currs, "%02x%02x", curr_lo, curr_hi);
         offset = t->parsed.size()+7;
         vendor_values["0215"] = { offset, DVEntry(offset, DifVifKey("0215"), MeasurementType::Instantaneous, 0x15, {}, {}, 0, 0, 0, currs) };

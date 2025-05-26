@@ -22,8 +22,6 @@
 #include<string.h>
 #include<limits>
 
-using namespace std;
-
 #define LIST_OF_CONVERSIONS \
     X(Second, Minute, {vto=vfrom/60.0;}) \
     X(Minute, Second, {vto=vfrom*60.0;}) \
@@ -188,8 +186,8 @@ double convert(double vfrom, Unit ufrom, Unit uto)
 LIST_OF_CONVERSIONS
 #undef X
 
-    string from = unitToStringHR(ufrom);
-    string to = unitToStringHR(uto);
+    std::string from = unitToStringHR(ufrom);
+    std::string to = unitToStringHR(uto);
 
     fprintf(stderr, "Cannot convert between units! from %s to %s\n", from.c_str(), to.c_str());
     assert(0);
@@ -430,7 +428,7 @@ LIST_OF_UNITS
     return Quantity::Unknown;
 }
 
-Quantity toQuantity(string q)
+Quantity toQuantity(std::string q)
 {
 #define X(qname,qunit) if (q == #qname) return Quantity::qname;
 LIST_OF_QUANTITIES
@@ -464,7 +462,7 @@ LIST_OF_QUANTITIES
 }
 
 
-Unit toUnit(string s)
+Unit toUnit(std::string s)
 {
 #define X(cname,lcname,hrname,quantity,explanation) if (s == #cname || s == #lcname) return Unit::cname;
 LIST_OF_UNITS
@@ -473,7 +471,7 @@ LIST_OF_UNITS
     return Unit::Unknown;
 }
 
-string unitToStringHR(Unit u)
+std::string unitToStringHR(Unit u)
 {
 #define X(cname,lcname,hrname,quantity,explanation) if (u == Unit::cname) return hrname;
 LIST_OF_UNITS
@@ -482,7 +480,7 @@ LIST_OF_UNITS
     return "?";
 }
 
-string unitToStringLowerCase(Unit u)
+std::string unitToStringLowerCase(Unit u)
 {
 #define X(cname,lcname,hrname,quantity,explanation) if (u == Unit::cname) return #lcname;
 LIST_OF_UNITS
@@ -491,7 +489,7 @@ LIST_OF_UNITS
     return "?";
 }
 
-string unitToStringUpperCase(Unit u)
+std::string unitToStringUpperCase(Unit u)
 {
 #define X(cname,lcname,hrname,quantity,explanation) if (u == Unit::cname) return #cname;
 LIST_OF_UNITS
@@ -500,21 +498,21 @@ LIST_OF_UNITS
     return "?";
 }
 
-string strWithUnitHR(double v, Unit u)
+std::string strWithUnitHR(double v, Unit u)
 {
-    string r = format3fdot3f(v);
+    std::string r = format3fdot3f(v);
     r += " "+unitToStringHR(u);
     return r;
 }
 
-string strWithUnitLowerCase(double v, Unit u)
+std::string strWithUnitLowerCase(double v, Unit u)
 {
-    string r = format3fdot3f(v);
+    std::string r = format3fdot3f(v);
     r += " "+unitToStringLowerCase(u);
     return r;
 }
 
-string valueToString(double v, Unit u)
+std::string valueToString(double v, Unit u)
 {
     if (::isnan(v))
     {
@@ -522,7 +520,7 @@ string valueToString(double v, Unit u)
     }
     // This rounds the double value to 6 decimal digits.
     // TODO this should be changed to track all double digits available.
-    string s = to_string(v);
+    std::string s = std::to_string(v);
     while (s.size() > 0 && s.back() == '0') s.pop_back();
     if (s.back() == '.') {
         s.pop_back();
@@ -533,17 +531,17 @@ string valueToString(double v, Unit u)
     return s;
 }
 
-bool extractUnit(const string &s, string *vname, Unit *u)
+bool extractUnit(const std::string &s, std::string *vname, Unit *u)
 {
     size_t pos;
-    string vn;
+    std::string vn;
     const char *c;
 
     if (s.length() < 3) goto err;
 
     pos = s.rfind('_');
 
-    if (pos == string::npos) goto err;
+    if (pos == std::string::npos) goto err;
     if (pos+1 >= s.length()) goto err;
     vn = s.substr(0,pos);
     pos++;
@@ -576,7 +574,7 @@ LIST_OF_SI_CONVERSIONS
     }
 }
 
-SIUnit::SIUnit(string s)
+SIUnit::SIUnit(std::string s)
 {
 }
 
@@ -600,7 +598,7 @@ LIST_OF_SI_CONVERSIONS
     return Unit::Unknown;
 }
 
-string super(uchar c)
+std::string super(uchar c)
 {
     switch (c)
     {
@@ -621,9 +619,9 @@ string super(uchar c)
     return "?";
 }
 
-string to_superscript(int8_t n)
+std::string to_superscript(int8_t n)
 {
-    string out;
+    std::string out;
 
     char buf[5];
     memset(buf, 0, sizeof(buf));
@@ -638,9 +636,9 @@ string to_superscript(int8_t n)
     return out;
 }
 
-string to_superscript(string &s)
+std::string to_superscript(std::string &s)
 {
-    string out;
+    std::string out;
 
     size_t i = 0;
     size_t len = s.length();
@@ -674,23 +672,23 @@ string to_superscript(string &s)
     return out;
 }
 
-string SIUnit::str() const
+std::string SIUnit::str() const
 {
-    string r = exponents_.str();
+    std::string r = exponents_.str();
 
-    string num = tostrprintf("%g", scale_);
+    std::string num = tostrprintf("%g", scale_);
 
     num = to_superscript(num);
     return num+r;
 }
 
 
-string SIUnit::info() const
+std::string SIUnit::info() const
 {
     Unit u = asUnit();
-    string unit = unitToStringLowerCase(u)+"|";
+    std::string unit = unitToStringLowerCase(u)+"|";
     if (unit == "?|") unit = "";
-    string quantity = toString(quantity_)+string("|");
+    std::string quantity = toString(quantity_)+std::string("|");
     if (quantity == "?|") quantity = "";
 
     return tostrprintf("[%s%s%s]",
@@ -803,9 +801,9 @@ SIExp SIExp::sqrt() const
 
 #define DO_UNIT_SIEXP(var, name) if (var != 0) { if (r.length()>0) { } r += #name; if (var != 1) { r += to_superscript(var); } }
 
-string SIExp::str() const
+std::string SIExp::str() const
 {
-    string r;
+    std::string r;
 
     DO_UNIT_SIEXP(mol_, mol);
     DO_UNIT_SIEXP(cd_, cd);

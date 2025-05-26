@@ -32,7 +32,7 @@ namespace
         di.addDetection(MANUFACTURER_LAS,  0x00,  0x14);
         di.addDetection(MANUFACTURER_LAS,  0x00,  0x1b);
         di.addDetection(MANUFACTURER_LAS,  0x02,  0x0b);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)

@@ -35,7 +35,7 @@ namespace
         di.addDetection(MANUFACTURER_TCH, 0x62,  0x74);
         di.addDetection(MANUFACTURER_TCH, 0x72,  0x74);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -65,8 +65,8 @@ namespace
         // simple wrapped inside a wmbus telegram since the ci-field is 0xa2.
         // Which means that the entire payload is manufacturer specific.
 
-        map<string,pair<int,DVEntry>> vendor_values;
-        vector<uchar> content;
+        std::map<std::string,std::pair<int,DVEntry>> vendor_values;
+        std::vector<uchar> content;
 
         t->extractPayload(&content);
 

@@ -277,12 +277,10 @@ AFLAuthenticationType fromIntToAFLAuthenticationType(int i);
 const char *toString(AFLAuthenticationType aat);
 int toLen(AFLAuthenticationType aat);
 
-using namespace std;
-
 struct MeterKeys
 {
-    vector<uchar> confidentiality_key;
-    vector<uchar> authentication_key;
+    std::vector<uchar> confidentiality_key;
+    std::vector<uchar> authentication_key;
 
     bool hasConfidentialityKey() { return confidentiality_key.size() > 0; }
     bool hasAuthenticationKey() { return authentication_key.size() > 0; }
@@ -300,7 +298,7 @@ const char *toString(FrameType ft);
 struct AboutTelegram
 {
     // wmbus device used to receive this telegram.
-    string device;
+    std::string device;
     // The device's opinion of the rssi, best effort conversion into the dbm scale.
     // -100 dbm = 0.1 pico Watt to -20 dbm = 10 micro W
     // Measurements smaller than -100 and larger than -10 are unlikely.
@@ -310,7 +308,7 @@ struct AboutTelegram
     // time the telegram was received
     time_t timestamp;
 
-    AboutTelegram(string dv, int rs, FrameType t, time_t ts = 0) : device(dv), rssi_dbm(rs), type(t), timestamp(ts) {}
+    AboutTelegram(std::string dv, int rs, FrameType t, time_t ts = 0) : device(dv), rssi_dbm(rs), type(t), timestamp(ts) {}
     AboutTelegram() {}
 };
 
@@ -329,17 +327,17 @@ enum class Understanding
     NONE, ENCRYPTED, COMPRESSED, PARTIAL, FULL
 };
 
-// struct Explanation
-// {
-//     int pos {};
-//     int len {};
-//     string info;
-//     KindOfData kind {};
-//     Understanding understanding {};
+struct Explanation
+{
+    int pos {};
+    int len {};
+    std::string info;
+    KindOfData kind {};
+    Understanding understanding {};
 
-//     Explanation(int p, int l, const string &i, KindOfData k, Understanding u) :
-//         pos(p), len(l), info(i), kind(k), understanding(u) {}
-// };
+    Explanation(int p, int l, const std::string &i, KindOfData k, Understanding u) :
+        pos(p), len(l), info(i), kind(k), understanding(u) {}
+};
 
 struct Meter;
 
@@ -363,7 +361,7 @@ public:
 
     // The different addresses found,
     // the first is the dll_id_mvt, ell_id_mvt, nwl_id_mvt, and the last is the tpl_id_mvt.
-    vector<Address> addresses;
+    std::vector<Address> addresses;
 
     // If decryption failed, set this to true, to prevent further processing.
     bool decryption_failed {};
@@ -378,10 +376,10 @@ public:
     uchar mbus_primary_address; // Single byte address 0-250 for mbus devices.
     uchar mbus_ci; // MBus control information field.
 
-    vector<uchar> dll_a; // A field 6 bytes
+    std::vector<uchar> dll_a; // A field 6 bytes
     // The 6 a field bytes are composed of 4 id bytes, version and type.
     uchar dll_id_b[4] {};    // 4 bytes, address in BCD = 8 decimal 00000000...99999999 digits.
-    vector<uchar> dll_id; // 4 bytes, human readable order.
+    std::vector<uchar> dll_id; // 4 bytes, human readable order.
     uchar dll_version {}; // 1 byte
     uchar dll_type {}; // 1 byte
 
@@ -427,10 +425,10 @@ public:
     int afl_mlen {};
 
     bool must_check_mac {};
-    vector<uchar> afl_mac_b;
+    std::vector<uchar> afl_mac_b;
 
     // TPL
-    vector<uchar>::iterator tpl_start;
+    std::vector<uchar>::iterator tpl_start;
     int tpl_ci {}; // 1 byte
     int tpl_acc {}; // 1 byte
     int tpl_sts {}; // 1 byte
@@ -441,11 +439,11 @@ public:
     int tpl_num_encr_blocks {};
     int tpl_cfg_ext {}; // 1 byte
     int tpl_kdf_selection {}; // 1 byte
-    vector<uchar> tpl_generated_key; // 16 bytes
-    vector<uchar> tpl_generated_mac_key; // 16 bytes
+    std::vector<uchar> tpl_generated_key; // 16 bytes
+    std::vector<uchar> tpl_generated_mac_key; // 16 bytes
 
     bool  tpl_id_found {}; // If set to true, then tpl_id_b contains valid values.
-    vector<uchar> tpl_a; // A field 6 bytes
+    std::vector<uchar> tpl_a; // A field 6 bytes
     // The 6 a field bytes are composed of 4 id bytes, version and type.
     uchar tpl_id_b[4] {}; // 4 bytes
     uchar tpl_mfct_b[2] {}; // 2 bytes
@@ -456,48 +454,48 @@ public:
     // The format signature is used for compact frames.
     int format_signature {};
 
-    vector<uchar> frame; // Content of frame, potentially decrypted.
-    vector<uchar> parsed;  // Parsed bytes with explanations.
+    std::vector<uchar> frame; // Content of frame, potentially decrypted.
+    std::vector<uchar> parsed;  // Parsed bytes with explanations.
     int header_size {}; // Size of headers before the APL content.
     int suffix_size {}; // Size of suffix after the APL content. Usually empty, but can be MACs!
     int mfct_0f_index = -1; // -1 if not found, else index of the 0f byte, if found, inside the difvif data after the header.
     int mfct_1f_index = -1; // -1 if not found, else index of the 1f byte, if found, then there are more records in the next telegram.
     int force_mfct_index = -1; // Force all data after this offset to be mfct specific. Used for meters not using 0f.
-    void extractFrame(vector<uchar> *fr); // Extract to full frame.
-    void extractPayload(vector<uchar> *pl); // Extract frame data containing the measurements, after the header and not the suffix.
-    void extractMfctData(vector<uchar> *pl); // Extract frame data after the DIF 0x0F.
+    void extractFrame(std::vector<uchar> *fr); // Extract to full frame.
+    void extractPayload(std::vector<uchar> *pl); // Extract frame data containing the measurements, after the header and not the suffix.
+    void extractMfctData(std::vector<uchar> *pl); // Extract frame data after the DIF 0x0F.
 
     bool handled {}; // Set to true, when a meter has accepted the telegram.
 
-    bool parseHeader(vector<uchar> &input_frame);
-    bool parse(vector<uchar> &input_frame, MeterKeys *mk, bool warn);
+    bool parseHeader(std::vector<uchar> &input_frame);
+    bool parse(std::vector<uchar> &input_frame, MeterKeys *mk, bool warn);
 
-    bool parseMBUSHeader(vector<uchar> &input_frame);
-    bool parseMBUS(vector<uchar> &input_frame, MeterKeys *mk, bool warn);
+    bool parseMBUSHeader(std::vector<uchar> &input_frame);
+    bool parseMBUS(std::vector<uchar> &input_frame, MeterKeys *mk, bool warn);
 
-    bool parseWMBUSHeader(vector<uchar> &input_frame);
-    bool parseWMBUS(vector<uchar> &input_frame, MeterKeys *mk, bool warn);
+    bool parseWMBUSHeader(std::vector<uchar> &input_frame);
+    bool parseWMBUS(std::vector<uchar> &input_frame, MeterKeys *mk, bool warn);
 
-    bool parseHANHeader(vector<uchar> &input_frame);
-    bool parseHAN(vector<uchar> &input_frame, MeterKeys *mk, bool warn);
+    bool parseHANHeader(std::vector<uchar> &input_frame);
+    bool parseHAN(std::vector<uchar> &input_frame, MeterKeys *mk, bool warn);
 
-    void addAddressMfctFirst(const vector<uchar>::iterator &pos);
-    void addAddressIdFirst(const vector<uchar>::iterator &pos);
+    void addAddressMfctFirst(const std::vector<uchar>::iterator &pos);
+    void addAddressIdFirst(const std::vector<uchar>::iterator &pos);
 
     void print();
 
     // A vector of indentations and explanations, to be printed
     // below the raw data bytes to explain the telegram content.
-    // vector<Explanation> explanations;
-    void addExplanationAndIncrementPos(vector<uchar>::iterator &pos, int len, KindOfData k, Understanding u, const char* fmt, ...);
-    void setExplanation(vector<uchar>::iterator &pos, int len, KindOfData k, Understanding u, const char* fmt, ...);
+    std::vector<Explanation> explanations;
+    void addExplanationAndIncrementPos(std::vector<uchar>::iterator &pos, int len, KindOfData k, Understanding u, const char* fmt, ...);
+    void setExplanation(std::vector<uchar>::iterator &pos, int len, KindOfData k, Understanding u, const char* fmt, ...);
     void addMoreExplanation(int pos, const char* fmt, ...);
-    void addMoreExplanation(int pos, string json);
+    void addMoreExplanation(int pos, std::string json);
 
     // Add an explanation of data inside manufacturer specific data.
     void addSpecialExplanation(int offset, int len, KindOfData k, Understanding u, const char* fmt, ...);
-    void explainParse(string intro, int from);
-    string analyzeParse(OutputFormat o, int *content_length, int *understood_content_length);
+    void explainParse(std::string intro, int from);
+    std::string analyzeParse(OutputFormat o, int *content_length, int *understood_content_length);
 
     bool parserWarns() { return parser_warns_; }
     bool isSimulated() { return is_simulated_; }
@@ -509,10 +507,10 @@ public:
     // Mapped from their key for quick access to their offset and content.
     std::map<std::string,std::pair<int,DVEntry>> dv_entries;
 
-    string autoDetectPossibleDrivers();
+    std::string autoDetectPossibleDrivers();
 
     // part of original telegram bytes, only filled if pre-processing modifies it
-    vector<uchar> original;
+    std::vector<uchar> original;
 
 private:
 
@@ -538,17 +536,17 @@ private:
     void printAFL();
     void printTPL();
 
-    bool parse_TPL_72(vector<uchar>::iterator &pos);
-    bool parse_TPL_78(vector<uchar>::iterator &pos);
-    bool parse_TPL_79(vector<uchar>::iterator &pos);
-    bool parse_TPL_7A(vector<uchar>::iterator &pos);
-    bool alreadyDecryptedCBC(vector<uchar>::iterator &pos);
-    bool potentiallyDecrypt(vector<uchar>::iterator &pos);
+    bool parse_TPL_72(std::vector<uchar>::iterator &pos);
+    bool parse_TPL_78(std::vector<uchar>::iterator &pos);
+    bool parse_TPL_79(std::vector<uchar>::iterator &pos);
+    bool parse_TPL_7A(std::vector<uchar>::iterator &pos);
+    bool alreadyDecryptedCBC(std::vector<uchar>::iterator &pos);
+    bool potentiallyDecrypt(std::vector<uchar>::iterator &pos);
     bool parseTPLConfig(std::vector<uchar>::iterator &pos);
-    static string toStringFromELLSN(int sn);
-    static string toStringFromTPLConfig(int cfg);
-    static string toStringFromAFLFC(int fc);
-    static string toStringFromAFLMC(int mc);
+    static std::string toStringFromELLSN(int sn);
+    static std::string toStringFromTPLConfig(int cfg);
+    static std::string toStringFromAFLFC(int fc);
+    static std::string toStringFromAFLMC(int mc);
 
     bool parseShortTPL(std::vector<uchar>::iterator &pos);
     bool parseLongTPL(std::vector<uchar>::iterator &pos);
@@ -564,67 +562,67 @@ struct SendBusContent
 {
     LinkMode link_mode;
     TelegramFormat format;
-    string bus;
-    string content;
+    std::string bus;
+    std::string content;
 
-    static bool isLikely(const string &s);
-    bool parse(const string &s);
+    static bool isLikely(const std::string &s);
+    bool parse(const std::string &s);
 };
 
 struct Meter;
 
-string manufacturer(int m_field);
-string mediaType(int a_field_device_type, int m_field);
-string mediaTypeJSON(int a_field_device_type, int m_field);
+std::string manufacturer(int m_field);
+std::string mediaType(int a_field_device_type, int m_field);
+std::string mediaTypeJSON(int a_field_device_type, int m_field);
 bool isCiFieldOfType(int ci_field, CI_TYPE type);
 int ciFieldLength(int ci_field);
 bool isCiFieldManufacturerSpecific(int ci_field);
-string ciType(int ci_field);
-string cType(int c_field);
+std::string ciType(int ci_field);
+std::string cType(int c_field);
 bool isValidWMBusCField(int c_field);
 bool isValidMBusCField(int c_field);
-string ccType(int cc_field);
-string difType(int dif);
+std::string ccType(int cc_field);
+std::string difType(int dif);
 double vifScale(int vif);
-string vifKey(int vif); // E.g. temperature energy power mass_flow volume_flow
-string vifUnit(int vif); // E.g. m3 c kwh kw MJ MJh
-string vifType(int vif); // Long description
-string vifeType(int dif, int vif, int vife); // Long description
+std::string vifKey(int vif); // E.g. temperature energy power mass_flow volume_flow
+std::string vifUnit(int vif); // E.g. m3 c kwh kw MJ MJh
+std::string vifType(int vif); // Long description
+std::string vifeType(int dif, int vif, int vife); // Long description
 
 // Decode only the standard defined bits in the tpl status byte. Ignore the top 3 bits.
 // Return "OK" if sts == 0
-string decodeTPLStatusByteOnlyStandardBits(uchar sts);
+std::string decodeTPLStatusByteOnlyStandardBits(uchar sts);
 // Decode the standard bits and report the top 3 bits if set as for example: UNKNOWN_0x80
 // Return "OK" if sts == 0
-string decodeTPLStatusByteNoMfct(uchar sts);
+std::string decodeTPLStatusByteNoMfct(uchar sts);
 // Decode the standard bits and translate the top 3 bits if set.
 // Return "OK" if sts == 0
-string decodeTPLStatusByteWithMfct(uchar sts, Translate::Lookup &lookup);
+std::string decodeTPLStatusByteWithMfct(uchar sts, Translate::Lookup &lookup);
 
 int difLenBytes(int dif);
 MeasurementType difMeasurementType(int dif);
 
-string linkModeName(LinkMode link_mode);
-string measurementTypeName(MeasurementType mt);
+std::string linkModeName(LinkMode link_mode);
+std::string measurementTypeName(MeasurementType mt);
 
 enum FrameStatus { PartialFrame, FullFrame, ErrorInFrame, TextAndNotFrame };
 const char *toString(FrameStatus fs);
 
 
-FrameStatus checkWMBusFrame(vector<uchar> &data,
+FrameStatus checkWMBusFrame(std::vector<uchar> &data,
                             size_t *frame_length,
                             int *payload_len_out,
                             int *payload_offset,
                             bool only_test);
 
-FrameStatus checkMBusFrame(vector<uchar> &data,
+FrameStatus checkMBusFrame(std::vector<uchar> &data,
                            size_t *frame_length,
                            int *payload_len_out,
                            int *payload_offset,
                            bool only_test);
 
 // Remember meters id/mfct/ver/type combos that we should only warn once for.
-bool warned_for_telegram_before(Telegram *t, vector<uchar> &dll_a);
+bool warned_for_telegram_before(Telegram *t, std::vector<uchar> &dll_a);
 
 ////////////////// MBUS
 

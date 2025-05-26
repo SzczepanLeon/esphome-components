@@ -35,7 +35,7 @@ namespace
         di.setMeterType(MeterType::WaterMeter);
         di.addDetection(MANUFACTURER_APA,  0x07,  0x14);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -49,16 +49,16 @@ namespace
 
     void Driver::processContent(Telegram *t)
     {
-        vector<uchar> content;
+        std::vector<uchar> content;
         t->extractPayload(&content);
 
         if (content.size() < 4) return;
 
-        vector<uchar> frame(content.begin() + 2, content.begin() + 18);
-        vector<uchar>::iterator pos = frame.begin();
+        std::vector<uchar> frame(content.begin() + 2, content.begin() + 18);
+        std::vector<uchar>::iterator pos = frame.begin();
 
         // TODO: read specified key from input
-        vector<uchar> aes_key(16, 0);
+        std::vector<uchar> aes_key(16, 0);
 
         int num_encrypted_bytes = 0;
         int num_not_encrypted_at_end = 0;

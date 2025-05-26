@@ -35,7 +35,7 @@ namespace
         di.setMeterType(MeterType::WaterMeter);
         di.addDetection(0x8614 /*APT?*/,  0x11,  0x04);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -49,19 +49,19 @@ namespace
 
     void Driver::processContent(Telegram *t)
     {
-        vector<uchar> content;
+        std::vector<uchar> content;
         t->extractPayload(&content);
 
         // Overwrite the non-standard 0x11 with 0x07 which means water.
         t->dll_type = 0x07;
 
-        map<string,pair<int,DVEntry>> vendor_values;
+        std::map<std::string,std::pair<int,DVEntry>> vendor_values;
 
         size_t i=0;
         if (i+4 < content.size())
         {
             // We found the register representing the total
-            string total;
+            std::string total;
             strprintf(&total, "%02x%02x%02x%02x", content[i+0], content[i+1], content[i+2], content[i+3]);
             int offset = i-1+t->header_size;
             vendor_values["0413"] = {offset, DVEntry(offset, DifVifKey("0413"), MeasurementType::Instantaneous, 0x13, {}, {}, 0, 0, 0, total) };

@@ -30,7 +30,7 @@ namespace
         di.setDefaultFields("name,id,status,temperature_c,relative_humidity_rh,timestamp");
         di.setMeterType(MeterType::TempHygroMeter);
         di.addLinkMode(LinkMode::MBUS);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
         di.addDetection(MANUFACTURER_PII,  0x1b,  0x01);
     });
 

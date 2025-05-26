@@ -33,7 +33,7 @@ namespace
         di.addLinkMode(LinkMode::T1);
         di.addDetection(MANUFACTURER_BMT, 0x07,  0x05);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -70,7 +70,7 @@ namespace
         if (t->tpl_cfg == 0x1006)
         {
             // This is the old type of meter and some values needs to be de-obfuscated.
-            vector<uchar> frame;
+            std::vector<uchar> frame;
             t->extractFrame(&frame);
 
             debugPayload("(rftx1) decoding raw frame", frame);
@@ -99,7 +99,7 @@ namespace
             int m = bcd2bin(frame[o+1]);
             int s = bcd2bin(frame[o+0]);
 
-            string tmp;
+            std::string tmp;
             strprintf(&tmp, "%d-%02d-%02d %02d:%02d:%02d",y, M%99, d%99, H%99, m%99, s%99);
             setStringValue("meter_datetime", tmp);
 

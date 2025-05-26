@@ -25,7 +25,7 @@ namespace
         Driver(MeterInfo &mi, DriverInfo &di);
 
         void processContent(Telegram *t);
-        string dateToString(uchar date_lo, uchar date_hi);
+        std::string dateToString(uchar date_lo, uchar date_hi);
     };
 
     static bool ok = registerDriver([](DriverInfo&di)
@@ -41,7 +41,7 @@ namespace
         di.addDetection(0x8614 /* APT? */, 0x08,  0x04);
         di.addDetection(0x8601 /* APA? */, 0x08,  0x04);
         di.usesProcessContent();
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -81,7 +81,7 @@ namespace
 
     void Driver::processContent(Telegram *t)
     {
-        vector<uchar> content;
+        std::vector<uchar> content;
         t->extractPayload(&content);
 
         if (t->tpl_ci == 0xB6) {
@@ -115,7 +115,7 @@ namespace
         // Note: NOT byte swapped. Accidentally? works via dateToString conversion.
         uchar season_start_date_lo = content[1];
         uchar season_start_date_hi = content[0];
-        string season_start_date = dateToString(season_start_date_lo, season_start_date_hi);
+        std::string season_start_date = dateToString(season_start_date_lo, season_start_date_hi);
         setStringValue("season_start_date", season_start_date, NULL);
 
         // Previous season total allocation
@@ -127,7 +127,7 @@ namespace
         // Electronic seal break date
         uchar esb_date_lo = content[6];
         uchar esb_date_hi = content[7];
-        string esb_date = dateToString(esb_date_lo, esb_date_hi);
+        std::string esb_date = dateToString(esb_date_lo, esb_date_hi);
         setStringValue("esb_date", esb_date, NULL);
 
         // Current season allocation
@@ -139,7 +139,7 @@ namespace
         // Current date reported by meter
         uchar date_curr_lo = content[10];
         uchar date_curr_hi = content[11];
-        string current_date = dateToString(date_curr_lo, date_curr_hi);
+        std::string current_date = dateToString(date_curr_lo, date_curr_hi);
         setStringValue("current_date", current_date, NULL);
 
         // Previous season average temperature
@@ -155,7 +155,7 @@ namespace
         setNumericValue("temp_room_avg", Unit::C, temp_room_avg);
     }
 
-    string Driver::dateToString(uchar date_lo, uchar date_hi) {
+    std::string Driver::dateToString(uchar date_lo, uchar date_hi) {
         // Data format (MSB -> LSB):
         // 2 bits of unknown data (or part of a year, but left over for season date
         //                         hack, and it doesn't matter until 2064 anyway...)

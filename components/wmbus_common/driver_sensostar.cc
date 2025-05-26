@@ -32,7 +32,7 @@ namespace
         di.addLinkMode(LinkMode::C1);
         di.addLinkMode(LinkMode::T1);
         di.addDetection(MANUFACTURER_EFE, 0x04,  0x00);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -197,7 +197,7 @@ namespace
 
         for (int i=1; i<=15; ++i)
         {
-            string name, info;
+            std::string name, info;
             strprintf(&name, "consumption_%d_months_ago", i);
             strprintf(&info, "Energy consumption %d month(s) ago.", i);
             addNumericFieldWithExtractor(

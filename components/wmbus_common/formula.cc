@@ -198,15 +198,15 @@ const char *toString(TokenType tt)
     return "?";
 }
 
-string Token::str(const string &s)
+std::string Token::str(const std::string &s)
 {
-    string v = s.substr(start, len);
+    std::string v = s.substr(start, len);
     return tostrprintf("%s(%s)", toString(type), v.c_str());
 }
 
-double Token::val(const string &s)
+double Token::val(const std::string &s)
 {
-    string v = s.substr(start, len);
+    std::string v = s.substr(start, len);
     if (type == TokenType::NUMBER)
     {
         return atof(v.c_str());
@@ -234,14 +234,14 @@ double Token::val(const string &s)
     return 0;
 }
 
-string Token::vals(const string &s)
+std::string Token::vals(const std::string &s)
 {
     return s.substr(start, len);
 }
 
-Unit Token::unit(const string &s)
+Unit Token::unit(const std::string &s)
 {
-    string v = s.substr(start, len);
+    std::string v = s.substr(start, len);
     return toUnit(v);
 }
 
@@ -321,25 +321,25 @@ size_t FormulaImplementation::findDateTime(size_t i)
     if (i+21 < formula_.length())
     {
         end = strptime(start, "'%Y-%m-%dT%H:%M:%SZ'", &time);
-        if (distance(start, end) == 22) return 22;
+        if (std::distance(start, end) == 22) return 22;
     }
 
     if (i+20 < formula_.length())
     {
         end = strptime(start, "'%Y-%m-%d %H:%M:%S'", &time);
-        if (distance(start, end) == 21) return 21;
+        if (std::distance(start, end) == 21) return 21;
     }
 
     if (i+17 < formula_.length())
     {
         end = strptime(start, "'%Y-%m-%d %H:%M'", &time);
-        if (distance(start, end) == 18) return 18;
+        if (std::distance(start, end) == 18) return 18;
     }
 
     if (i+11 < formula_.length())
     {
         end = strptime(start, "'%Y-%m-%d'", &time);
-        if (distance(start, end) == 12) return 12;
+        if (std::distance(start, end) == 12) return 12;
     }
 
     return 0;
@@ -568,7 +568,7 @@ bool FormulaImplementation::tokenize()
     if (i < formula_.length())
     {
         Token tok(TokenType::SPACE, i, 0);
-        string s = string("Unknown token!\n")+tok.withMarker(formula_);
+        std::string s = std::string("Unknown token!\n")+tok.withMarker(formula_);
         errors_.push_back(s);
         valid_ = false;
         return false;
@@ -750,8 +750,8 @@ void FormulaImplementation::handleAddition(Token *tok)
 
     if (!ok)
     {
-        string lsis = left_siunit.str();
-        string rsis = right_siunit.str();
+        std::string lsis = left_siunit.str();
+        std::string rsis = right_siunit.str();
         errors_.push_back(tostrprintf("Cannot add %s to %s!\n%s",
                                       left_siunit.info().c_str(),
                                       right_siunit.info().c_str(),
@@ -774,8 +774,8 @@ void FormulaImplementation::handleSubtraction(Token *tok)
 
     if (!ok)
     {
-        string lsis = left_siunit.str();
-        string rsis = right_siunit.str();
+        std::string lsis = left_siunit.str();
+        std::string rsis = right_siunit.str();
         errors_.push_back(tostrprintf("Cannot subtract %s from %s!\n%s",
                                       left_siunit.info().c_str(),
                                       right_siunit.info().c_str(),
@@ -812,8 +812,8 @@ void FormulaImplementation::handleSquareRoot(Token *tok)
 
 void FormulaImplementation::handleField(Token *field)
 {
-    string field_name = field->vals(formula_); // Full field: total_m3
-    string vname;                              // Without unit: total
+    std::string field_name = field->vals(formula_); // Full field: total_m3
+    std::string vname;                              // Without unit: total
     Unit named_unit;                      // The extracted unit: m3
     bool ok = extractUnit(field_name, &vname, &named_unit);
 
@@ -871,7 +871,7 @@ Token *FormulaImplementation::LA(size_t i)
     return &tokens_[i];
 }
 
-bool FormulaImplementation::parse(Meter *m, const string &f)
+bool FormulaImplementation::parse(Meter *m, const std::string &f)
 {
     bool ok;
 
@@ -891,8 +891,6 @@ bool FormulaImplementation::parse(Meter *m, const string &f)
     {
         debug("%s ", t.str(formula_).c_str());
     }
-    debug("\n");
-    
 
     ok = go();
     if (!ok) return false;
@@ -907,10 +905,10 @@ bool FormulaImplementation::valid()
     return valid_ == true && op_stack_.size() == 1;
 }
 
-string FormulaImplementation::errors()
+std::string FormulaImplementation::errors()
 {
-    string s;
-    for (string& e : errors_) s += e;
+    std::string s;
+    for (std::string& e : errors_) s += e;
     return s;
 }
 
@@ -921,14 +919,14 @@ double FormulaImplementation::calculate(Unit to, DVEntry *dve, Meter *m)
 
     if (!valid_)
     {
-        string t = tree();
+        std::string t = tree();
         warning("Warning! Formula is not valid! Returning nan!\n%s\n", t.c_str());
         return std::nan("");
     }
 
     if (op_stack_.size() != 1)
     {
-        string t = tree();
+        std::string t = tree();
         warning("Warning! Formula is not valid! Multiple ops on stack! Returning nan!\n%s\n", t.c_str());
         return std::nan("");
     }
@@ -945,8 +943,8 @@ void FormulaImplementation::doAddition(const SIUnit &to_siunit)
 {
     assert(op_stack_.size() >= 2);
 
-    unique_ptr<NumericFormula> right_node = popOp();
-    unique_ptr<NumericFormula> left_node = popOp();
+    std::unique_ptr<NumericFormula> right_node = popOp();
+    std::unique_ptr<NumericFormula> left_node = popOp();
 
     pushOp(new NumericFormulaAddition(this, to_siunit, left_node, right_node));
 }
@@ -955,8 +953,8 @@ void FormulaImplementation::doSubtraction(const SIUnit &to_siunit)
 {
     assert(op_stack_.size() >= 2);
 
-    unique_ptr<NumericFormula> right_node = popOp();
-    unique_ptr<NumericFormula> left_node = popOp();
+    std::unique_ptr<NumericFormula> right_node = popOp();
+    std::unique_ptr<NumericFormula> left_node = popOp();
 
     pushOp(new NumericFormulaSubtraction(this, to_siunit, left_node, right_node));
 }
@@ -967,17 +965,17 @@ void FormulaImplementation::doMultiplication()
 
     SIUnit right_siunit = topOp()->siunit();
 
-    unique_ptr<NumericFormula> right_node = popOp();
+    std::unique_ptr<NumericFormula> right_node = popOp();
 
     SIUnit left_siunit = topOp()->siunit();
 
-    unique_ptr<NumericFormula> left_node = popOp();
+    std::unique_ptr<NumericFormula> left_node = popOp();
 
     SIUnit mul_siunit = left_siunit.mul(right_siunit);
 
-    string lsis = left_siunit.info();
-    string rsis = right_siunit.info();
-    string msis = mul_siunit.info();
+    std::string lsis = left_siunit.info();
+    std::string rsis = right_siunit.info();
+    std::string msis = mul_siunit.info();
 
     pushOp(new NumericFormulaMultiplication(this, mul_siunit, left_node, right_node));
 }
@@ -988,17 +986,17 @@ void FormulaImplementation::doDivision()
 
     SIUnit right_siunit = topOp()->siunit();
 
-    unique_ptr<NumericFormula> right_node = popOp();
+    std::unique_ptr<NumericFormula> right_node = popOp();
 
     SIUnit left_siunit = topOp()->siunit();
 
-    unique_ptr<NumericFormula> left_node = popOp();
+    std::unique_ptr<NumericFormula> left_node = popOp();
 
     SIUnit div_siunit = left_siunit.div(right_siunit);
 
-    string lsis = left_siunit.info();
-    string rsis = right_siunit.info();
-    string dsis = div_siunit.info();
+    std::string lsis = left_siunit.info();
+    std::string rsis = right_siunit.info();
+    std::string dsis = div_siunit.info();
 
     debug("(formula) unit %s DIV %s ==> %s\n", lsis.c_str(), rsis.c_str(), dsis.c_str());
 
@@ -1011,11 +1009,11 @@ void FormulaImplementation::doExponentiation()
 
 //    SIUnit right_siunit = topOp()->siunit();
 
-    unique_ptr<NumericFormula> right_node = popOp();
+    std::unique_ptr<NumericFormula> right_node = popOp();
 
     SIUnit left_siunit = topOp()->siunit();
 
-    unique_ptr<NumericFormula> left_node = popOp();
+    std::unique_ptr<NumericFormula> left_node = popOp();
 
     pushOp(new NumericFormulaDivision(this, left_siunit, left_node, right_node));
 
@@ -1030,7 +1028,7 @@ void FormulaImplementation::doSquareRoot()
 
     SIUnit siunit = inner_siunit.sqrt();
 
-    unique_ptr<NumericFormula> inner_node = popOp();
+    std::unique_ptr<NumericFormula> inner_node = popOp();
 
     pushOp(new NumericFormulaSquareRoot(this, siunit, inner_node));
 }
@@ -1063,14 +1061,14 @@ FormulaImplementation::~FormulaImplementation()
 {
 }
 
-string FormulaImplementation::str()
+std::string FormulaImplementation::str()
 {
     return topOp()->str();
 }
 
-string FormulaImplementation::tree()
+std::string FormulaImplementation::tree()
 {
-    string s;
+    std::string s;
 
     for (auto &op : op_stack_)
     {
@@ -1091,47 +1089,47 @@ void FormulaImplementation::setDVEntry(DVEntry *dve)
     dventry_ = dve;
 }
 
-string NumericFormulaConstant::str()
+std::string NumericFormulaConstant::str()
 {
     return tostrprintf("%.17g %s", constant_, siunit());
 }
 
-string NumericFormulaConstant::tree()
+std::string NumericFormulaConstant::tree()
 {
     Quantity q = siunit().quantity();
     Unit nearest = siunit().asUnit(q);
-    string sis = siunit().str();
+    std::string sis = siunit().str();
 
     return tostrprintf("<CONST %.17g %s[%s]%s> ", constant_, unitToStringLowerCase(nearest).c_str(), sis.c_str(), toString(q));
 }
 
-string NumericFormulaPair::str()
+std::string NumericFormulaPair::str()
 {
-    string left = left_->tree();
-    string right = right_->tree();
+    std::string left = left_->tree();
+    std::string right = right_->tree();
     return left+" "+op_+" "+right;
 }
 
-string NumericFormulaPair::tree()
+std::string NumericFormulaPair::tree()
 {
-    string left = left_->tree();
-    string right = right_->tree();
+    std::string left = left_->tree();
+    std::string right = right_->tree();
     return "<"+name_+" "+left+right+"> ";
 }
 
-string NumericFormulaSquareRoot::str()
+std::string NumericFormulaSquareRoot::str()
 {
-    string inner = inner_->str();
+    std::string inner = inner_->str();
     return "sqrt("+inner+")";
 }
 
-string NumericFormulaSquareRoot::tree()
+std::string NumericFormulaSquareRoot::tree()
 {
-    string inner = inner_->tree();
+    std::string inner = inner_->tree();
     return "<SQRT "+inner+"> ";
 }
 
-string NumericFormulaMeterField::str()
+std::string NumericFormulaMeterField::str()
 {
     if (formula()->meter() == NULL) return "<?"+vname_+"?>";
     FieldInfo *fi = formula()->meter()->findFieldInfo(vname_, quantity_);
@@ -1139,32 +1137,32 @@ string NumericFormulaMeterField::str()
     return fi->vname()+"_"+unitToStringLowerCase(fi->displayUnit());
 }
 
-string NumericFormulaMeterField::tree()
+std::string NumericFormulaMeterField::tree()
 {
     if (formula()->meter() == NULL) return "<?"+vname_+"?>";
     FieldInfo *fi = formula()->meter()->findFieldInfo(vname_, quantity_);
     return "<FIELD "+fi->vname()+"_"+unitToStringLowerCase(fi->displayUnit())+"> ";
 }
 
-string NumericFormulaDVEntryField::str()
+std::string NumericFormulaDVEntryField::str()
 {
     return toString(counter_);
 }
 
-string NumericFormulaDVEntryField::tree()
+std::string NumericFormulaDVEntryField::tree()
 {
-    return string("<DVENTRY ")+toString(counter_)+"> ";
+    return std::string("<DVENTRY ")+toString(counter_)+"> ";
 }
 
 void FormulaImplementation::pushOp(NumericFormula *nf)
 {
-    op_stack_.push_back(unique_ptr<NumericFormula>(nf));
+    op_stack_.push_back(std::unique_ptr<NumericFormula>(nf));
 }
 
-unique_ptr<NumericFormula> FormulaImplementation::popOp()
+std::unique_ptr<NumericFormula> FormulaImplementation::popOp()
 {
     assert(op_stack_.size() > 0);
-    unique_ptr<NumericFormula> nf = std::move(op_stack_.back());
+    std::unique_ptr<NumericFormula> nf = std::move(op_stack_.back());
     op_stack_.pop_back();
     return nf;
 }
@@ -1186,9 +1184,9 @@ SIUnit &FormulaImplementation::siUnit()
     return topOp()->siunit();
 }
 
-string Token::withMarker(const string& formula)
+std::string Token::withMarker(const std::string& formula)
 {
-    string indent;
+    std::string indent;
     size_t n = start;
     while (n > 0)
     {
@@ -1219,19 +1217,19 @@ bool StringInterpolatorImplementation::parse(Meter *m, const std::string &f)
     size_t prev_string_start = 0;
     size_t next_start_brace = f.find('{', prev_string_start);
 
-    while (next_start_brace != string::npos)
+    while (next_start_brace != std::string::npos)
     {
         // Push the string up to the brace.
-        string part = f.substr(prev_string_start, next_start_brace - prev_string_start);
+        std::string part = f.substr(prev_string_start, next_start_brace - prev_string_start);
         strings_.push_back(part);
 
         // Find the end of the formula.
         size_t next_end_brace = f.find('}', next_start_brace);
-        if (next_end_brace == string::npos) return false; // Oups, missing closing }
+        if (next_end_brace == std::string::npos) return false; // Oups, missing closing }
 
-        string formula = f.substr(next_start_brace+1, next_end_brace - next_start_brace - 1);
+        std::string formula = f.substr(next_start_brace+1, next_end_brace - next_start_brace - 1);
 
-        formulas_.push_back(unique_ptr<Formula>(newFormula()));
+        formulas_.push_back(std::unique_ptr<Formula>(newFormula()));
         bool ok = formulas_.back()->parse(m, formula);
         if (!ok) return false;
 
@@ -1243,16 +1241,16 @@ bool StringInterpolatorImplementation::parse(Meter *m, const std::string &f)
     // Add any remaining string segment after the last formula.
     if (prev_string_start < f.length())
     {
-        string part = f.substr(prev_string_start);
+        std::string part = f.substr(prev_string_start);
         strings_.push_back(part);
     }
 
     return true;
 }
 
-string StringInterpolatorImplementation::apply(Meter *m, DVEntry *dve)
+std::string StringInterpolatorImplementation::apply(Meter *m, DVEntry *dve)
 {
-    string result;
+    std::string result;
     size_t s = 0;
     size_t f = 0;
 

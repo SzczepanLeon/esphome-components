@@ -30,7 +30,7 @@ namespace
         di.setDefaultFields("name,id,status,reporting_date,consumption_at_reporting_date_m3,timestamp");
         di.addLinkMode(LinkMode::T1);
         di.addDetection(MANUFACTURER_EFE,  0x07,  0x00);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) :
@@ -86,7 +86,7 @@ namespace
 
         for (int i=2; i<=16; ++i)
         {
-            string name, info;
+            std::string name, info;
             strprintf(&name, "consumption_%d_months_ago", i-1);
             strprintf(&info, "Water consumption %d month(s) ago.", i-1);
 

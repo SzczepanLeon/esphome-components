@@ -22,9 +22,7 @@
 #include<algorithm>
 #include<string.h>
 
-using namespace std;
-
-vector<string> splitSequenceOfAddressExpressionsAtCommas(const string& mes);
+std::vector<std::string> splitSequenceOfAddressExpressionsAtCommas(const std::string& mes);
 bool isValidMatchExpression(const std::string& s, bool *has_wildcard);
 bool doesIdMatchExpression(const std::string& id, std::string match_rule);
 bool doesAddressMatchExpressions(Address &address,
@@ -34,9 +32,9 @@ bool doesAddressMatchExpressions(Address &address,
                                  bool *required_found,
                                  bool *required_failed);
 
-bool isValidMatchExpression(const string& s, bool *has_wildcard)
+bool isValidMatchExpression(const std::string& s, bool *has_wildcard)
 {
-    string me = s;
+    std::string me = s;
 
     // Examples of valid match expressions:
     //  12345678
@@ -103,11 +101,11 @@ bool isValidMatchExpression(const string& s, bool *has_wildcard)
     return count <= 7;
 }
 
-vector<string> splitSequenceOfAddressExpressionsAtCommas(const string& mes)
+std::vector<std::string> splitSequenceOfAddressExpressionsAtCommas(const std::string& mes)
 {
-    vector<string> r;
+    std::vector<std::string> r;
     bool eof, err;
-    vector<uchar> v (mes.begin(), mes.end());
+    std::vector<uchar> v (mes.begin(), mes.end());
     auto i = v.begin();
 
     for (;;) {
@@ -121,11 +119,11 @@ vector<string> splitSequenceOfAddressExpressionsAtCommas(const string& mes)
     return r;
 }
 
-bool isValidSequenceOfAddressExpressions(const string& mes)
+bool isValidSequenceOfAddressExpressions(const std::string& mes)
 {
-    vector<string> v = splitSequenceOfAddressExpressionsAtCommas(mes);
+    std::vector<std::string> v = splitSequenceOfAddressExpressionsAtCommas(mes);
 
-    for (string me : v)
+    for (std::string me : v)
     {
         AddressExpression ae;
         if (!ae.parse(me)) return false;
@@ -133,13 +131,13 @@ bool isValidSequenceOfAddressExpressions(const string& mes)
     return true;
 }
 
-vector<AddressExpression> splitAddressExpressions(const string &aes)
+std::vector<AddressExpression> splitAddressExpressions(const std::string &aes)
 {
-    vector<string> v = splitSequenceOfAddressExpressionsAtCommas(aes);
+    std::vector<std::string> v = splitSequenceOfAddressExpressionsAtCommas(aes);
 
-    vector<AddressExpression> r;
+    std::vector<AddressExpression> r;
 
-    for (string me : v)
+    for (std::string me : v)
     {
         AddressExpression ae;
         if (ae.parse(me))
@@ -150,9 +148,9 @@ vector<AddressExpression> splitAddressExpressions(const string &aes)
     return r;
 }
 
-bool doesIdMatchExpression(const string& s, string match)
+bool doesIdMatchExpression(const std::string& s, std::string match)
 {
-    string id = s;
+    std::string id = s;
     if (id.length() == 0) return false;
 
     // Here we assume that the match expression has been
@@ -197,9 +195,9 @@ bool doesIdMatchExpression(const string& s, string match)
     return can_match;
 }
 
-bool hasWildCard(const string& mes)
+bool hasWildCard(const std::string& mes)
 {
-    return mes.find('*') != string::npos;
+    return mes.find('*') != std::string::npos;
 }
 
 bool AddressExpression::match(const std::string &i, uint16_t m, uchar v, uchar t)
@@ -242,9 +240,9 @@ void AddressExpression::trimToIdentity(IdentityMode im, Address &a)
     }
 }
 
-bool AddressExpression::parse(const string &in)
+bool AddressExpression::parse(const std::string &in)
 {
-    string s = in;
+    std::string s = in;
     // Example: 12345678
     // or       12345678.M=PII.T=1B.V=01
     // or       1234*
@@ -273,7 +271,7 @@ bool AddressExpression::parse(const string &in)
         // Double ! not allowed.
         if (s.size() > 1 && s[0] == '!') return false;
     }
-    vector<string> parts = splitString(s, '.');
+    std::vector<std::string> parts = splitString(s, '.');
 
     assert(parts.size() > 0);
 
@@ -297,12 +295,12 @@ bool AddressExpression::parse(const string &in)
     if (parts.size() == 1 && id.length() == 16)
     {
         // This is a secondary libmbus address.
-        string mfct_hex = id.substr(8,4);
-        string version_hex = id.substr(12,2);
-        string type_hex = id.substr(14,2);
+        std::string mfct_hex = id.substr(8,4);
+        std::string version_hex = id.substr(12,2);
+        std::string type_hex = id.substr(14,2);
         id = id.substr(0,8);
 
-        vector<uchar> data;
+        std::vector<uchar> data;
         bool ok = hex2bin(mfct_hex.c_str(), &data);
         if (!ok) return false;
         if (data.size() != 2) return false;
@@ -329,7 +327,7 @@ bool AddressExpression::parse(const string &in)
         {
             if (parts[i][1] != '=') return false;
 
-            vector<uchar> data;
+            std::vector<uchar> data;
             bool ok = hex2bin(&parts[i][2], &data);
             if (!ok) return false;
             if (data.size() != 1) return false;
@@ -360,7 +358,7 @@ bool AddressExpression::parse(const string &in)
             if (parts[i][1] != '=') return false;
             if (parts[i][0] != 'M') return false;
 
-            vector<uchar> data;
+            std::vector<uchar> data;
             bool ok = hex2bin(&parts[i][2], &data);
             if (!ok) return false;
             if (data.size() != 2) return false;
@@ -388,9 +386,9 @@ bool flagToManufacturer(const char *s, uint16_t *out_mfct)
     return true;
 }
 
-string AddressExpression::str()
+std::string AddressExpression::str()
 {
-    string s;
+    std::string s;
 
     if (filter_out) s = "!";
     if (required) s = "R";
@@ -412,9 +410,9 @@ string AddressExpression::str()
     return s;
 }
 
-string Address::str()
+std::string Address::str()
 {
-    string s;
+    std::string s;
 
     s.append(id);
     if (mfct != 0xffff)
@@ -433,9 +431,9 @@ string Address::str()
     return s;
 }
 
-string Address::concat(std::vector<Address> &addresses)
+std::string Address::concat(std::vector<Address> &addresses)
 {
-    string s;
+    std::string s;
     for (Address& a: addresses)
     {
         if (s.size() > 0) s.append(",");
@@ -444,9 +442,9 @@ string Address::concat(std::vector<Address> &addresses)
     return s;
 }
 
-string AddressExpression::concat(std::vector<AddressExpression> &address_expressions)
+std::string AddressExpression::concat(std::vector<AddressExpression> &address_expressions)
 {
-    string s;
+    std::string s;
     for (AddressExpression& a: address_expressions)
     {
         if (s.size() > 0) s.append(",");
@@ -455,19 +453,19 @@ string AddressExpression::concat(std::vector<AddressExpression> &address_express
     return s;
 }
 
-string manufacturerFlag(int m_field) {
+std::string manufacturerFlag(int m_field) {
     char a = (m_field/1024)%32+64;
     char b = (m_field/32)%32+64;
     char c = (m_field)%32+64;
 
-    string flag;
+    std::string flag;
     flag += a;
     flag += b;
     flag += c;
     return flag;
 }
 
-void Address::decodeMfctFirst(const vector<uchar>::iterator &pos)
+void Address::decodeMfctFirst(const std::vector<uchar>::iterator &pos)
 {
     mfct = *(pos+1) << 8 | *(pos+0);
     id = tostrprintf("%02x%02x%02x%02x", *(pos+5), *(pos+4), *(pos+3), *(pos+2));
@@ -475,7 +473,7 @@ void Address::decodeMfctFirst(const vector<uchar>::iterator &pos)
     type = *(pos+7);
 }
 
-void Address::decodeIdFirst(const vector<uchar>::iterator &pos)
+void Address::decodeIdFirst(const std::vector<uchar>::iterator &pos)
 {
     id = tostrprintf("%02x%02x%02x%02x", *(pos+3), *(pos+2), *(pos+1), *(pos+0));
     mfct = *(pos+5) << 8 | *(pos+4);
@@ -514,7 +512,7 @@ bool doesTelegramMatchExpressions(std::vector<Address> &addresses,
 }
 
 bool doesAddressMatchExpressions(Address &address,
-                                 vector<AddressExpression>& address_expressions,
+                                 std::vector<AddressExpression>& address_expressions,
                                  bool *used_wildcard,
                                  bool *filtered_out,
                                  bool *required_found,

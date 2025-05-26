@@ -30,7 +30,7 @@ namespace
         di.setDefaultFields("name,id,heat_kwh,timestamp");
         di.setMeterType(MeterType::HeatMeter);
         di.addDetection(MANUFACTURER_LUG, 0x04,  0x04);
-        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
+        di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return std::shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
