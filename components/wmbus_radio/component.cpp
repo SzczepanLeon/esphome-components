@@ -60,17 +60,17 @@ namespace esphome
         ESP_LOGI(TAG, "Telegram handled by %d handlers", frame->handlers_count());
       else
       {
-        Telegram t;
-        if (t.parseHeader(frame->data()) && t.addresses.empty()) {
-          ESP_LOGE(TAG, "Address is empty! T: %s", frame->as_hex().c_str());
-        }
-        else {
-          uint32_t meter_id = (uint32_t)strtoul(t.addresses[0].id.c_str(), nullptr, 16);
-          ESP_LOGE(TAG, "ID: [0x%08x]", frame->as_hex().c_str());
-
-        }
         ESP_LOGW(TAG, "Telegram not handled by any handler");
-        ESP_LOGW(TAG, "Check if telegram can be parsed on:");
+        Telegram t;
+        if (t.parseHeader(frame->data()) && t.addresses.empty())
+        {
+          ESP_LOGW(TAG, "Check if telegram can be parsed on:");
+        }
+        else
+        {
+          uint32_t meter_id = (uint32_t)strtoul(t.addresses[0].id.c_str(), nullptr, 16);
+          ESP_LOGW(TAG, "Check if telegram with ID: 0x%08x can be parsed on:", meter_id);
+        }
         ESP_LOGW(TAG, (std::string{"https://wmbusmeters.org/analyze/"}+frame->as_hex()).c_str());
       }
     }
