@@ -3,6 +3,7 @@ import itertools
 import logging
 import os
 from pathlib import Path
+from typing import Optional, Union
 
 from esphome import git
 import esphome.codegen as cg
@@ -59,7 +60,6 @@ from .const import (  # noqa
     VARIANT_ESP32C3,
     VARIANT_ESP32C6,
     VARIANT_ESP32H2,
-    VARIANT_ESP32P4,
     VARIANT_ESP32S2,
     VARIANT_ESP32S3,
     VARIANT_FRIENDLY,
@@ -90,7 +90,6 @@ CPU_FREQUENCIES = {
     VARIANT_ESP32C3: get_cpu_frequencies(80, 160),
     VARIANT_ESP32C6: get_cpu_frequencies(80, 120, 160),
     VARIANT_ESP32H2: get_cpu_frequencies(16, 32, 48, 64, 96),
-    VARIANT_ESP32P4: get_cpu_frequencies(40, 360, 400),
 }
 
 # Make sure not missed here if a new variant added.
@@ -190,7 +189,7 @@ class RawSdkconfigValue:
     value: str
 
 
-SdkconfigValueType = bool | int | HexInt | str | RawSdkconfigValue
+SdkconfigValueType = Union[bool, int, HexInt, str, RawSdkconfigValue]
 
 
 def add_idf_sdkconfig_option(name: str, value: SdkconfigValueType):
@@ -207,8 +206,8 @@ def add_idf_component(
     ref: str = None,
     path: str = None,
     refresh: TimePeriod = None,
-    components: list[str] | None = None,
-    submodules: list[str] | None = None,
+    components: Optional[list[str]] = None,
+    submodules: Optional[list[str]] = None,
 ):
     """Add an esp-idf component to the project."""
     if not CORE.using_esp_idf:
@@ -297,11 +296,11 @@ ARDUINO_PLATFORM_VERSION = cv.Version(5, 4, 0)
 # The default/recommended esp-idf framework version
 #  - https://github.com/espressif/esp-idf/releases
 #  - https://api.registry.platformio.org/v3/packages/platformio/tool/framework-espidf
-RECOMMENDED_ESP_IDF_FRAMEWORK_VERSION = cv.Version(5, 3, 2)
+RECOMMENDED_ESP_IDF_FRAMEWORK_VERSION = cv.Version(5, 1, 6)
 # The platformio/espressif32 version to use for esp-idf frameworks
 #  - https://github.com/platformio/platform-espressif32/releases
 #  - https://api.registry.platformio.org/v3/packages/platformio/platform/espressif32
-ESP_IDF_PLATFORM_VERSION = cv.Version(53, 3, 13)
+ESP_IDF_PLATFORM_VERSION = cv.Version(51, 3, 7)
 
 # List based on https://registry.platformio.org/tools/platformio/framework-espidf/versions
 SUPPORTED_PLATFORMIO_ESP_IDF_5X = [
@@ -370,8 +369,8 @@ def _arduino_check_versions(value):
 def _esp_idf_check_versions(value):
     value = value.copy()
     lookups = {
-        "dev": (cv.Version(5, 3, 2), "https://github.com/espressif/esp-idf.git"),
-        "latest": (cv.Version(5, 3, 2), None),
+        "dev": (cv.Version(5, 1, 6), "https://github.com/espressif/esp-idf.git"),
+        "latest": (cv.Version(5, 1, 6), None),
         "recommended": (RECOMMENDED_ESP_IDF_FRAMEWORK_VERSION, None),
     }
 
