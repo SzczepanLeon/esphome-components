@@ -12,6 +12,8 @@
 #include "packet.h"
 #include "transceiver.h"
 
+#include "esphome/components/wmbus_common/wmbus.h"
+
 namespace esphome
 {
   namespace wmbus_radio
