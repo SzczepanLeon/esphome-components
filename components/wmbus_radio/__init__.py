@@ -29,11 +29,13 @@ CONF_MARK_AS_HANDLED = "mark_as_handled"
 
 radio_ns = cg.esphome_ns.namespace("wmbus_radio")
 RadioComponent = radio_ns.class_("Radio", cg.Component)
-RadioTransceiver = radio_ns.class_("RadioTransceiver", spi.SPIDevice, cg.Component)
+RadioTransceiver = radio_ns.class_(
+    "RadioTransceiver", spi.SPIDevice, cg.Component)
 Frame = radio_ns.class_("Frame")
 FrameOutputFormat = Frame.enum("OutputFormat")
 FramePtr = Frame.operator("ptr")
-FrameTrigger = radio_ns.class_("FrameTrigger", automation.Trigger.template(FramePtr))
+FrameTrigger = radio_ns.class_(
+    "FrameTrigger", automation.Trigger.template(FramePtr))
 
 TRANSCEIVER_NAMES = {
     r.stem.removeprefix("transceiver_").upper()
@@ -86,7 +88,8 @@ async def to_code(config):
     await cg.register_component(var, config)
 
     for conf in config.get(CONF_ON_FRAME, []):
-        trig = cg.new_Pvariable(conf[CONF_TRIGGER_ID], var, conf[CONF_MARK_AS_HANDLED])
+        trig = cg.new_Pvariable(
+            conf[CONF_TRIGGER_ID], var, conf[CONF_MARK_AS_HANDLED])
         await automation.build_automation(
             trig,
             [(FramePtr, "frame")],

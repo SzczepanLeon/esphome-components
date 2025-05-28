@@ -20,6 +20,6 @@
 
 typedef unsigned char uchar;
 
-void AES_CMAC (uchar *key, uchar *input, int length, uchar *mac);
+void AES_CMAC(uchar *key, uchar *input, int length, uchar *mac);
 
 #endif //_AESCMAC_H_

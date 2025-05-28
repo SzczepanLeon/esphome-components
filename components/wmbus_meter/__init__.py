@@ -55,7 +55,8 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_METER_ID, default=""): cv.hex_int,
         cv.Optional(CONF_TYPE, default="auto"): validate_driver,
         cv.Optional(CONF_KEY): cv.Any(
-            cv.All(cv.string_strict, lambda s: s.encode().hex(), hex_key_validator),
+            cv.All(cv.string_strict, lambda s: s.encode().hex(),
+                   hex_key_validator),
             hex_key_validator,
         ),
         cv.Optional(CONF_ON_TELEGRAM): automation.validate_automation(
@@ -63,7 +64,8 @@ CONFIG_SCHEMA = cv.Schema(
         ),
         cv.Optional(CONF_MODE, default="Any"): cv.ensure_list(
             cv.enum(
-                {name: getattr(link_mode_enum, name) for name in ("Any", "C1", "T1")}
+                {name: getattr(link_mode_enum, name)
+                 for name in ("Any", "C1", "T1")}
             )
         ),
     }
