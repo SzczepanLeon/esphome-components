@@ -61,8 +61,16 @@ namespace esphome
       else
       {
         ESP_LOGW(TAG, "Telegram not handled by any handler");
-        ESP_LOGW(TAG, "Check if telegram can be parsed on:");
-        ESP_LOGW(TAG, (std::string{"https://wmbusmeters.org/analyze/"}+frame->as_hex()).c_str());
+        Telegram t;
+        if (t.parseHeader(frame->data()) && t.addresses.empty())
+        {
+          ESP_LOGW(TAG, "Check if telegram can be parsed on:");
+        }
+        else
+        {
+          ESP_LOGW(TAG, "Check if telegram with address %s can be parsed on:", t.addresses.back().id.c_str());
+        }
+        ESP_LOGW(TAG, (std::string{"https://wmbusmeters.org/analyze/"} + frame->as_hex()).c_str());
       }
     }
 
@@ -129,3 +137,4 @@ namespace esphome
 
   } // namespace wmbus
 } // namespace esphome
+
