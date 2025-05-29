@@ -13,11 +13,11 @@ void SocketTransmitter::send(std::vector<uint8_t> data) {
 void SocketTransmitter::send(const uint8_t *data, size_t length) {
   ESP_LOGD(TAG, "Setting up socket transmitter");
   this->socket_ = socket::socket_ip(this->protocol, 0);
-  this->socket_->setblocking(false);
   int enable = 1;
   this->socket_->setsockopt(SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable));
 
-  ESP_LOGD(TAG, "Connecting...");
+  ESP_LOGD(TAG, "Connecting %s ...",
+           this->protocol == SOCK_DGRAM ? "UDP" : "TCP");
   sockaddr destination;
   socket::set_sockaddr(&destination, sizeof(destination), this->host,
                        this->port);
@@ -30,6 +30,7 @@ void SocketTransmitter::send(const uint8_t *data, size_t length) {
   int n_bytes = this->socket_->write(data, length);
   if (n_bytes < 0)
     ESP_LOGE(TAG, "Failed to send message");
+  this->socket_->close();
 }
 
 void SocketTransmitter::dump_config() {

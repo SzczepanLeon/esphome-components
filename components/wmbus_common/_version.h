@@ -1,4 +1,4 @@
 #pragma once
 
-#define WMBUS_COMPONENT_VERSION "5.1.0"
+#define WMBUS_COMPONENT_VERSION "5.1.1"
 #define WMBUSMETERS_VERSION "1.19.0-fe1b1e0"

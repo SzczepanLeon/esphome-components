@@ -7,8 +7,6 @@
 #include "esphome/core/component.h"
 #include "esphome/core/log.h"
 
-#include "esphome/components/wmbus_radio/packet.h"
-
 namespace esphome {
 namespace socket_transmitter {
 static const char *TAG = "socket_transmitter";
