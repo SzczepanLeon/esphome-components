@@ -89,6 +89,16 @@ namespace
             );
 
         addNumericFieldWithExtractor(
+            "flow_temperature_c",
+            "The flow temperature",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Temperature,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(MeasurementType::Instantaneous)
+            .set(VIFRange::FlowTemperature));
+
+        addNumericFieldWithExtractor(
             "flow",
             "The current water flow.",
             DEFAULT_PRINT_PROPERTIES,
