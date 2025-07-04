@@ -93,6 +93,9 @@ std::optional<Frame> Packet::convert_to_frame() {
     if (decoded_data)
       this->data_ = decoded_data.value();
   }
+  else if (this->link_mode() == LinkMode::C1) {
+    this->data_.erase(this->data_.begin(), this->data_.begin() + 2);
+  }
 
   removeAnyDLLCRCs(this->data_);
   int dummy;
