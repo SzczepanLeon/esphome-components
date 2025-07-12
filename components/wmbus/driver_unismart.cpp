@@ -159,6 +159,16 @@ namespace
             .set(IndexNr(2))
             );
 
+        addNumericFieldWithExtractor(
+            "battery",
+            "Remaining battery life in days.",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Time,
+            VifScaling::None, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(MeasurementType::Instantaneous)
+            .set(VIFRange::RemainingBattery),
+            Unit::Day);
     }
 }
 
