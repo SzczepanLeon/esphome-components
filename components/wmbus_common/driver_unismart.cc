@@ -30,7 +30,7 @@ static bool ok = registerDriver([](DriverInfo &di) {
   di.addDetection(MANUFACTURER_AMX, 0x03, 0x01);
 
   di.setConstructor([](MeterInfo &mi, DriverInfo &di) {
-    return shared_ptr<Meter>(new Driver(mi, di));
+    return std::shared_ptr<Meter>(new Driver(mi, di));
   });
 });
 
