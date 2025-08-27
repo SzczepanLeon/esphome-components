@@ -1,0 +1,148 @@
+# For more information please visit: https://github.com/SzczepanLeon/esphome-components
+# There is also SUPLA fw available:
+#    https://github.com/wM-Bus/UltimateReader/releases/tag/supla-25.02-0.0.1
+# If you want, you can buy me a coffee:
+#     https://www.buymeacoffee.com/szczepan
+#     https://buycoffee.to/szczepanleon
+
+substitutions:
+  name: "ultimatereader"
+  friendly_name: "Ultimate Reader"
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: wmbus.UltimateReader
+    version: "1.2.5"
+
+esp32:
+  board: lilygo-t3-s3
+  framework:
+    type: esp-idf
+
+external_components:
+  - source: github://SzczepanLeon/esphome-components/components@main
+    refresh: 0d
+
+dashboard_import:
+  package_import_url: github://SzczepanLeon/esphome-components/UltimateReader_v5.yaml@main
+  import_full_config: true
+
+logger:
+  id: component_logger
+  level: DEBUG
+  baud_rate: 115200
+
+psram:
+
+wifi:
+  ap:
+
+captive_portal:
+
+time:
+  - platform: homeassistant
+
+api:
+
+ota:
+  - platform: esphome
+
+web_server:
+  version: 3 
+
+spi:
+  clk_pin:
+    number: GPIO5
+  mosi_pin: GPIO6
+  miso_pin:
+    number: GPIO3
+    ignore_strapping_warning: true
+
+debug:
+  update_interval: 5s
+
+wmbus_radio:
+  radio_type: SX1276
+  cs_pin: GPIO7
+  reset_pin: GPIO8
+  irq_pin: GPIO33
+  on_frame:
+    - then:
+        - logger.log:
+            format: "RSSI: %ddBm T: %s (%d) %s"
+            args: [ frame->rssi(), frame->as_hex().c_str(), frame->data().size(), toString(frame->link_mode()) ]
+    - then:
+        - repeat:
+            count: 3
+            then:
+              - output.turn_on: status_led
+              - delay: 100ms
+              - output.turn_off: status_led
+              - delay: 100ms
+    # - mark_as_handled: False
+    #   then:
+    #     - mqtt.publish:
+    #         topic: wmbus-test/telegram_rtl
+    #         payload: !lambda return frame->as_rtlwmbus();
+    # - mark_as_handled: False
+    #   then:
+    #     - socket_transmitter.send:
+    #         data: !lambda return frame->as_hex();
+    # - then:
+    #     - mqtt.publish:
+    #         topic: wmbus-test/telegram_hex
+    #         payload: !lambda return frame->as_hex();
+    # - then:
+    #     - socket_transmitter.send:
+    #         data: !lambda return frame->as_rtlwmbus();
+
+wmbus_common:
+  drivers: all
+
+output:
+  - platform: gpio
+    id: status_led
+    pin:
+      number: GPIO37
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy
+    source_id: wifi_signal_db
+    name: "WiFi Signal %"
+    filters:
+      - lambda: return {min(max(2 * (x + 100.0), 0.0), 100.0)};
+    unit_of_measurement: "%"
+    entity_category: "diagnostic"
+
+  - platform: internal_temperature
+    name: "Internal Temperature"
+
+  - platform: debug
+    free:
+      name: "Heap Free"
+    loop_time:
+      name: "Loop Time"
+
+  - platform: uptime
+    type: seconds
+    name: Uptime
+
+text_sensor:
+  - platform: debug
+    device:
+      name: "Device Info"
+    reset_reason:
+      name: "Reset Reason"
+
+
