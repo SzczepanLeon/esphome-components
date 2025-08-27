@@ -6,7 +6,7 @@ _units_dict = {}
 
 def build_units_dict():
     """Builds a dictionary of units from the units.h file."""
-    with Path(__file__).with_name("units.h").open() as file:
+    with Path(__file__).with_name("units.h").open("r", encoding="utf-8") as file:
         for line in file:
             if "LIST_OF_UNITS" in line:
                 break
