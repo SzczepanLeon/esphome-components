@@ -131,7 +131,7 @@ output:
     pin:
       number: GPIO37
 
-wmbus_meter:
+# wmbus_meter:
 ## Define meter
   # - id: electricity_meter
   #   meter_id: 0x0101010101
