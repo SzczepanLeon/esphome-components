@@ -14,7 +14,7 @@ substitutions:
 esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
-  name_add_mac_suffix: true
+  name_add_mac_suffix: false
   project:
     name: wmbus.UltimateReader
     version: "1.2.5"
@@ -25,7 +25,7 @@ esp32:
     type: esp-idf
 
 external_components:
-  - source: github://SzczepanLeon/esphome-components/components@main
+  - source: github://SzczepanLeon/esphome-components@main
     refresh: 0d
 
 dashboard_import:
@@ -84,25 +84,46 @@ wmbus_radio:
               - delay: 100ms
               - output.turn_off: status_led
               - delay: 100ms
+## Send telegram via MQTT in RTLwMBus format
     # - mark_as_handled: False
     #   then:
     #     - mqtt.publish:
     #         topic: wmbus-test/telegram_rtl
     #         payload: !lambda return frame->as_rtlwmbus();
+## Send telegram to another machine in HEX format
     # - mark_as_handled: False
     #   then:
     #     - socket_transmitter.send:
     #         data: !lambda return frame->as_hex();
+## Send telegram via MQTT in HEX format
     # - then:
     #     - mqtt.publish:
     #         topic: wmbus-test/telegram_hex
     #         payload: !lambda return frame->as_hex();
+## Send telegram to another machine in RTLwMBus format
     # - then:
     #     - socket_transmitter.send:
     #         data: !lambda return frame->as_rtlwmbus();
 
 wmbus_common:
-  drivers: all
+    drivers: all
+    # or specify specific drivers
+#    drivers:
+#      - apator162
+#      - amiplus
+
+## If You want to send telegram to nother machine and decode it via wmbusmeters.
+# socket_transmitter:
+#   id: my_socket
+#   ip_address: 192.168.1.1
+#   port: 3333
+#   protocol: TCP # or UDP
+
+## MQTT if You want to send data to broker.
+# mqtt:
+#   broker: test.mosquitto.org
+#   port: 1883
+#   client_id: some_client_id
 
 output:
   - platform: gpio
@@ -110,7 +131,48 @@ output:
     pin:
       number: GPIO37
 
+wmbus_meter:
+## Define meter
+  # - id: electricity_meter
+  #   meter_id: 0x0101010101
+  #   type: amiplus
+  #   key: 00000000000000000000000000000000
+  #   mode: 
+  #     - T1
+  #     - C1
+## Define meter and send telegram to MQTT broker
+  # - id: water_meter
+  #   meter_id: 12321
+  #   type: izar
+  #   on_telegram:
+  #     then:
+  #       - wmbus_meter.send_telegram_with_mqtt:
+  #           topic: wmbus-test/telegram
+
 sensor:
+## Create sensor for 'electricity_meter' for field 'current_power_consumption_kw'
+  # - platform: wmbus_meter
+  #   parent_id: electricity_meter
+  #   field: current_power_consumption_kw
+  #   name: My power
+  #   accuracy_decimals: 0
+  #   device_class: power
+  #   unit_of_measurement: W
+  #   state_class: measurement
+  #   filters:
+  #     - multiply: 1000
+
+## Create sensor for 'water_meter' for field 'total_m3'
+  # - platform: wmbus_meter
+  #   parent_id: water_meter
+  #   field: total_m3
+  #   name: Izar water meter total m3
+  #   accuracy_decimals: 3
+  #   unit_of_measurement: "m³"
+  #   device_class: "water"
+  #   state_class: "total_increasing"
+  #   icon: "mdi:water"
+
   - platform: wifi_signal
     name: "WiFi Signal dB"
     id: wifi_signal_db
@@ -139,6 +201,12 @@ sensor:
     name: Uptime
 
 text_sensor:
+## Text sensor with alarms
+  # - platform: wmbus_meter
+  #   parent_id: electricity_meter
+  #   field: current_alarms
+  #   name: Electricity Meter alarms
+
   - platform: debug
     device:
       name: "Device Info"
