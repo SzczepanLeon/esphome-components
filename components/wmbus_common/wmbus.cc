@@ -4844,9 +4844,9 @@ bool trimCRCsFrameFormatAInternal(std::vector<uchar> &payload,
     return false;
   }
   size_t len = payload.size();
-  if (!fail_is_ok) {
-    debugPayload("(wmbus) trimming frame A", payload);
-  }
+  // if (!fail_is_ok) {
+  debugPayload("(wmbus) trimming frame A", payload);
+  // }
 
   std::vector<uchar> out;
 
@@ -4906,7 +4906,7 @@ bool trimCRCsFrameFormatAInternal(std::vector<uchar> &payload,
     }
   }
 
-  debugPayload("(wmbus) trimming frame A", payload);
+  // debugPayload("(wmbus) trimming frame A", payload);
 
   out[0] = out.size() - 1;
   size_t new_len = out[0] + 1;
@@ -4932,9 +4932,9 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload,
     return false;
   }
   size_t len = payload.size();
-  if (!fail_is_ok) {
-    debugPayload("(wmbus) trimming frame B", payload);
-  }
+  // if (!fail_is_ok) {
+  debugPayload("(wmbus) trimming frame B", payload);
+  // }
 
   std::vector<uchar> out;
   size_t crc1_pos, crc2_pos;
@@ -4984,7 +4984,7 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload,
     }
   }
 
-  debugPayload("(wmbus) trimming frame B", payload);
+  // debugPayload("(wmbus) trimming frame B", payload);
 
   out[0] = out.size() - 1;
   size_t new_len = out[0] + 1;

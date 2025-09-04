@@ -8,12 +8,14 @@
 #include "decode3of6.h"
 
 #define WMBUS_PREAMBLE_SIZE (3)
+#define WMBUS_MODE_C_SUFIX_LEN (2)
 #define WMBUS_MODE_C_PREAMBLE (0x54)
 #define WMBUS_BLOCK_A_PREAMBLE (0xCD)
 #define WMBUS_BLOCK_B_PREAMBLE (0x3D)
 
 namespace esphome {
 namespace wmbus_radio {
+static const char *TAG = "packet";
 Packet::Packet() { this->data_.reserve(WMBUS_PREAMBLE_SIZE); }
 
 // Determine the link mode based on the first byte of the data
@@ -46,6 +48,10 @@ uint8_t Packet::l_field() {
 
 size_t Packet::expected_size() {
   if (!this->expected_size_) {
+    // Format A
+    //   L-field = length without CRC fields and without L (1 byte)
+    // Format B
+    //   L-field = length with CRC fields and without L (1 byte)
     auto l_field = this->l_field();
 
     // The 2 first blocks contains 25 bytes when excluding CRC and the L-field
@@ -60,10 +66,11 @@ size_t Packet::expected_size() {
     if (this->link_mode() != LinkMode::C1)
       this->expected_size_ = encoded_size(nrBytes);
     else if (this->data_[1] == WMBUS_BLOCK_A_PREAMBLE)
-      this->expected_size_ = 2 + nrBytes;
+      this->expected_size_ = WMBUS_MODE_C_SUFIX_LEN + nrBytes;
     else if (this->data_[1] == WMBUS_BLOCK_B_PREAMBLE)
-      this->expected_size_ = 2 + 1 + nrBytes;
+      this->expected_size_ = WMBUS_MODE_C_SUFIX_LEN + 1 + l_field;
   }
+  ESP_LOGV(TAG, "expected_size: %zu", this->expected_size_);
   return this->expected_size_;
 }
 
@@ -87,14 +94,32 @@ bool Packet::calculate_payload_size() {
 std::optional<Frame> Packet::convert_to_frame() {
   std::optional<Frame> frame = {};
 
-  if (this->link_mode() == LinkMode::T1 &&
-      this->expected_size() == this->data_.size()) {
-    auto decoded_data = decode3of6(this->data_);
-    if (decoded_data)
-      this->data_ = decoded_data.value();
-  }
-  else if (this->link_mode() == LinkMode::C1) {
-    this->data_.erase(this->data_.begin(), this->data_.begin() + 2);
+  ESP_LOGI(TAG, "Have data from radio (%zu bytes)", this->data_.size());
+
+  ESP_LOGD(TAG, "expected_size: %zu  size: %zu", this->expected_size(),
+           this->data_.size());
+
+  debugPayload("(raw) packet ", this->data_);
+
+  if (this->expected_size() == this->data_.size()) {
+    if (this->link_mode() == LinkMode::T1) {
+      this->frame_format_ = "b";
+      auto decoded_data = decode3of6(this->data_);
+      if (decoded_data)
+        this->data_ = decoded_data.value();
+    } else if (this->link_mode() == LinkMode::C1) {
+      if (this->data_[1] == WMBUS_BLOCK_A_PREAMBLE)
+        this->frame_format_ = "A";
+      else if (this->data_[1] == WMBUS_BLOCK_B_PREAMBLE)
+        this->frame_format_ = "B";
+      this->data_.erase(this->data_.begin(), this->data_.begin() + 2);
+      debugPayload("(without sufix) packet ", this->data_);
+    } else {
+      ESP_LOGE(TAG, "unknown link mode!");
+    }
+  } else {
+    ESP_LOGE(TAG, "expected_size: %zu NOT size: %zu", this->expected_size(),
+             this->data_.size());
   }
 
   removeAnyDLLCRCs(this->data_);
@@ -110,11 +135,12 @@ std::optional<Frame> Packet::convert_to_frame() {
 
 Frame::Frame(Packet *packet)
     : data_(std::move(packet->data_)), link_mode_(packet->link_mode_),
-      rssi_(packet->rssi_) {}
+      rssi_(packet->rssi_), format_(packet->frame_format_) {}
 
 std::vector<uint8_t> &Frame::data() { return this->data_; }
 LinkMode Frame::link_mode() { return this->link_mode_; }
 int8_t Frame::rssi() { return this->rssi_; }
+std::string Frame::format() { return this->format_; }
 
 std::vector<uint8_t> Frame::as_raw() { return this->data_; }
 std::string Frame::as_hex() { return format_hex(this->data_); }
