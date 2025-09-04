@@ -36,6 +36,9 @@ void Radio::loop() {
   if (xQueueReceive(this->packet_queue_, &p, 0) != pdPASS)
     return;
 
+  // ESP_LOGI(TAG, "Have RAW data from radio (%zu bytes)",
+  //          p->calculate_payload_size());
+
   auto frame = p->convert_to_frame();
 
   if (!frame)
@@ -53,7 +56,7 @@ void Radio::loop() {
       block_type = "B";
   }
 
-  ESP_LOGI(TAG, "Have data from radio (%zu bytes) [RSSI: %ddBm, mode: %s %c]",
+  ESP_LOGI(TAG, "Have data from radio (%zu bytes) [RSSI: %ddBm, mode: %s %s]",
            frame->data().size(), frame->rssi(), toString(frame->link_mode()),
            block_type.c_str());
 
