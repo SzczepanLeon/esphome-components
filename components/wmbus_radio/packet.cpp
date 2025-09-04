@@ -94,16 +94,13 @@ bool Packet::calculate_payload_size() {
 std::optional<Frame> Packet::convert_to_frame() {
   std::optional<Frame> frame = {};
 
-  ESP_LOGI(TAG, "Have data from radio (%zu bytes)", this->data_.size());
-
-  ESP_LOGD(TAG, "expected_size: %zu  size: %zu", this->expected_size(),
-           this->data_.size());
-
-  debugPayload("(raw) packet ", this->data_);
+  ESP_LOGD(TAG, "Have data from radio (%zu bytes)", this->data_.size());
+  debugPayload("raw packet", this->data_);
 
   if (this->expected_size() == this->data_.size()) {
     if (this->link_mode() == LinkMode::T1) {
-      this->frame_format_ = "b";
+      // TODO: Remove assumption that T1 is always B
+      this->frame_format_ = "B";
       auto decoded_data = decode3of6(this->data_);
       if (decoded_data)
         this->data_ = decoded_data.value();
@@ -112,8 +109,8 @@ std::optional<Frame> Packet::convert_to_frame() {
         this->frame_format_ = "A";
       else if (this->data_[1] == WMBUS_BLOCK_B_PREAMBLE)
         this->frame_format_ = "B";
-      this->data_.erase(this->data_.begin(), this->data_.begin() + 2);
-      debugPayload("(without sufix) packet ", this->data_);
+      this->data_.erase(this->data_.begin(),
+                        this->data_.begin() + WMBUS_MODE_C_SUFIX_LEN);
     } else {
       ESP_LOGE(TAG, "unknown link mode!");
     }
