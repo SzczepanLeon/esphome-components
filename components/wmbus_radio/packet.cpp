@@ -140,6 +140,7 @@ Frame::Frame(Packet *packet)
 std::vector<uint8_t> &Frame::data() { return this->data_; }
 LinkMode Frame::link_mode() { return this->link_mode_; }
 int8_t Frame::rssi() { return this->rssi_; }
+std::string Frame::format() { return this->format_; }
 
 std::vector<uint8_t> Frame::as_raw() { return this->data_; }
 std::string Frame::as_hex() { return format_hex(this->data_); }
