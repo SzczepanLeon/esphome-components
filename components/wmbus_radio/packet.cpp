@@ -15,6 +15,7 @@
 
 namespace esphome {
 namespace wmbus_radio {
+static const char *TAG = "packet";
 Packet::Packet() { this->data_.reserve(WMBUS_PREAMBLE_SIZE); }
 
 // Determine the link mode based on the first byte of the data
