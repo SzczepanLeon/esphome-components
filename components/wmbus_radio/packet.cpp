@@ -93,7 +93,6 @@ bool Packet::calculate_payload_size() {
 
 std::optional<Frame> Packet::convert_to_frame() {
   std::optional<Frame> frame = {};
-  std::string frame_format = "b";
 
   ESP_LOGI(TAG, "Have data from radio (%zu bytes)", this->data_.size());
 
@@ -104,14 +103,15 @@ std::optional<Frame> Packet::convert_to_frame() {
 
   if (this->expected_size() == this->data_.size()) {
     if (this->link_mode() == LinkMode::T1) {
+      this->frame_format_ = "b";
       auto decoded_data = decode3of6(this->data_);
       if (decoded_data)
         this->data_ = decoded_data.value();
     } else if (this->link_mode() == LinkMode::C1) {
       if (this->data_[1] == WMBUS_BLOCK_A_PREAMBLE)
-        frame_format = "A";
+        this->frame_format_ = "A";
       else if (this->data_[1] == WMBUS_BLOCK_B_PREAMBLE)
-        frame_format = "B";
+        this->frame_format_ = "B";
       this->data_.erase(this->data_.begin(), this->data_.begin() + 2);
       debugPayload("(without sufix) packet ", this->data_);
     } else {
@@ -135,7 +135,7 @@ std::optional<Frame> Packet::convert_to_frame() {
 
 Frame::Frame(Packet *packet)
     : data_(std::move(packet->data_)), link_mode_(packet->link_mode_),
-      rssi_(packet->rssi_), format_(frame_format) {}
+      rssi_(packet->rssi_), format_(packet->frame_format_) {}
 
 std::vector<uint8_t> &Frame::data() { return this->data_; }
 LinkMode Frame::link_mode() { return this->link_mode_; }

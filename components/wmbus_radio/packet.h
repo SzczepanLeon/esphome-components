@@ -37,6 +37,8 @@ protected:
 
   LinkMode link_mode();
   LinkMode link_mode_ = LinkMode::UNKNOWN;
+
+  std::string frame_format_;
 };
 
 struct Frame {
