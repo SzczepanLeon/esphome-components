@@ -53,9 +53,9 @@ void Radio::loop() {
       block_type = "B";
   }
 
-  ESP_LOGI(TAG, "Have data from radio (%zu bytes) [RSSI: %ddBm, mode: %s %s]",
+  ESP_LOGI(TAG, "Have data from radio (%zu bytes) [RSSI: %ddBm, mode: %s %c]",
            frame->data().size(), frame->rssi(), toString(frame->link_mode()),
-           toString(block_type));
+           block_type.c_str());
 
   uint8_t packet_handled = 0;
   for (auto &handler : this->handlers_)
