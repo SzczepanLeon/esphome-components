@@ -348,13 +348,13 @@ void incrementIV(uchar *iv, size_t len) {
 
 void debugPayload(const std::string &intro, std::vector<uchar> &payload) {
   std::string msg = bin2hex(payload);
-  debug("%s \"%s\"\n", intro.c_str(), msg.c_str());
+  verbose("%s \"%s\"\n", intro.c_str(), msg.c_str());
 }
 
 void debugPayload(const std::string &intro, std::vector<uchar> &payload,
                   std::vector<uchar>::iterator &pos) {
   std::string msg = bin2hex(pos, payload.end(), 1024);
-  debug("%s \"%s\"\n", intro.c_str(), msg.c_str());
+  verbose("%s \"%s\"\n", intro.c_str(), msg.c_str());
 }
 
 void logTelegram(std::vector<uchar> &original, std::vector<uchar> &parsed,
