@@ -8,6 +8,7 @@
 #include "decode3of6.h"
 
 #define WMBUS_PREAMBLE_SIZE (3)
+#define WMBUS_MODE_C_SUFIX_LEN (2)
 #define WMBUS_MODE_C_PREAMBLE (0x54)
 #define WMBUS_BLOCK_A_PREAMBLE (0xCD)
 #define WMBUS_BLOCK_B_PREAMBLE (0x3D)
@@ -60,10 +61,11 @@ size_t Packet::expected_size() {
     if (this->link_mode() != LinkMode::C1)
       this->expected_size_ = encoded_size(nrBytes);
     else if (this->data_[1] == WMBUS_BLOCK_A_PREAMBLE)
-      this->expected_size_ = 2 + nrBytes;
+      this->expected_size_ = WMBUS_MODE_C_SUFIX_LEN + nrBytes;
     else if (this->data_[1] == WMBUS_BLOCK_B_PREAMBLE)
-      this->expected_size_ = 2 + 1 + nrBytes;
+      this->expected_size_ = WMBUS_MODE_C_SUFIX_LEN + 1 + l_field;
   }
+  ESP_LOGV(TAG, "expected_size: %zu", this->expected_size_);
   return this->expected_size_;
 }
 
@@ -86,15 +88,19 @@ bool Packet::calculate_payload_size() {
 
 std::optional<Frame> Packet::convert_to_frame() {
   std::optional<Frame> frame = {};
+  ESP_LOGD(TAG, "expected_size: %zu  size: %zu", this->expected_size(),
+           this->data_.size());
+
+  debugPayload("(convert_to_frame) packet ", this->data_);
 
   if (this->link_mode() == LinkMode::T1 &&
       this->expected_size() == this->data_.size()) {
     auto decoded_data = decode3of6(this->data_);
     if (decoded_data)
       this->data_ = decoded_data.value();
-  }
-  else if (this->link_mode() == LinkMode::C1) {
+  } else if (this->link_mode() == LinkMode::C1) {
     this->data_.erase(this->data_.begin(), this->data_.begin() + 2);
+    debugPayload("(convert_to_frame) packet without sufix ", this->data_);
   }
 
   removeAnyDLLCRCs(this->data_);

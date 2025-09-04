@@ -41,8 +41,21 @@ void Radio::loop() {
   if (!frame)
     return;
 
-  ESP_LOGI(TAG, "Have data from radio (%zu bytes) [RSSI: %ddBm, mode: %s]",
-           frame->data().size(), frame->rssi(), toString(frame->link_mode()));
+#define WMBUS_BLOCK_A_PREAMBLE (0xCD)
+#define WMBUS_BLOCK_B_PREAMBLE (0x3D)
+
+  char block_type = "b";
+
+  if (frame->link_mode() == LinkMode::C1) {
+    if (frame->data()[1] == WMBUS_BLOCK_A_PREAMBLE)
+      block_type = "A";
+    else if (frame->data()[1] == WMBUS_BLOCK_B_PREAMBLE)
+      block_type = "B";
+  }
+
+  ESP_LOGI(TAG, "Have data from radio (%zu bytes) [RSSI: %ddBm, mode: %s %s]",
+           frame->data().size(), frame->rssi(), toString(frame->link_mode()),
+           block_type);
 
   uint8_t packet_handled = 0;
   for (auto &handler : this->handlers_)
