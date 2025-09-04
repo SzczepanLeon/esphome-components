@@ -48,6 +48,10 @@ uint8_t Packet::l_field() {
 
 size_t Packet::expected_size() {
   if (!this->expected_size_) {
+    // Format A
+    //   L-field = length without CRC fields and without L (1 byte)
+    // Format B
+    //   L-field = length with CRC fields and without L (1 byte)
     auto l_field = this->l_field();
 
     // The 2 first blocks contains 25 bytes when excluding CRC and the L-field
@@ -89,19 +93,33 @@ bool Packet::calculate_payload_size() {
 
 std::optional<Frame> Packet::convert_to_frame() {
   std::optional<Frame> frame = {};
+  std::string frame_format = "b";
+
+  ESP_LOGI(TAG, "Have data from radio (%zu bytes)", this->data_.size());
+
   ESP_LOGD(TAG, "expected_size: %zu  size: %zu", this->expected_size(),
            this->data_.size());
 
-  debugPayload("(convert_to_frame) packet ", this->data_);
+  debugPayload("(raw) packet ", this->data_);
 
-  if (this->link_mode() == LinkMode::T1 &&
-      this->expected_size() == this->data_.size()) {
-    auto decoded_data = decode3of6(this->data_);
-    if (decoded_data)
-      this->data_ = decoded_data.value();
-  } else if (this->link_mode() == LinkMode::C1) {
-    this->data_.erase(this->data_.begin(), this->data_.begin() + 2);
-    debugPayload("(convert_to_frame) packet without sufix ", this->data_);
+  if (this->expected_size() == this->data_.size()) {
+    if (this->link_mode() == LinkMode::T1) {
+      auto decoded_data = decode3of6(this->data_);
+      if (decoded_data)
+        this->data_ = decoded_data.value();
+    } else if (this->link_mode() == LinkMode::C1) {
+      if (this->data_[1] == WMBUS_BLOCK_A_PREAMBLE)
+        frame_format = "A";
+      else if (this->data_[1] == WMBUS_BLOCK_B_PREAMBLE)
+        frame_format = "B";
+      this->data_.erase(this->data_.begin(), this->data_.begin() + 2);
+      debugPayload("(without sufix) packet ", this->data_);
+    } else {
+      ESP_LOGE(TAG, "unknown link mode!");
+    }
+  } else {
+    ESP_LOGE(TAG, "expected_size: %zu NOT size: %zu", this->expected_size(),
+             this->data_.size());
   }
 
   removeAnyDLLCRCs(this->data_);
@@ -117,7 +135,7 @@ std::optional<Frame> Packet::convert_to_frame() {
 
 Frame::Frame(Packet *packet)
     : data_(std::move(packet->data_)), link_mode_(packet->link_mode_),
-      rssi_(packet->rssi_) {}
+      rssi_(packet->rssi_), format_(frame_format) {}
 
 std::vector<uint8_t> &Frame::data() { return this->data_; }
 LinkMode Frame::link_mode() { return this->link_mode_; }

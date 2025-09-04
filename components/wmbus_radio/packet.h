@@ -46,6 +46,7 @@ public:
   std::vector<uint8_t> &data();
   LinkMode link_mode();
   int8_t rssi();
+  std::string format();
 
   std::vector<uint8_t> as_raw();
   std::string as_hex();
@@ -58,6 +59,7 @@ protected:
   std::vector<uint8_t> data_;
   LinkMode link_mode_;
   int8_t rssi_;
+  std::string format_;
   uint8_t handlers_count_ = 0;
 };
 
