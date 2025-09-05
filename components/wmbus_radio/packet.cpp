@@ -99,8 +99,8 @@ std::optional<Frame> Packet::convert_to_frame() {
 
   if (this->expected_size() == this->data_.size()) {
     if (this->link_mode() == LinkMode::T1) {
-      // TODO: Remove assumption that T1 is always B
-      this->frame_format_ = "B";
+      // TODO: Remove assumption that T1 is always A
+      this->frame_format_ = "A";
       auto decoded_data = decode3of6(this->data_);
       if (decoded_data)
         this->data_ = decoded_data.value();
