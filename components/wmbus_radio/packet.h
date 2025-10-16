@@ -23,6 +23,9 @@ public:
   size_t rx_capacity();
   bool calculate_payload_size();
   void set_rssi(int8_t rssi);
+  void set_data(const std::vector<uint8_t> &data);
+  void set_link_mode_hint(LinkMode mode);
+  void set_requires_decode(bool required);
 
   std::optional<Frame> convert_to_frame();
 
@@ -37,6 +40,7 @@ protected:
 
   LinkMode link_mode();
   LinkMode link_mode_ = LinkMode::UNKNOWN;
+  bool requires_decode_ = true;
 
   std::string frame_format_;
 };
