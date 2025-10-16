@@ -1,20 +1,21 @@
 Version 5 based on Kuba's dirty [fork](https://github.com/IoTLabs-pl/esphome-components).
 
-> **_NOTE:_**  Component with CC1101 support is here:
+Supports both CC1101 and SX1276 radio transceivers for wM-Bus reception.
+
+Previous versions:
 [version 4](https://github.com/SzczepanLeon/esphome-components/tree/version_4)
 [version 3](https://github.com/SzczepanLeon/esphome-components/tree/version_3)
 [version 2](https://github.com/SzczepanLeon/esphome-components/tree/version_2)
 
 
 # TODO:
-- Add backward support for CC1101
 - Add support for SX1262 (with limited frame length)
-- ...
 - Prepare packages for ready made boards (like UltimateReader) with displays, leds etc.
 - Aggresive cleanup of wmbusmeters classes/structs
 - Refactor traces/logs
 
 # DONE:
+- Add backward support for CC1101 with modern architecture
 - Reuse CRCs and frame parsers from wmbusmeters
 - Refactor 3out6 decoder
 - Migrate to esp-idf and drop Arduino!
@@ -32,6 +33,45 @@ Version 5 based on Kuba's dirty [fork](https://github.com/IoTLabs-pl/esphome-com
 
 
 # Usage example:
+
+## CC1101 Radio Configuration
+```yaml
+esphome:
+  name: wmbus
+  friendly_name: WMBus
+
+external_components:
+  - source: github://SzczepanLeon/esphome-components@main
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+logger:
+  level: DEBUG
+
+wifi:
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
+
+api:
+
+spi:
+  clk_pin: GPIO14
+  mosi_pin: GPIO13
+  miso_pin: GPIO12
+
+wmbus_radio:
+  radio_type: CC1101
+  cs_pin: GPIO15
+  gdo0_pin: GPIO4
+  gdo2_pin: GPIO16
+  frequency: 868.95
+```
+
+## SX1276 Radio Configuration
 ```yaml
 esphome:
   name: wmbus
@@ -47,7 +87,7 @@ esp32:
   flash_size: 8MB
   framework:
     type: esp-idf
-  
+
 logger:
   id: component_logger
   level: DEBUG
@@ -61,7 +101,7 @@ wifi:
 api:
 
 web_server:
-  version: 3 
+  version: 3
 
 time:
   - platform: homeassistant
@@ -190,7 +230,25 @@ text_sensor:
     name: Electricity Meter alarms
 ```
 
-For SX1276 radio you need to configure SPI instance as usual in ESPHome and additionally specify reset pin and IRQ pin (as DIO1). Interrupts are triggered on non empty FIFO. 
+## Radio Configuration Notes
+
+### CC1101
+- **GDO0 pin**: FIFO threshold indicator (asserts when data ready to read)
+- **GDO2 pin**: Sync word detection indicator (asserts when frame starts)
+- **Frequency**: Default 868.95 MHz (configurable via `frequency` parameter)
+- **Polling interval**: Default 2ms (configurable via `polling_interval` parameter)
+- **Reception mode**: Polling-based (checks GPIO pins periodically)
+- **No hardware reset pin**: Uses software reset via SPI command
+
+### SX1276
+- **Reset pin**: Hardware reset line (required for initialization)
+- **IRQ pin**: DIO1 interrupt line (triggers on FIFO threshold)
+- **Reception mode**: Interrupt-driven (hardware triggers when data available)
+- **Board compatibility**: Works with Heltec WiFi LoRa 32 boards
+
+Both radios support wM-Bus Mode T (100 kbps, 3-of-6 encoding) and Mode C (100 kbps).
+
+## Updating wmbusmeters Code
 
 In order to pull latest wmbusmeters code run:
 ```bash
