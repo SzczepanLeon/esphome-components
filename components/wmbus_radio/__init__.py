@@ -11,7 +11,12 @@ from esphome.const import (
     CONF_TRIGGER_ID,
     CONF_FORMAT,
     CONF_DATA,
+    CONF_FREQUENCY,
 )
+
+CONF_GDO0_PIN = "gdo0_pin"
+CONF_GDO2_PIN = "gdo2_pin"
+CONF_POLLING_INTERVAL = "polling_interval"
 from pathlib import Path
 
 CODEOWNERS = ["@SzczepanLeon", "@kubasaw"]
@@ -43,14 +48,52 @@ TRANSCEIVER_NAMES = {
     if r.is_file()
 }
 
-CONFIG_SCHEMA = (
+def validate_radio_config(config):
+    """Validate that required pins are present for the selected radio type."""
+    radio_type = config[CONF_RADIO_TYPE]
+
+    if radio_type == "CC1101":
+        # CC1101 requires GDO0 and GDO2 pins
+        if CONF_GDO0_PIN not in config:
+            raise cv.Invalid(f"CC1101 requires '{CONF_GDO0_PIN}' to be specified")
+        if CONF_GDO2_PIN not in config:
+            raise cv.Invalid(f"CC1101 requires '{CONF_GDO2_PIN}' to be specified")
+        # CC1101 has no hardware reset pin (uses software SRES strobe)
+        if CONF_RESET_PIN in config:
+            raise cv.Invalid(f"CC1101 does not have a hardware reset pin (uses software reset). Remove '{CONF_RESET_PIN}'")
+        # IRQ_PIN not used for CC1101
+        if CONF_IRQ_PIN in config:
+            raise cv.Invalid(f"CC1101 does not use '{CONF_IRQ_PIN}', use '{CONF_GDO0_PIN}' and '{CONF_GDO2_PIN}' instead")
+    elif radio_type == "SX1276":
+        # SX1276 requires reset and IRQ pins
+        if CONF_RESET_PIN not in config:
+            raise cv.Invalid(f"SX1276 requires '{CONF_RESET_PIN}' to be specified")
+        if CONF_IRQ_PIN not in config:
+            raise cv.Invalid(f"SX1276 requires '{CONF_IRQ_PIN}' to be specified")
+        # GDO pins not used for SX1276
+        if CONF_GDO0_PIN in config or CONF_GDO2_PIN in config:
+            raise cv.Invalid(f"SX1276 does not use GDO pins, use '{CONF_IRQ_PIN}' instead")
+
+    return config
+
+
+CONFIG_SCHEMA = cv.All(
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(RadioComponent),
             cv.GenerateID(CONF_RADIO_ID): cv.declare_id(RadioTransceiver),
             cv.Required(CONF_RADIO_TYPE): cv.one_of(*TRANSCEIVER_NAMES, upper=True),
-            cv.Required(CONF_RESET_PIN): pins.internal_gpio_output_pin_schema,
-            cv.Required(CONF_IRQ_PIN): pins.internal_gpio_input_pin_schema,
+            # Conditional pins - validated by validate_radio_config
+            cv.Optional(CONF_RESET_PIN): pins.internal_gpio_output_pin_schema,
+            cv.Optional(CONF_IRQ_PIN): pins.internal_gpio_input_pin_schema,
+            cv.Optional(CONF_GDO0_PIN): pins.internal_gpio_input_pin_schema,
+            cv.Optional(CONF_GDO2_PIN): pins.internal_gpio_input_pin_schema,
+            cv.Optional(CONF_FREQUENCY, default=868.95): cv.float_range(min=300.0, max=928.0),
+            # Advanced: Polling interval for CC1101 (milliseconds)
+            # Lower values = better reception but higher CPU load
+            # At 100kbps, data arrives at 12.5 bytes/ms, FIFO is 64 bytes
+            # Default 2ms is recommended. Values >5ms may cause FIFO overflow and frame loss.
+            cv.Optional(CONF_POLLING_INTERVAL, default=2): cv.int_range(min=1, max=10),
             cv.Optional(CONF_ON_FRAME): automation.validate_automation(
                 {
                     cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(FrameTrigger),
@@ -60,7 +103,8 @@ CONFIG_SCHEMA = (
         }
     )
     .extend(spi.spi_device_schema())
-    .extend(cv.COMPONENT_SCHEMA)
+    .extend(cv.COMPONENT_SCHEMA),
+    validate_radio_config,
 )
 
 
@@ -72,11 +116,30 @@ async def to_code(config):
     )
     radio_var = cg.new_Pvariable(config[CONF_RADIO_ID])
 
-    reset_pin = await cg.gpio_pin_expression(config[CONF_RESET_PIN])
-    cg.add(radio_var.set_reset_pin(reset_pin))
+    # Configure pins based on radio type
+    radio_type = config[CONF_RADIO_TYPE]
+    if radio_type == "CC1101":
+        # CC1101 uses GDO0 and GDO2 pins (no hardware reset)
+        gdo0_pin = await cg.gpio_pin_expression(config[CONF_GDO0_PIN])
+        cg.add(radio_var.set_gdo0_pin(gdo0_pin))
 
-    irq_pin = await cg.gpio_pin_expression(config[CONF_IRQ_PIN])
-    cg.add(radio_var.set_irq_pin(irq_pin))
+        gdo2_pin = await cg.gpio_pin_expression(config[CONF_GDO2_PIN])
+        cg.add(radio_var.set_gdo2_pin(gdo2_pin))
+
+        # Set frequency if specified
+        if CONF_FREQUENCY in config:
+            cg.add(radio_var.set_frequency(config[CONF_FREQUENCY]))
+
+        # Set polling interval (CC1101 only - used for polling-based reception)
+        if CONF_POLLING_INTERVAL in config:
+            cg.add(radio_var.set_polling_interval(config[CONF_POLLING_INTERVAL]))
+    elif radio_type == "SX1276":
+        # SX1276 uses reset and IRQ pins
+        reset_pin = await cg.gpio_pin_expression(config[CONF_RESET_PIN])
+        cg.add(radio_var.set_reset_pin(reset_pin))
+
+        irq_pin = await cg.gpio_pin_expression(config[CONF_IRQ_PIN])
+        cg.add(radio_var.set_irq_pin(irq_pin))
 
     await spi.register_spi_device(radio_var, config)
     await cg.register_component(radio_var, config)
