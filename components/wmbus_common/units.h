@@ -22,6 +22,11 @@
 #include <string>
 #include <vector>
 
+// Undefine HZ macro from system headers to prevent conflict with Unit::HZ enum
+#ifdef HZ
+#undef HZ
+#endif
+
 // A named quantity has a preferred unit,
 // ie Volume has m3 (cubic meters) Energy has kwh, Power has kw.
 // We search for quantities in the mbus telegrams instead of
