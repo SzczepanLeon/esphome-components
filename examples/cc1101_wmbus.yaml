@@ -1,0 +1,54 @@
+# Minimal test configuration for CC1101 wM-Bus frame scanning
+# Purpose: Deep investigation of frame reception and processing
+# No WiFi/API/OTA to reduce log noise
+
+substitutions:
+  name: "wmbus-cc1101-scan"
+  friendly_name: "wM-Bus CC1101 Scanner"
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: esp-idf  # Required! CC1101 driver uses ESP-IDF
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [wmbus_radio, wmbus_meter, wmbus_common]
+    # Note: Removed esp32 component - using standard ESPHome esp32 to avoid post_build.py issue
+
+logger:
+  level: DEBUG  # Debug level to show frame hex dumps
+  tx_buffer_size: 2048  # Increase buffer to prevent log truncation
+  baud_rate: 115200
+  logs:
+    component: INFO     # Reduce noise from other components
+    esp32: INFO
+    spi: INFO
+    app: INFO
+    wifi: ERROR         # Disable WiFi scan logs
+    wmbus_radio: DEBUG  # Show frame hex dumps
+    cc1101: DEBUG       # Show CC1101 details
+
+# SPI bus configuration
+spi:
+  clk_pin: GPIO0
+  mosi_pin: GPIO4
+  miso_pin: GPIO3
+
+# CC1101 wM-Bus radio configuration
+wmbus_radio:
+  radio_type: CC1101
+  cs_pin: GPIO1
+  gdo0_pin: GPIO5  # Changed from GPIO2 to avoid strapping pin warning
+  gdo2_pin: GPIO10
+  frequency: 868.95 # MHz (EU wM-Bus band)
+
+# wM-Bus common configuration (no specific meters configured - scan all)
+wmbus_common:
+  drivers: all  # Support all meter types for scanning
