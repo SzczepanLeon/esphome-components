@@ -1,5 +1,6 @@
 /*
  Copyright (C) 2019-2023 Fredrik Öhrström (gpl-3.0-or-later)
+ Extended 2025 to support frame 0x03 (BATTERY_VOLTAGE FRAUD_DATE)
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -34,6 +35,7 @@ namespace {
         di.addDetection(MANUFACTURER_BMT, 0x06, 0x17);
         di.addDetection(MANUFACTURER_BMT, 0x07, 0x13);
         di.addDetection(MANUFACTURER_BMT, 0x07, 0x15);
+        di.addDetection(MANUFACTURER_BMT, 0x07, 0x17);
         di.usesProcessContent();
         di.setConstructor([](MeterInfo &mi, DriverInfo &di) {
             return shared_ptr<Meter>(new Driver(mi, di));
@@ -55,14 +57,25 @@ namespace {
                 VifScaling::Auto, DifSignedness::Signed,
                 FieldMatcher::build().set(MeasurementType::Instantaneous).set(
                         VIFRange::DateTime), Unit::DateTimeLT);
+        
         addStringField("contents", "Contents of this telegrams",
                 DEFAULT_PRINT_PROPERTIES);
+        
         addNumericField("voltage", Quantity::Voltage, DEFAULT_PRINT_PROPERTIES,
                 "Voltage of the battery inside the meter", Unit::Volt);
+        
+        addStringField("fraud_date", "Date of fraud/tampering detected by meter",
+                DEFAULT_PRINT_PROPERTIES);
+        
+        addStringField("fraud_type", "Type of fraud/tampering detected",
+                DEFAULT_PRINT_PROPERTIES);
+        
         addStringField("leak_date", "Date of leakage detected by meter",
                 DEFAULT_PRINT_PROPERTIES);
+        
         addNumericField("backflow", Quantity::Volume, DEFAULT_PRINT_PROPERTIES,
                 "Backflow detected by the meter", Unit::M3);
+        
         addNumericField("January_total", Quantity::Volume,
                 DEFAULT_PRINT_PROPERTIES, "Total value at the end of January",
                 Unit::M3);
@@ -175,7 +188,16 @@ namespace {
             default:
                 return 3.7; // 0, E and F all are 3.7
         }
+    }
 
+    string getFraudType(uchar fraud_byte1, uchar fraud_byte2, uchar fraud_byte3) {
+        // Check if all bytes are 0x00 (no fraud detected)
+        if (fraud_byte1 == 0x00 && fraud_byte2 == 0x00 && fraud_byte3 == 0x00) {
+            return "no type info";
+        }
+        // If there's any non-zero value, it indicates some type of fraud
+        // The actual fraud type encoding needs to be documented by manufacturer
+        return "detected";
     }
 
     void Driver::processContent(Telegram *t) {
@@ -192,19 +214,92 @@ namespace {
 
         if (i >= len) return;
         uchar frame_identifier = bytes[i];
-        if (frame_identifier == 0x15) {
+        
+        // Frame 0x03: BATTERY_VOLTAGE FRAUD_DATE
+        if (frame_identifier == 0x03) {
+            t->addSpecialExplanation(i + offset, 1, KindOfData::PROTOCOL,
+                    Understanding::FULL, "*** %02X frame content: %s",
+                    frame_identifier, "Battery voltage and fraud date");
+            setStringValue("contents", "BATTERY_VOLTAGE FRAUD_DATE");
+            i++;
+
+            // Process voltage
+            if (i >= len) return;
+            uchar somethingAndVoltage = bytes[i];
+            double voltage = getVoltage(somethingAndVoltage & 0x0F);
+            t->addSpecialExplanation(i + offset, 1, KindOfData::CONTENT,
+                    Understanding::FULL,
+                    "*** %02X voltage of battery %0.2f V",
+                    somethingAndVoltage, voltage);
+            setNumericValue("voltage", Unit::Volt, voltage);
+            i++;
+
+            // Process fraud date (3 bytes: DD MM YY in BCD format)
+            if (i + 2 >= len) return;
+            uchar fraud_day = bytes[i];
+            uchar fraud_month = bytes[i + 1];
+            uchar fraud_year = bytes[i + 2];
+            
+            // Determine fraud type
+            string fraud_type = getFraudType(fraud_day, fraud_month, fraud_year);
+            setStringValue("fraud_type", fraud_type);
+            
+            // Format fraud date
+            char fraud_buffer[17];
+            memset(fraud_buffer, 0, sizeof(fraud_buffer));
+            if (fraud_day == 0x00 && fraud_month == 0x00 && fraud_year == 0x00) {
+                // No fraud detected
+                snprintf(fraud_buffer, 16, "2000-00-00");
+                t->addSpecialExplanation(i + offset, 3, KindOfData::CONTENT,
+                        Understanding::FULL,
+                        "*** %02X%02X%02X fraud date: %02X.%02X.20%02X [%s]",
+                        fraud_day, fraud_month, fraud_year,
+                        fraud_day, fraud_month, fraud_year, fraud_type.c_str());
+            } else {
+                // Fraud detected - format as proper date
+                snprintf(fraud_buffer, 16, "20%02X-%02X-%02X", fraud_year, fraud_month, fraud_day);
+                t->addSpecialExplanation(i + offset, 3, KindOfData::CONTENT,
+                        Understanding::FULL,
+                        "*** %02X%02X%02X fraud date: %02X.%02X.20%02X [%s]",
+                        fraud_day, fraud_month, fraud_year,
+                        fraud_day, fraud_month, fraud_year, fraud_type.c_str());
+            }
+            setStringValue("fraud_date", fraud_buffer);
+            i += 3;
+
+            // Check for additional unknown data
+            if (i < len) {
+                uchar unknown = bytes[i];
+                t->addSpecialExplanation(i + offset, 1, KindOfData::CONTENT,
+                        Understanding::NONE,
+                        "*** %02X unknown data",
+                        unknown);
+                i++;
+            }
+            
+            return; // End processing for frame 0x03
+        }
+        
+        // Frame 0x15: Backflow, alarms and monthly data
+        else if (frame_identifier == 0x15) {
             t->addSpecialExplanation(i + offset, 1, KindOfData::PROTOCOL,
                     Understanding::FULL, "*** %02X frame content: %s",
                     frame_identifier, "Backflow, alarms and monthly data");
             setStringValue("contents", "Backflow, alarms and monthly data");
-        } else if (frame_identifier == 0x95) {
+        } 
+        
+        // Frame 0x95: Backflow, leak date, alarms and monthly data
+        else if (frame_identifier == 0x95) {
             t->addSpecialExplanation(i + offset, 1, KindOfData::PROTOCOL,
                     Understanding::FULL, "*** %02X frame content: %s",
                     frame_identifier,
                     "Backflow, leak date, alarms and monthly data");
             setStringValue("contents",
                     "Backflow, leak date, alarms and monthly data");
-        } else {
+        } 
+        
+        // Unknown frame
+        else {
             t->addSpecialExplanation(i + offset, 1, KindOfData::PROTOCOL,
                     Understanding::NONE,
                     "*** %02X frame content unknown, please open issue with this telegram for driver improvement",
@@ -215,12 +310,8 @@ namespace {
         }
         i++;
 
-
+        // Process voltage (for frames 0x15 and 0x95)
         if (i >= len) return;
-        // only the bottom half changes the voltage, top half's purpose is unknown
-        // values obtained from software by changing value from 0x00-0F
-        // changing the top half didn't seem to change anything, but it might require a combination with other bytes
-        // my meters have 0x0A and 0x2A but the data seems same
         uchar somethingAndVoltage = bytes[i];
         double voltage = getVoltage(somethingAndVoltage & 0x0F);
         t->addSpecialExplanation(i + offset, 1, KindOfData::CONTENT,
@@ -230,13 +321,13 @@ namespace {
         setNumericValue("voltage", Unit::Volt, voltage);
         i++;
 
-
+        // Process leak date (only for frame 0x95)
         if (frame_identifier == 0x95) {
             if (i + 2 >= len) return;
             uchar leak_year = bytes[i];
             uchar leak_month = bytes[i + 1];
             uchar leak_day = bytes[i + 2];
-            // its BCD so I just print it as is
+            
             t->addSpecialExplanation(i + offset, 3, KindOfData::CONTENT,
                     Understanding::FULL,
                     "*** %02X%02X%02X date of leakage: %02X.%02X.20%02X",
@@ -251,9 +342,8 @@ namespace {
             i += 3;
         }
 
-
+        // Process backflow (for frames 0x15 and 0x95)
         if (i + 3 >= len) return;
-        // backflow detected by the meter, has higher precision than normal values
         double backflow = fromBackflow(bytes[i], bytes[i + 1], bytes[i + 2],
                 bytes[i + 3]);
         t->addSpecialExplanation(i + offset, 4, KindOfData::CONTENT,
@@ -264,6 +354,7 @@ namespace {
 
         i += 4;
 
+        // Process monthly data (for frames 0x15 and 0x95)
         double monthData;
         string month_field_name;
         for (int month = 1; month <= 12; ++month) {
@@ -271,10 +362,10 @@ namespace {
             month_field_name.clear();
             month_field_name.append(getMonth(month)).append("_total");
             monthData = fromMonthly(bytes[i], bytes[i + 1], bytes[i + 2]);
-            // one of our meters was installed backwards so we know the max value is 99999,99
-            // anything above (which should only be FFFFFF, more on that below) should be 0
+            
             // FFFFFF (167772,15) means module was not active back then (before installation) - translates to 0
             if (monthData >= 100000) monthData = 0;
+            
             t->addSpecialExplanation(i + offset, 3, KindOfData::CONTENT,
                     Understanding::FULL,
                     "*** %02X%02X%02X total consumption at the end of %s: %0.2f m3",
@@ -285,16 +376,14 @@ namespace {
             i += 3;
         }
 
+        // Process unknown trailing byte (for frames 0x15 and 0x95)
         if (i >= len) return;
-        // changing this byte didn't seem to do anything
-        // and it's always 00 on my meters
         uchar unknown = bytes[i];
         t->addSpecialExplanation(i + offset, 1, KindOfData::CONTENT,
                 Understanding::NONE,
                 "*** %02X unknown data",
                 unknown);
         i++;
-        // there should not be any more data
     }
 }
 
@@ -304,10 +393,10 @@ namespace {
 // |HydrodigitWater;86868686;3.866;2019-10-30 08:39;1111-11-11 11:11.11
 
 // Test: HydridigitWaterr hydrodigit 03245501 NOKEY
+// Comment: Frame 0x03 with battery voltage and fraud date
 // telegram=|2444B4090155240317068C00487AC0000000_0C1335670000046D172EEA280F030000000000|
-// {"contents": "unknown, please open issue with this telegram for driver improvement","id": "03245501","media": "warm water","meter": "hydrodigit","meter_datetime": "2023-08-10 14:23","name": "HydridigitWaterr","timestamp": "1111-11-11T11:11:11Z","total_m3": 6.735}
+// {"contents": "BATTERY_VOLTAGE FRAUD_DATE","fraud_date":"2000-00-00","fraud_type":"no type info","id": "03245501","media": "warm water","meter": "hydrodigit","meter_datetime": "2023-08-10 14:23","name": "HydridigitWaterr","timestamp": "1111-11-11T11:11:11Z","total_m3": 6.735,"voltage_v":3.7}
 // |HydridigitWaterr;03245501;6.735;2023-08-10 14:23;1111-11-11 11:11.11
-
 
 // Test: Hydro3 hydrodigit 87654321 NOKEY
 // Comment: This is a nice one to showcase the backflow encoding.
@@ -315,9 +404,14 @@ namespace {
 // {"media":"water","meter":"hydrodigit","name":"Hydro3","id":"87654321","April_total_m3":43.09,"August_total_m3":33.02,"December_total_m3":37.82,"February_total_m3":40.32,"January_total_m3":39.08,"July_total_m3":31.96,"June_total_m3":30.96,"March_total_m3":41.77,"May_total_m3":29.94,"November_total_m3":36.48,"October_total_m3":35.37,"September_total_m3":34.14,"backflow_m3":0.015,"meter_datetime":"2024-05-22 15:33","total_m3":43.964,"voltage_v":3.05,"contents":"Backflow, alarms and monthly data","timestamp":"1111-11-11T11:11:11Z"}
 // |Hydro3;87654321;43.964;2024-05-22 15:33;1111-11-11 11:11.11
 
-
 // Test: Hydro4 hydrodigit 87654322 NOKEY
 // Comment: This one adds a leak date to the definition, plus shows how the monthly data looks before module installation.
 // telegram=|4944B4092243658713077A7F000000_0C1363020400_046D242C1236_0F950A24042507000000A405006E0700850900CA0B004A0E00FFFFFFFFFFFF020000020000250000B3010095030000|
 // {"media":"water","meter":"hydrodigit","name":"Hydro4","id":"87654322","April_total_m3":30.18,"August_total_m3":0.02,"December_total_m3":9.17,"February_total_m3":19.02,"January_total_m3":14.44,"July_total_m3":0,"June_total_m3":0,"March_total_m3":24.37,"May_total_m3":36.58,"November_total_m3":4.35,"October_total_m3":0.37,"September_total_m3":0.02,"backflow_m3":0.007,"meter_datetime":"2024-06-18 12:36","total_m3":40.263,"voltage_v":3.05,"contents":"Backflow, leak date, alarms and monthly data","leak_date":"25.04.2024","timestamp":"1111-11-11T11:11:11Z"}
 // |Hydro4;87654322;40.263;2024-06-18 12:36;1111-11-11 11:11.11
+
+// Test: HydroFrame03 hydrodigit 03273936 NOKEY
+// Comment: Frame 0x03 - Battery voltage and fraud date (your telegram)
+// telegram=|2144B4093639270317077A23000000_0C1310000000046D0C2F263B0F030000000000|
+// {"contents":"BATTERY_VOLTAGE FRAUD_DATE","fraud_date":"2000-00-00","fraud_type":"no type info","id":"03273936","media":"water","meter":"hydrodigit","meter_datetime":"2025-11-06 15:12","name":"HydroFrame03","timestamp":"1111-11-11T11:11:11Z","total_m3":0.01,"voltage_v":3.7}
+// |HydroFrame03;03273936;0.01;2025-11-06 15:12;1111-11-11 11:11.11
