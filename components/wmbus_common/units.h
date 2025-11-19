@@ -22,6 +22,13 @@
 #include <string>
 #include <vector>
 
+// TODO: There is a naming clash between ESP-IDF and following units.
+//       This is a hack which undef the ESP-IDF macro to allow ussage of wmbus
+//       defined unit.
+#ifdef HZ
+#undef HZ
+#endif
+
 // A named quantity has a preferred unit,
 // ie Volume has m3 (cubic meters) Energy has kwh, Power has kw.
 // We search for quantities in the mbus telegrams instead of
