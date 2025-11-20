@@ -19,10 +19,10 @@
 #define UTIL_H
 
 #include <cstdint>
+#include <ctime>
 #include <functional>
 #include <map>
 #include <set>
-#include <signal.h>
 #include <string>
 #include <vector>
 

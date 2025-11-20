@@ -8,6 +8,17 @@ namespace esphome {
 namespace wmbus_radio {
 static const char *TAG = "wmbus.transceiver";
 
+namespace {
+  constexpr uint32_t DEFAULT_POLLING_INTERVAL_MS = 2;
+}
+
+RadioTransceiver::RadioTransceiver()
+  : reset_pin_(nullptr)
+  , irq_pin_(nullptr)
+  , polling_interval_ms_(DEFAULT_POLLING_INTERVAL_MS)
+  , packet_queue_(nullptr) {
+}
+
 bool RadioTransceiver::read_in_task(uint8_t *buffer, size_t length) {
   const uint8_t *buffer_end = buffer + length;
   int wait_count = 0;
@@ -33,16 +44,49 @@ void RadioTransceiver::set_irq_pin(InternalGPIOPin *irq_pin) {
   this->irq_pin_ = irq_pin;
 }
 
+bool RadioTransceiver::has_irq_pin() const {
+  return this->irq_pin_ != nullptr;
+}
+
+bool RadioTransceiver::is_frame_oriented() const {
+  return false;
+}
+
+void RadioTransceiver::run_receiver() {
+}
+
+void RadioTransceiver::set_polling_interval(uint32_t interval_ms) {
+  this->polling_interval_ms_ = interval_ms;
+}
+
+uint32_t RadioTransceiver::get_polling_interval() const {
+  return this->polling_interval_ms_;
+}
+
+void RadioTransceiver::set_packet_queue(QueueHandle_t queue) {
+  this->packet_queue_ = queue;
+}
+
+gpio::InterruptType RadioTransceiver::irq_interrupt_type() const {
+  return gpio::INTERRUPT_FALLING_EDGE;
+}
+
 void RadioTransceiver::reset() {
-  this->reset_pin_->digital_write(0);
-  delay(5);
-  this->reset_pin_->digital_write(1);
-  delay(5);
+  if (this->reset_pin_ != nullptr) {
+    this->reset_pin_->digital_write(0);
+    delay(5);
+    this->reset_pin_->digital_write(1);
+    delay(5);
+  }
 }
 
 void RadioTransceiver::common_setup() {
-  this->reset_pin_->setup();
-  this->irq_pin_->setup();
+  if (this->reset_pin_ != nullptr) {
+    this->reset_pin_->setup();
+  }
+  if (this->irq_pin_ != nullptr) {
+    this->irq_pin_->setup();
+  }
   this->spi_setup();
 }
 

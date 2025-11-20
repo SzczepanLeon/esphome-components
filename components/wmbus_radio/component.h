@@ -18,11 +18,13 @@ namespace wmbus_radio {
 
 class Radio : public Component {
 public:
-  void set_radio(RadioTransceiver *radio) { this->radio = radio; };
+  Radio();
+  void set_radio(RadioTransceiver *radio);
 
   void setup() override;
   void loop() override;
   void receive_frame();
+  void wakeup_polling_receiver_task();
 
   void add_frame_handler(std::function<void(Frame *)> &&callback);
 
@@ -30,9 +32,9 @@ protected:
   static void wakeup_receiver_task_from_isr(TaskHandle_t *arg);
   static void receiver_task(Radio *arg);
 
-  RadioTransceiver *radio{nullptr};
-  TaskHandle_t receiver_task_handle_{nullptr};
-  QueueHandle_t packet_queue_{nullptr};
+  RadioTransceiver *radio;
+  TaskHandle_t receiver_task_handle_;
+  QueueHandle_t packet_queue_;
 
   std::vector<std::function<void(Frame *)>> handlers_;
 };

@@ -32,12 +32,29 @@ LinkMode Packet::link_mode() {
 
 void Packet::set_rssi(int8_t rssi) { this->rssi_ = rssi; }
 
+void Packet::set_data(const std::vector<uint8_t> &data) {
+  this->data_ = data;
+  this->expected_size_ = 0;
+  this->requires_decode_ = true;
+}
+
+void Packet::set_link_mode_hint(LinkMode mode) {
+  if (mode != LinkMode::UNKNOWN)
+    this->link_mode_ = mode;
+}
+
+void Packet::set_requires_decode(bool required) {
+  this->requires_decode_ = required;
+}
+
 // Get value of L-field
 uint8_t Packet::l_field() {
   switch (this->link_mode()) {
   case LinkMode::C1:
     return this->data_[2];
   case LinkMode::T1: {
+    if (!this->requires_decode_)
+      return this->data_[0];
     auto decoded = decode3of6(this->data_);
     if (decoded)
       return (*decoded)[0];
@@ -63,8 +80,12 @@ size_t Packet::expected_size() {
     // block
     auto nrBytes = l_field + 1 + 2 * nrBlocks;
 
-    if (this->link_mode() != LinkMode::C1)
-      this->expected_size_ = encoded_size(nrBytes);
+    if (this->link_mode() != LinkMode::C1) {
+      if (this->requires_decode_)
+        this->expected_size_ = encoded_size(nrBytes);
+      else
+        this->expected_size_ = nrBytes;
+    }
     else if (this->data_[1] == WMBUS_BLOCK_A_PREAMBLE)
       this->expected_size_ = WMBUS_MODE_C_SUFIX_LEN + nrBytes;
     else if (this->data_[1] == WMBUS_BLOCK_B_PREAMBLE)
@@ -101,9 +122,11 @@ std::optional<Frame> Packet::convert_to_frame() {
     if (this->link_mode() == LinkMode::T1) {
       // TODO: Remove assumption that T1 is always A
       this->frame_format_ = "A";
-      auto decoded_data = decode3of6(this->data_);
-      if (decoded_data)
-        this->data_ = decoded_data.value();
+      if (this->requires_decode_) {
+        auto decoded_data = decode3of6(this->data_);
+        if (decoded_data)
+          this->data_ = decoded_data.value();
+      }
     } else if (this->link_mode() == LinkMode::C1) {
       if (this->data_[1] == WMBUS_BLOCK_A_PREAMBLE)
         this->frame_format_ = "A";

@@ -18,20 +18,40 @@
 namespace esphome {
 namespace wmbus_radio {
 static const char *TAG = "wmbus";
+Radio::Radio()
+    : radio(nullptr)
+    , receiver_task_handle_(nullptr)
+    , packet_queue_(nullptr) {}
+
+void Radio::set_radio(RadioTransceiver *radio) {
+  this->radio = radio;
+}
 
 void Radio::setup() {
   ASSERT_SETUP(this->packet_queue_ = xQueueCreate(3, sizeof(Packet *)));
+
+  this->radio->set_packet_queue(this->packet_queue_);
 
   ASSERT_SETUP(xTaskCreate((TaskFunction_t)this->receiver_task, "radio_recv",
                            3 * 1024, this, 2, &(this->receiver_task_handle_)));
 
   ESP_LOGI(TAG, "Receiver task created [%p]", this->receiver_task_handle_);
 
-  this->radio->attach_data_interrupt(Radio::wakeup_receiver_task_from_isr,
-                                     &(this->receiver_task_handle_));
+  if (this->radio->has_irq_pin()) {
+    this->radio->attach_data_interrupt(Radio::wakeup_receiver_task_from_isr,
+                                       &(this->receiver_task_handle_));
+  }
+}
+
+void Radio::wakeup_polling_receiver_task() {
+  if (this->radio->is_frame_oriented() && !this->radio->has_irq_pin()) {
+    xTaskNotifyGive(this->receiver_task_handle_);
+  }
 }
 
 void Radio::loop() {
+  this->wakeup_polling_receiver_task();
+
   Packet *p;
   if (xQueueReceive(this->packet_queue_, &p, 0) != pdPASS)
     return;
@@ -76,12 +96,33 @@ void Radio::wakeup_receiver_task_from_isr(TaskHandle_t *arg) {
 }
 
 void Radio::receive_frame() {
-  this->radio->restart_rx();
+  bool is_frame_oriented = this->radio->is_frame_oriented();
+  bool use_interrupt = this->radio->has_irq_pin();
 
-  if (!ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(60000))) {
-    ESP_LOGD(TAG, "Radio interrupt timeout");
+  static bool rx_initialized = false;
+  if (is_frame_oriented && !rx_initialized) {
+    this->radio->restart_rx();
+    rx_initialized = true;
+  } else if (!is_frame_oriented) {
+    this->radio->restart_rx();
+  }
+
+  uint32_t timeout_ms = is_frame_oriented
+                        ? this->radio->get_polling_interval()
+                        : 60000;
+
+  if (!ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(timeout_ms))) {
+    if (!is_frame_oriented) {
+      ESP_LOGD(TAG, "Radio interrupt timeout");
+    }
     return;
   }
+
+  if (is_frame_oriented) {
+    this->radio->run_receiver();
+    return;
+  }
+
   auto packet = std::make_unique<Packet>();
 
   if (!this->radio->read_in_task(packet->rx_data_ptr(),
