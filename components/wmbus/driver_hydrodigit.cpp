@@ -21,6 +21,10 @@
 #include<string.h>
 
 namespace {
+    using std::string;
+    using std::vector;
+    using std::shared_ptr;
+
     struct Driver: public virtual MeterCommonImplementation {
             Driver(MeterInfo &mi, DriverInfo &di);
             void processContent(Telegram *t);
