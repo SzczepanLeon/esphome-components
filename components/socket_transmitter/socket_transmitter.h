@@ -38,7 +38,9 @@ public:
 
   TEMPLATABLE_VALUE(StrOrVector, data)
 
-  void play(Ts... x) override { this->parent_->send(this->data_.value(x...)); }
+  void play(const Ts& ... x) override {
+    this->parent_->send(this->data_.value(x...));
+  }
 
 protected:
   SocketTransmitter *parent_;
