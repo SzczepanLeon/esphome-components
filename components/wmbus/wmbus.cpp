@@ -142,11 +142,11 @@ namespace wmbus {
                   if (field_name == "rssi") {
                     field.second->publish_state(mbus_data.rssi);
                   }
-                  else if (field.second->get_unit_of_measurement().empty()) {
+                  else if (field.second->get_unit_of_measurement_ref().empty()) {
                     ESP_LOGW(TAG, "Fields without unit not supported as sensor, please switch to text_sensor.");
                   }
                   else {
-                    Unit field_unit = toUnit(field.second->get_unit_of_measurement());
+                    Unit field_unit = toUnit(field.second->get_unit_of_measurement_ref());
                     if (field_unit != Unit::Unknown) {
                       double value  = meter->getNumericValue(field_name, field_unit);
                       if (!std::isnan(value)) {
