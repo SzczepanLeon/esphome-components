@@ -29,6 +29,7 @@ from .const import (
     VARIANT_ESP32C3,
     VARIANT_ESP32C5,
     VARIANT_ESP32C6,
+    VARIANT_ESP32C61,
     VARIANT_ESP32H2,
     VARIANT_ESP32P4,
     VARIANT_ESP32S2,
@@ -107,6 +108,10 @@ _esp32_validations = {
         usage_validation=esp32_c5_validate_supports,
     ),
     VARIANT_ESP32C6: ESP32ValidationFunctions(
+        pin_validation=esp32_c6_validate_gpio_pin,
+        usage_validation=esp32_c6_validate_supports,
+    ),
+    VARIANT_ESP32C61: ESP32ValidationFunctions(
         pin_validation=esp32_c6_validate_gpio_pin,
         usage_validation=esp32_c6_validate_supports,
     ),
