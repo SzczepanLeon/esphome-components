@@ -9,22 +9,12 @@ namespace wmbus_radio {
 static const char *TAG = "wmbus.transceiver";
 
 bool RadioTransceiver::read_in_task(uint8_t *buffer, size_t length, uint32_t offset) {
-  if (this->uses_fifo_reading()) {
-    // SX1276: byte-by-byte FIFO reading
-    uint8_t *ptr = buffer;
-    const uint8_t *end = buffer + length;
-
-    while (ptr != end) {
-      if (this->get_frame(ptr, 1, offset)) {
-        ptr++;
-      } else {
-        if (!ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(1)))
-          return false;
-      }
-    }
-  } else {
-    // SX1262: frame-based buffer reading
-    while (!this->get_frame(buffer, length, offset)) {
+  size_t total = 0;
+  while (total < length) {
+    size_t got = this->get_frame(buffer + total, length - total, offset + total);
+    if (got > 0) {
+      total += got;
+    } else {
       if (!ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(1)))
         return false;
     }

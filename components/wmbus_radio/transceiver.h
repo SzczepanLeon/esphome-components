@@ -39,13 +39,11 @@ public:
   virtual int8_t get_rssi() = 0;
   virtual const char *get_name() = 0;
 
-  // Frame-based reading interface (used by SX1262)
-  // Returns true when entire buffer is filled, false if waiting for data
-  virtual bool get_frame(uint8_t *buffer, size_t length, uint32_t offset) { return false; }
-
-  // Returns true if this transceiver uses byte-by-byte FIFO reading (SX1276)
-  // vs frame-based buffer reading (SX1262)
-  virtual bool uses_fifo_reading() { return false; }
+  // Frame-based reading interface
+  // Returns number of bytes read (0 if no data available yet)
+  // SX1276: returns 1 (byte-by-byte FIFO reading)
+  // SX1262: returns length (entire buffer at once)
+  virtual size_t get_frame(uint8_t *buffer, size_t length, uint32_t offset) { return 0; }
 
   bool read_in_task(uint8_t *buffer, size_t length, uint32_t offset);
 

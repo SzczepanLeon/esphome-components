@@ -94,15 +94,15 @@ optional<uint8_t> SX1276::read() {
   return {};
 }
 
-bool SX1276::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
+size_t SX1276::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
   // SX1276 reads byte-by-byte from FIFO (offset is ignored for FIFO-based reading)
-  // Try to read one byte - returns false if FIFO is empty (waiting for more data)
+  // Returns 1 on success, 0 if FIFO is empty (waiting for more data)
   auto byte = this->read();
   if (!byte.has_value())
-    return false;
+    return 0;
 
   *buffer = *byte;
-  return true;
+  return 1;
 }
 
 void SX1276::restart_rx() {

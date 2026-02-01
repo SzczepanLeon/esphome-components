@@ -110,7 +110,7 @@ void SX1262::setup() {
   ESP_LOGV(TAG, "SX1262 setup done");
 }
 
-bool SX1262::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
+size_t SX1262::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
   if (this->irq_pin_->digital_read()) {
     spi_read_frame(RADIOLIB_SX126X_CMD_READ_BUFFER, {uint8_t(offset), 0x00}, buffer, length);
 
@@ -124,10 +124,10 @@ bool SX1262::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
                         BYTE(timeout, 2), BYTE(timeout, 1), BYTE(timeout, 0)
       });
     }
-    return true;
+    return length;
   }
 
-  return false;
+  return 0;
 }
 
 void SX1262::restart_rx() {
