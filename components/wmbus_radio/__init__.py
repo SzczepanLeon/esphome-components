@@ -26,6 +26,9 @@ CONF_RADIO_ID = "radio_id"
 CONF_ON_FRAME = "on_frame"
 CONF_RADIO_TYPE = "radio_type"
 CONF_MARK_AS_HANDLED = "mark_as_handled"
+CONF_BUSY_PIN = "busy_pin"
+CONF_RX_GAIN = "rx_gain"
+CONF_RF_SWITCH = "rf_switch"
 
 radio_ns = cg.esphome_ns.namespace("wmbus_radio")
 RadioComponent = radio_ns.class_("Radio", cg.Component)
@@ -43,14 +46,28 @@ TRANSCEIVER_NAMES = {
     if r.is_file()
 }
 
+RX_GAIN_OPTIONS = {
+    "BOOSTED": "RX_GAIN_BOOSTED",
+    "POWER_SAVING": "RX_GAIN_POWER_SAVING",
+}
+
 CONFIG_SCHEMA = (
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(RadioComponent),
             cv.GenerateID(CONF_RADIO_ID): cv.declare_id(RadioTransceiver),
             cv.Required(CONF_RADIO_TYPE): cv.one_of(*TRANSCEIVER_NAMES, upper=True),
-            cv.Required(CONF_RESET_PIN): pins.internal_gpio_output_pin_schema,
+            # Changed to gpio_output_pin_schema to support I/O expanders
+            cv.Required(CONF_RESET_PIN): pins.gpio_output_pin_schema,
             cv.Required(CONF_IRQ_PIN): pins.internal_gpio_input_pin_schema,
+            # Optional BUSY pin for SX1262
+            cv.Optional(CONF_BUSY_PIN): pins.gpio_input_pin_schema,
+            # Optional RX gain mode for SX1262 (default: BOOSTED for better sensitivity)
+            cv.Optional(CONF_RX_GAIN, default="BOOSTED"): cv.one_of(
+                *RX_GAIN_OPTIONS, upper=True
+            ),
+            # Use DIO2 as RF switch control (SX1262 only, default: False)
+            cv.Optional(CONF_RF_SWITCH, default=False): cv.boolean,
             cv.Optional(CONF_ON_FRAME): automation.validate_automation(
                 {
                     cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(FrameTrigger),
@@ -77,6 +94,17 @@ async def to_code(config):
 
     irq_pin = await cg.gpio_pin_expression(config[CONF_IRQ_PIN])
     cg.add(radio_var.set_irq_pin(irq_pin))
+
+    # Optional BUSY pin for SX1262
+    if CONF_BUSY_PIN in config:
+        busy_pin = await cg.gpio_pin_expression(config[CONF_BUSY_PIN])
+        cg.add(radio_var.set_busy_pin(busy_pin))
+
+    # RX gain mode
+    cg.add(radio_var.set_rx_gain_mode(RX_GAIN_OPTIONS[config[CONF_RX_GAIN]]))
+
+    # RF switch (DIO2 control)
+    cg.add(radio_var.set_rf_switch(config[CONF_RF_SWITCH]))
 
     await spi.register_spi_device(radio_var, config)
     await cg.register_component(radio_var, config)

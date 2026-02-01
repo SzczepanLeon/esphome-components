@@ -87,10 +87,22 @@ void SX1276::setup() {
 }
 
 optional<uint8_t> SX1276::read() {
+  // Read single byte from FIFO if data available (DIO1 low = FIFO not empty)
   if (this->irq_pin_->digital_read() == false)
     return this->spi_read(0x00);
 
   return {};
+}
+
+size_t SX1276::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
+  // SX1276 reads byte-by-byte from FIFO (offset is ignored for FIFO-based reading)
+  // Returns 1 on success, 0 if FIFO is empty (waiting for more data)
+  auto byte = this->read();
+  if (!byte.has_value())
+    return 0;
+
+  *buffer = *byte;
+  return 1;
 }
 
 void SX1276::restart_rx() {
