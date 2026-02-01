@@ -8,13 +8,12 @@ Version 5 based on Kuba's dirty [fork](https://github.com/IoTLabs-pl/esphome-com
 
 # TODO:
 - Add backward support for CC1101
-- Add support for SX1262 (with limited frame length)
-- ...
 - Prepare packages for ready made boards (like UltimateReader) with displays, leds etc.
 - Aggresive cleanup of wmbusmeters classes/structs
 - Refactor traces/logs
 
 # DONE:
+- Add support for SX1262 (with limited frame length)
 - Reuse CRCs and frame parsers from wmbusmeters
 - Refactor 3out6 decoder
 - Migrate to esp-idf and drop Arduino!
@@ -190,7 +189,31 @@ text_sensor:
     name: Electricity Meter alarms
 ```
 
-For SX1276 radio you need to configure SPI instance as usual in ESPHome and additionally specify reset pin and IRQ pin (as DIO1). Interrupts are triggered on non empty FIFO. 
+## Radio Configuration
+
+### SX1276
+For SX1276 radio you need to configure SPI instance as usual in ESPHome and additionally specify reset pin and IRQ pin (as DIO1). Interrupts are triggered on non empty FIFO.
+
+### SX1262
+For SX1262 radio, the configuration is similar but with additional options:
+
+```yaml
+wmbus_radio:
+  radio_type: SX1262
+  cs_pin: GPIO23
+  reset_pin: GPIO4
+  irq_pin: GPIO7
+  busy_pin: GPIO19           # Optional but recommended for proper timing
+  rx_gain: BOOSTED           # BOOSTED (default) or POWER_SAVING
+  rf_switch: false           # Set to true if DIO2 controls RF switch
+```
+
+**SX1262-specific options:**
+- `busy_pin`: Optional GPIO for BUSY signal. Recommended for reliable operation.
+- `rx_gain`: RX gain mode - `BOOSTED` (better sensitivity, default) or `POWER_SAVING` (lower power)
+- `rf_switch`: Set to `true` if your board uses DIO2 to control the RF switch
+
+Tested on M5Stack Stamp C6LoRa (ESP32-C6). 
 
 In order to pull latest wmbusmeters code run:
 ```bash
