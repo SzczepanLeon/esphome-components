@@ -466,6 +466,7 @@ public:
   void restart_rx() override;
   int8_t get_rssi() override;
   const char *get_name() override;
+  uint16_t get_irq_status();
 protected:
   uint8_t offset;
 };

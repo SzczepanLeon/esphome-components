@@ -29,6 +29,7 @@ CONF_MARK_AS_HANDLED = "mark_as_handled"
 CONF_BUSY_PIN = "busy_pin"
 CONF_RX_GAIN = "rx_gain"
 CONF_RF_SWITCH = "rf_switch"
+CONF_SYNC_MODE = "sync_mode"
 
 radio_ns = cg.esphome_ns.namespace("wmbus_radio")
 RadioComponent = radio_ns.class_("Radio", cg.Component)
@@ -51,6 +52,11 @@ RX_GAIN_OPTIONS = {
     "POWER_SAVING": "RX_GAIN_POWER_SAVING",
 }
 
+SYNC_MODE_OPTIONS = {
+    "NORMAL": "SYNC_MODE_NORMAL",
+    "ULTRA_LOW_LATENCY": "SYNC_MODE_ULTRA_LOW_LATENCY",
+}
+
 CONFIG_SCHEMA = (
     cv.Schema(
         {
@@ -68,6 +74,10 @@ CONFIG_SCHEMA = (
             ),
             # Use DIO2 as RF switch control (SX1262 only, default: False)
             cv.Optional(CONF_RF_SWITCH, default=False): cv.boolean,
+            # Sync mode for packet detection (SX1262 only, default: NORMAL)
+            cv.Optional(CONF_SYNC_MODE, default="NORMAL"): cv.one_of(
+                *SYNC_MODE_OPTIONS, upper=True
+            ),
             cv.Optional(CONF_ON_FRAME): automation.validate_automation(
                 {
                     cv.GenerateID(CONF_TRIGGER_ID): cv.declare_id(FrameTrigger),
@@ -105,6 +115,9 @@ async def to_code(config):
 
     # RF switch (DIO2 control)
     cg.add(radio_var.set_rf_switch(config[CONF_RF_SWITCH]))
+
+    # Sync mode
+    cg.add(radio_var.set_sync_mode(SYNC_MODE_OPTIONS[config[CONF_SYNC_MODE]]))
 
     await spi.register_spi_device(radio_var, config)
     await cg.register_component(radio_var, config)

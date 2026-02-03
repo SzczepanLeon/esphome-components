@@ -72,7 +72,11 @@ void SX1262::setup() {
   }
 
   ESP_LOGVV(TAG, "setting IRQ parameters");
-  const uint32_t irqmask = RADIOLIB_SX126X_IRQ_RX_DONE;
+  uint32_t irqmask = RADIOLIB_SX126X_IRQ_RX_DONE;
+  if (this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY) {
+    irqmask |= RADIOLIB_SX126X_IRQ_SYNC_WORD_VALID;
+    ESP_LOGV(TAG, "Ultra low latency mode: enabling SYNC_WORD_VALID IRQ");
+  }
   this->spi_command(RADIOLIB_SX126X_CMD_SET_DIO_IRQ_PARAMS, {
                     BYTE(irqmask, 1), BYTE(irqmask, 0),
                     BYTE(irqmask, 1), BYTE(irqmask, 0),
@@ -112,11 +116,27 @@ void SX1262::setup() {
 
 size_t SX1262::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
   if (this->irq_pin_->digital_read()) {
+    // In ultra low latency mode, check if RX_DONE is actually set
+    if (this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY) {
+      uint16_t irq_status = this->get_irq_status();
+      // If SYNC_WORD_VALID fired but not RX_DONE, packet isn't ready yet
+      if (!(irq_status & RADIOLIB_SX126X_IRQ_RX_DONE)) {
+        ESP_LOGVV(TAG, "SYNC_WORD_VALID fired, waiting for RX_DONE (irq: 0x%04X)", irq_status);
+        // Clear SYNC_WORD_VALID so IRQ pin goes low, allowing RX_DONE rising edge
+        const uint32_t sync_irq = RADIOLIB_SX126X_IRQ_SYNC_WORD_VALID;
+        this->spi_command(RADIOLIB_SX126X_CMD_CLEAR_IRQ_STATUS, {BYTE(sync_irq, 1), BYTE(sync_irq, 0)});
+        return 0;  // Not ready, caller will retry
+      }
+    }
+
     spi_read_frame(RADIOLIB_SX126X_CMD_READ_BUFFER, {uint8_t(offset), 0x00}, buffer, length);
 
     // Clear IRQ
     if (offset > 0) {
-      const uint32_t irqmask = RADIOLIB_SX126X_IRQ_RX_DONE;
+      uint32_t irqmask = RADIOLIB_SX126X_IRQ_RX_DONE;
+      if (this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY) {
+        irqmask |= RADIOLIB_SX126X_IRQ_SYNC_WORD_VALID;
+      }
       this->spi_command(RADIOLIB_SX126X_CMD_CLEAR_IRQ_STATUS, {BYTE(irqmask, 1), BYTE(irqmask, 0)});
 
       const uint32_t timeout = 0x000000; // 0xFFFFFF;
@@ -136,8 +156,11 @@ void SX1262::restart_rx() {
   this->spi_command(RADIOLIB_SX126X_CMD_SET_STANDBY, {RADIOLIB_SX126X_STANDBY_XOSC});
   delay(5);
 
-  // Clear IRQ
-  const uint32_t irqmask = RADIOLIB_SX126X_IRQ_RX_DONE;
+  // Clear all enabled IRQs
+  uint32_t irqmask = RADIOLIB_SX126X_IRQ_RX_DONE;
+  if (this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY) {
+    irqmask |= RADIOLIB_SX126X_IRQ_SYNC_WORD_VALID;
+  }
   this->spi_command(RADIOLIB_SX126X_CMD_CLEAR_IRQ_STATUS, {
                     BYTE(irqmask, 1), BYTE(irqmask, 0)
   });
@@ -159,5 +182,17 @@ int8_t SX1262::get_rssi() {
 }
 
 const char *SX1262::get_name() { return TAG; }
+
+uint16_t SX1262::get_irq_status() {
+  uint8_t status[3] = {0};
+  this->wait_busy();
+  this->delegate_->begin_transaction();
+  this->delegate_->transfer(RADIOLIB_SX126X_CMD_GET_IRQ_STATUS);
+  status[0] = this->delegate_->transfer(0x00);  // NOP
+  status[1] = this->delegate_->transfer(0x00);  // IRQ status MSB
+  status[2] = this->delegate_->transfer(0x00);  // IRQ status LSB
+  this->delegate_->end_transaction();
+  return (status[1] << 8) | status[2];
+}
 } // namespace wmbus_radio
 } // namespace esphome

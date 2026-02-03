@@ -46,6 +46,14 @@ void RadioTransceiver::set_rf_switch(bool enable) {
   this->rf_switch_ = enable;
 }
 
+void RadioTransceiver::set_sync_mode(const std::string &mode) {
+  if (mode == "SYNC_MODE_NORMAL") {
+    this->sync_mode_ = SYNC_MODE_NORMAL;
+  } else if (mode == "SYNC_MODE_ULTRA_LOW_LATENCY") {
+    this->sync_mode_ = SYNC_MODE_ULTRA_LOW_LATENCY;
+  }
+}
+
 bool RadioTransceiver::wait_busy(uint32_t timeout_ms) {
   if (this->busy_pin_ == nullptr) {
     return true;  // No BUSY pin configured, assume ready
@@ -145,6 +153,8 @@ void RadioTransceiver::dump_config() {
   if (this->rf_switch_) {
     ESP_LOGCONFIG(TAG, "  RF Switch: DIO2");
   }
+  ESP_LOGCONFIG(TAG, "  Sync Mode: %s",
+                this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY ? "Ultra Low Latency" : "Normal");
 }
 } // namespace wmbus_radio
 } // namespace esphome
