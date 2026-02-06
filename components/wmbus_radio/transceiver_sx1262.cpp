@@ -13,14 +13,6 @@ void SX1262::setup() {
   ESP_LOGVV(TAG, "reset");
   this->reset();
 
-  ESP_LOGVV(TAG, "checking silicon revision");
-  uint32_t revision = 0x1262; // this->spi_read(0x42);
-  ESP_LOGVV(TAG, "revision: %04X", revision);
-  if (revision != 0x1262) {
-    ESP_LOGE(TAG, "Invalid silicon revision: %04X", revision);
-    return;
-  }
-
   ESP_LOGVV(TAG, "setting Standby mode");
   this->spi_command(RADIOLIB_SX126X_CMD_SET_STANDBY, {RADIOLIB_SX126X_STANDBY_RC});
 
