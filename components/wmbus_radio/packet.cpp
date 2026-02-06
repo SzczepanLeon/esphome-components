@@ -119,10 +119,17 @@ std::optional<Frame> Packet::convert_to_frame() {
              this->data_.size());
   }
 
-  removeAnyDLLCRCs(this->data_);
+  bool crcOk = false;
+
+  if (this->frame_format_ == "A") {
+      crcOk = trimCRCsFrameFormatA(this->data_);
+  } else {
+      crcOk = trimCRCsFrameFormatB(this->data_);
+  }
+
   int dummy;
-  if (checkWMBusFrame(this->data_, (size_t *)&dummy, &dummy, &dummy, false) ==
-      FrameStatus::FullFrame)
+  if (crcOk && (checkWMBusFrame(this->data_, (size_t *)&dummy, &dummy, &dummy, false) ==
+      FrameStatus::FullFrame))
     frame.emplace(this);
 
   delete this;
