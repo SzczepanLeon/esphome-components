@@ -206,12 +206,14 @@ wmbus_radio:
   busy_pin: GPIO19           # Optional but recommended for proper timing
   rx_gain: BOOSTED           # BOOSTED (default) or POWER_SAVING
   rf_switch: false           # Set to true if DIO2 controls RF switch
+  has_tcxo: true             # By default, DIO3 controls an external TCXO
 ```
 
 **SX1262-specific options:**
 - `busy_pin`: Optional GPIO for BUSY signal. Recommended for reliable operation.
 - `rx_gain`: RX gain mode - `BOOSTED` (better sensitivity, default) or `POWER_SAVING` (lower power)
 - `rf_switch`: Set to `true` if your board uses DIO2 to control the RF switch
+- `has_tcxo`: Set to `false` if your borad does not use DIO3 for control of an external TCXO
 
 Tested on M5Stack Stamp C6LoRa (ESP32-C6). 
 

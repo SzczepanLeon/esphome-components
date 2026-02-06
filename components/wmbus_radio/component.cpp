@@ -44,7 +44,7 @@ void Radio::loop() {
   if (!frame)
     return;
 
-  ESP_LOGI(TAG, "Have data (%zu bytes) [RSSI: %ddBm, mode: %s %s]",
+  ESP_LOGV(TAG, "Have data (%zu bytes) [RSSI: %ddBm, mode: %s %s]",
            frame->data().size(), frame->rssi(), toString(frame->link_mode()),
            frame->format().c_str());
 
@@ -53,7 +53,7 @@ void Radio::loop() {
     handler(&frame.value());
 
   if (frame->handlers_count())
-    ESP_LOGI(TAG, "Telegram handled by %d handlers", frame->handlers_count());
+    ESP_LOGV(TAG, "Telegram handled by %d handlers", frame->handlers_count());
   else {
     ESP_LOGW(TAG, "Telegram not handled by any handler");
     Telegram t;

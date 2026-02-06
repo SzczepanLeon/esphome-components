@@ -54,6 +54,10 @@ void RadioTransceiver::set_sync_mode(const std::string &mode) {
   }
 }
 
+void RadioTransceiver::set_tcxo(bool enable) {
+  this->has_tcxo_ = enable;
+}
+
 bool RadioTransceiver::wait_busy(uint32_t timeout_ms) {
   if (this->busy_pin_ == nullptr) {
     return true;  // No BUSY pin configured, assume ready
@@ -155,6 +159,9 @@ void RadioTransceiver::dump_config() {
   }
   ESP_LOGCONFIG(TAG, "  Sync Mode: %s",
                 this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY ? "Ultra Low Latency" : "Normal");
+  if (this->has_tcxo_) {
+    ESP_LOGCONFIG(TAG, "  TCXO: DIO3");
+  }
 }
 } // namespace wmbus_radio
 } // namespace esphome

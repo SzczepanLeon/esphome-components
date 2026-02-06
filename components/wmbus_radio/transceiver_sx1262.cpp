@@ -13,14 +13,6 @@ void SX1262::setup() {
   ESP_LOGVV(TAG, "reset");
   this->reset();
 
-  ESP_LOGVV(TAG, "checking silicon revision");
-  uint32_t revision = 0x1262; // this->spi_read(0x42);
-  ESP_LOGVV(TAG, "revision: %04X", revision);
-  if (revision != 0x1262) {
-    ESP_LOGE(TAG, "Invalid silicon revision: %04X", revision);
-    return;
-  }
-
   ESP_LOGVV(TAG, "setting Standby mode");
   this->spi_command(RADIOLIB_SX126X_CMD_SET_STANDBY, {RADIOLIB_SX126X_STANDBY_RC});
 
@@ -59,7 +51,9 @@ void SX1262::setup() {
   });
 
   ESP_LOGVV(TAG, "setting RX gain");
-  uint8_t rx_gain_val = (this->rx_gain_mode_ == RX_GAIN_BOOSTED) ? 0x96 : 0x94;
+  uint8_t rx_gain_val = (this->rx_gain_mode_ == RX_GAIN_BOOSTED)
+                            ? RADIOLIB_SX126X_RX_GAIN_BOOSTED
+                            : RADIOLIB_SX126X_RX_GAIN_POWER_SAVING;
   this->spi_command(RADIOLIB_SX126X_CMD_WRITE_REGISTER, {
                     BYTE(RADIOLIB_SX126X_REG_RX_GAIN, 1), BYTE(RADIOLIB_SX126X_REG_RX_GAIN, 0),
                     rx_gain_val
@@ -90,11 +84,24 @@ void SX1262::setup() {
                     0x54, 0x3d, 0x00, 0x00, 0x00, 0x00
   });
 
-  ESP_LOGVV(TAG, "setting DIO3 as TCXO control");
-  const uint32_t tcxodelay = 64;
-  this->spi_command(RADIOLIB_SX126X_CMD_SET_DIO3_AS_TCXO_CTRL, {
-                    RADIOLIB_SX126X_DIO3_OUTPUT_3_0,
-                    BYTE(tcxodelay, 2), BYTE(tcxodelay, 1), BYTE(tcxodelay, 0)
+  // Configure DIO2 as a TCXO driver
+  if (this->has_tcxo_) {
+    ESP_LOGVV(TAG, "setting DIO3 as TCXO control");
+    const uint32_t tcxodelay = 64;
+    this->spi_command(RADIOLIB_SX126X_CMD_SET_DIO3_AS_TCXO_CTRL, {
+                      RADIOLIB_SX126X_DIO3_OUTPUT_3_0,
+                      BYTE(tcxodelay, 2), BYTE(tcxodelay, 1), BYTE(tcxodelay, 0)
+    });
+  }
+
+  ESP_LOGVV(TAG, "running calibration");
+  this->spi_command(RADIOLIB_SX126X_CMD_CALIBRATE, {
+                    RADIOLIB_SX126X_CALIBRATE_ALL & ~RADIOLIB_SX126X_CALIBRATE_IMAGE_ON
+  });
+
+  ESP_LOGVV(TAG, "image calibration for 868MHz");
+  this->spi_command(RADIOLIB_SX126X_CMD_CALIBRATE_IMAGE, {
+                    RADIOLIB_SX126X_CAL_IMG_863_MHZ_1, RADIOLIB_SX126X_CAL_IMG_863_MHZ_2
   });
 
   ESP_LOGVV(TAG, "setting fallback mode");
