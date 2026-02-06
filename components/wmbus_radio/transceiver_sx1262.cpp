@@ -99,6 +99,16 @@ void SX1262::setup() {
                     BYTE(tcxodelay, 2), BYTE(tcxodelay, 1), BYTE(tcxodelay, 0)
   });
 
+  ESP_LOGVV(TAG, "running calibration");
+  this->spi_command(RADIOLIB_SX126X_CMD_CALIBRATE, {
+                    RADIOLIB_SX126X_CALIBRATE_ALL & ~RADIOLIB_SX126X_CALIBRATE_IMAGE_ON
+  });
+
+  ESP_LOGVV(TAG, "image calibration for 868MHz");
+  this->spi_command(RADIOLIB_SX126X_CMD_CALIBRATE_IMAGE, {
+                    RADIOLIB_SX126X_CAL_IMG_863_MHZ_1, RADIOLIB_SX126X_CAL_IMG_863_MHZ_2
+  });
+
   ESP_LOGVV(TAG, "setting fallback mode");
   this->spi_command(RADIOLIB_SX126X_CMD_SET_RX_TX_FALLBACK_MODE, {RADIOLIB_SX126X_RX_TX_FALLBACK_MODE_STDBY_XOSC});
 
