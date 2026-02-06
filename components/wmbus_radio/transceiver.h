@@ -60,6 +60,7 @@ public:
   void set_rx_gain_mode(const std::string &mode);
   void set_rf_switch(bool enable);
   void set_sync_mode(const std::string &mode);
+  void set_tcxo(bool enable);
 
 protected:
   GPIOPin *reset_pin_{nullptr};
@@ -68,6 +69,7 @@ protected:
   RxGainMode rx_gain_mode_{RX_GAIN_BOOSTED};
   bool rf_switch_{false};  // Use DIO2 as RF switch control (SX1262)
   SyncMode sync_mode_{SYNC_MODE_NORMAL};
+  bool has_tcxo_{true}; // Use DIO3 as driver for temperature-compensated crystal oscillator
 
   // Byte-by-byte reading interface (used by SX1276) - optional, returns empty if not supported
   virtual optional<uint8_t> read() { return {}; }

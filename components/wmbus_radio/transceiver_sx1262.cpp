@@ -84,12 +84,15 @@ void SX1262::setup() {
                     0x54, 0x3d, 0x00, 0x00, 0x00, 0x00
   });
 
-  ESP_LOGVV(TAG, "setting DIO3 as TCXO control");
-  const uint32_t tcxodelay = 64;
-  this->spi_command(RADIOLIB_SX126X_CMD_SET_DIO3_AS_TCXO_CTRL, {
-                    RADIOLIB_SX126X_DIO3_OUTPUT_3_0,
-                    BYTE(tcxodelay, 2), BYTE(tcxodelay, 1), BYTE(tcxodelay, 0)
-  });
+  // Configure DIO2 as a TCXO driver
+  if (this->has_tcxo_) {
+    ESP_LOGVV(TAG, "setting DIO3 as TCXO control");
+    const uint32_t tcxodelay = 64;
+    this->spi_command(RADIOLIB_SX126X_CMD_SET_DIO3_AS_TCXO_CTRL, {
+                      RADIOLIB_SX126X_DIO3_OUTPUT_3_0,
+                      BYTE(tcxodelay, 2), BYTE(tcxodelay, 1), BYTE(tcxodelay, 0)
+    });
+  }
 
   ESP_LOGVV(TAG, "running calibration");
   this->spi_command(RADIOLIB_SX126X_CMD_CALIBRATE, {
