@@ -59,7 +59,9 @@ void SX1262::setup() {
   });
 
   ESP_LOGVV(TAG, "setting RX gain");
-  uint8_t rx_gain_val = (this->rx_gain_mode_ == RX_GAIN_BOOSTED) ? 0x96 : 0x94;
+  uint8_t rx_gain_val = (this->rx_gain_mode_ == RX_GAIN_BOOSTED)
+                            ? RADIOLIB_SX126X_RX_GAIN_BOOSTED
+                            : RADIOLIB_SX126X_RX_GAIN_POWER_SAVING;
   this->spi_command(RADIOLIB_SX126X_CMD_WRITE_REGISTER, {
                     BYTE(RADIOLIB_SX126X_REG_RX_GAIN, 1), BYTE(RADIOLIB_SX126X_REG_RX_GAIN, 0),
                     rx_gain_val
