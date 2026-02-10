@@ -28,7 +28,7 @@ CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(WMBusCommon),
         cv.Optional(CONF_DRIVERS, default=set()): cv.All(
-            lambda x: AVAILABLE_DRIVERS if x == "all" else x,
+            lambda x: AVAILABLE_DRIVERS if x == "all" else set(x) if isinstance(x, list) else x,
             {validate_driver},
         ),
     }
