@@ -48,6 +48,14 @@ TRANSCEIVER_NAMES = {
     if r.is_file()
 }
 
+_selected_radio_types = set()
+
+
+def _validate_radio_type(value):
+    value = cv.one_of(*TRANSCEIVER_NAMES, upper=True)(value)
+    _selected_radio_types.add(value)
+    return value
+
 RX_GAIN_OPTIONS = {
     "BOOSTED": "RX_GAIN_BOOSTED",
     "POWER_SAVING": "RX_GAIN_POWER_SAVING",
@@ -58,12 +66,22 @@ SYNC_MODE_OPTIONS = {
     "ULTRA_LOW_LATENCY": "SYNC_MODE_ULTRA_LOW_LATENCY",
 }
 
+def FILTER_SOURCE_FILES():
+    """Return set of transceiver source files to exclude from compilation."""
+    exclude = set()
+    for name in TRANSCEIVER_NAMES - _selected_radio_types:
+        lower = name.lower()
+        exclude.add(f"transceiver_{lower}.cpp")
+        exclude.add(f"transceiver_{lower}.h")
+    return exclude
+
+
 CONFIG_SCHEMA = (
     cv.Schema(
         {
             cv.GenerateID(): cv.declare_id(RadioComponent),
             cv.GenerateID(CONF_RADIO_ID): cv.declare_id(RadioTransceiver),
-            cv.Required(CONF_RADIO_TYPE): cv.one_of(*TRANSCEIVER_NAMES, upper=True),
+            cv.Required(CONF_RADIO_TYPE): _validate_radio_type,
             # Changed to gpio_output_pin_schema to support I/O expanders
             cv.Required(CONF_RESET_PIN): pins.gpio_output_pin_schema,
             cv.Required(CONF_IRQ_PIN): pins.internal_gpio_input_pin_schema,
