@@ -183,6 +183,7 @@ async def to_code(config):
 
     cg.add(var.set_log_all(config[CONF_LOG_ALL]))
 
+    cg.add_library("WiFi", None)
     for conf in config.get(CONF_CLIENTS, []):
         cg.add(var.add_client(conf[CONF_NAME],
                               safe_ip(conf[CONF_IP_ADDRESS]),
