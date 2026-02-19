@@ -311,20 +311,22 @@ namespace wmbus {
             switch (client.transport) {
               case TRANSPORT_TCP:
                 {
-                  ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
-                  if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                  char ip_buf[network::IP_ADDRESS_BUFFER_SIZE];
+                  ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via TCP", client.ip.str_to(ip_buf), client.port);
+                  if (this->tcp_client_.connect(client.ip.str_to(ip_buf), client.port)) {
                     this->tcp_client_.write((const uint8_t *) mbus_data.frame.data(), mbus_data.frame.size());
                     this->tcp_client_.stop();
                   }
                   else {
-                    ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", client.ip.str().c_str(), client.port);
+                    ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", client.ip.str_to(ip_buf), client.port);
                   }
                 }
                 break;
               case TRANSPORT_UDP:
                 {
-                  ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
-                  this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                  char ip_buf[network::IP_ADDRESS_BUFFER_SIZE];
+                  ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via UDP", client.ip.str_to(ip_buf), client.port);
+                  this->udp_client_.beginPacket(client.ip.str_to(ip_buf), client.port);
                   this->udp_client_.write((const uint8_t *) mbus_data.frame.data(), mbus_data.frame.size());
                   this->udp_client_.endPacket();
                 }
@@ -342,8 +344,9 @@ namespace wmbus {
             switch (client.transport) {
               case TRANSPORT_TCP:
                 {
-                  ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
-                  if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                  char ip_buf[network::IP_ADDRESS_BUFFER_SIZE];
+                  ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str_to(ip_buf), client.port);
+                  if (this->tcp_client_.connect(client.ip.str_to(ip_buf), client.port)) {
                     this->tcp_client_.printf("%c1;1;1;%s;%d;;;0x",
                                              mbus_data.mode,
                                              telegram_time,
@@ -355,14 +358,15 @@ namespace wmbus {
                     this->tcp_client_.stop();
                   }
                   else {
-                    ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", client.ip.str().c_str(), client.port);
+                    ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", client.ip.str_to(ip_buf), client.port);
                   }
                 }
                 break;
               case TRANSPORT_UDP:
                 {
-                  ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
-                  this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                  char ip_buf[network::IP_ADDRESS_BUFFER_SIZE];
+                  ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str_to(ip_buf), client.port);
+                  this->udp_client_.beginPacket(client.ip.str_to(ip_buf), client.port);
                   this->udp_client_.printf("%c1;1;1;%s;%d;;;0x",
                                            mbus_data.mode,
                                            telegram_time,
