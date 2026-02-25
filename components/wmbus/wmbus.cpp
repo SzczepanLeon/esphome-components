@@ -418,9 +418,10 @@ namespace wmbus {
     if (this->clients_.size() > 0) {
       ESP_LOGCONFIG(TAG, "  Clients:");
       for (auto & client : this->clients_) {
+        char ip_buf[network::IP_ADDRESS_BUFFER_SIZE];
         ESP_LOGCONFIG(TAG, "    %s: %s:%d %s [%s]",
                       client.name.c_str(),
-                      client.ip.str().c_str(),
+                      client.ip.str_to(ip_buf),
                       client.port,
                       LOG_STR_ARG(transport_to_string(client.transport)),
                       LOG_STR_ARG(format_to_string(client.format)));
