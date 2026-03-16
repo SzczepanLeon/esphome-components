@@ -13,11 +13,9 @@ void CC1101::setup() {
   this->common_setup();
 
   ESP_LOGV(TAG, "Setup");
-  ESP_LOGVV(TAG, "reset");
-  this->reset();
 
-  // Software reset via SRES strobe
-  ESP_LOGVV(TAG, "software reset");
+  // CC1101 has no hardware reset pin — skip hardware reset, use software reset only
+  ESP_LOGVV(TAG, "software reset (SRES)");
   this->strobe(CC1101_SRES);
   delay(10);
 

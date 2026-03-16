@@ -1,0 +1,184 @@
+# ESP32-C3 Super Mini + CC1101 v2.0 (E07-M1101D-SMA) wM-Bus Reader
+# Tested with Kamstrup MULTICAL 21 water meter (wM-Bus Mode C1, 868.95 MHz)
+#
+# CC1101 v2.0 Blue Board Pinout (E07-M1101D)
+# Pin  Label      ESP32-C3 Super Mini    Function
+# 1    GND        GND                    Ground
+# 2    VCC        3V3                    Power (3.3V)
+# 3    GDO0       GPIO3                  Interrupt (IRQ)
+# 4    CSN        GPIO4                  SPI Chip Select
+# 5    SCK        GPIO5                  SPI Clock
+# 6    MOSI       GPIO6                  SPI Data -> CC1101
+# 7    MISO/GDO1  GPIO7                  SPI Data <- CC1101
+# 8    GDO2       n/c                    Unused
+#
+# Note: GPIO0-4, 3V3, GND, and 5V are on the left side of the board.
+# GPIO5-10, 20, and 21 are on the right side.
+
+substitutions:
+  name: water-meter
+  friendly_name: Water Meter
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: false
+
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: ESP32C3
+  framework:
+    type: esp-idf
+
+logger:
+  hardware_uart: USB_CDC
+  level: DEBUG
+
+time:
+  - platform: homeassistant
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+web_server:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  output_power: 8.5dB
+  reboot_timeout: 5min
+  ap:
+    ssid: ${friendly_name}
+    password: !secret ap_password
+
+external_components:
+  - source: github://SzczepanLeon/esphome-components@main
+    components: [wmbus_radio, wmbus_common, wmbus_meter]
+
+# SPI Configuration for CC1101
+spi:
+  clk_pin: GPIO5
+  mosi_pin: GPIO6
+  miso_pin: GPIO7
+
+# CC1101 Radio Configuration
+# Note: CC1101 has no hardware reset pin - do not configure reset_pin
+wmbus_radio:
+  radio_type: CC1101
+  cs_pin: GPIO4
+  irq_pin: GPIO3
+  on_frame:
+    - then:
+        - logger.log:
+            format: "Frame received: RSSI=%ddBm, Mode=%s, Data=%s"
+            args: [ 'frame->rssi()', 'toString(frame->link_mode())', 'frame->as_hex().c_str()' ]
+
+# Uncomment and list only the drivers you need to save flash space
+#wmbus_common:
+#  drivers:
+#    - multical21
+
+# Define your water meter
+wmbus_meter:
+  - id: water_meter
+    meter_id: !secret meter_serial_number
+    type: multical21            # Change to match your meter type
+    key: !secret meter_encryption_key
+    mode:
+      - C1
+    on_telegram:
+      - logger.log:
+          format: "Telegram received from water meter"
+
+sensor:
+  # Water meter total consumption
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: total_m3
+    name: "Water Total Consumption"
+    unit_of_measurement: "m³"
+    device_class: water
+    state_class: total_increasing
+    accuracy_decimals: 3
+    icon: "mdi:water"
+
+  # Target/Last month reading
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: target_m3
+    name: "Water Target"
+    unit_of_measurement: "m³"
+    accuracy_decimals: 3
+    icon: "mdi:counter"
+
+  # Flow temperature
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: flow_temperature_c
+    name: "Water Temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+
+  # External/Ambient temperature
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: external_temperature_c
+    name: "Meter Ambient Temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+
+  # RSSI
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: rssi_dbm
+    name: "Water Meter RSSI"
+    unit_of_measurement: "dBm"
+    device_class: signal_strength
+    state_class: measurement
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    icon: "mdi:signal"
+
+  # WiFi signal strength
+  - platform: wifi_signal
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    unit_of_measurement: "dBm"
+    device_class: signal_strength
+    state_class: measurement
+    entity_category: diagnostic
+    accuracy_decimals: 0
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 60s
+    entity_category: diagnostic
+
+text_sensor:
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: current_alarms
+    name: "Water Meter Alarms"
+
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: status
+    name: "Water Meter Status"
+
+binary_sensor:
+  - platform: status
+    name: "ESP Status"
+    entity_category: diagnostic
+
+button:
+  - platform: restart
+    name: "Restart ESP"
+    entity_category: diagnostic
