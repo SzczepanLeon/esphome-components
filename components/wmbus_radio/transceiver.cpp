@@ -76,6 +76,8 @@ bool RadioTransceiver::wait_busy(uint32_t timeout_ms) {
 }
 
 void RadioTransceiver::reset() {
+  if (this->reset_pin_ == nullptr)
+    return;
   this->reset_pin_->digital_write(0);
   delay(5);
   this->reset_pin_->digital_write(1);
@@ -86,7 +88,9 @@ void RadioTransceiver::reset() {
 }
 
 void RadioTransceiver::common_setup() {
-  this->reset_pin_->setup();
+  if (this->reset_pin_ != nullptr) {
+    this->reset_pin_->setup();
+  }
   this->irq_pin_->setup();
   if (this->busy_pin_ != nullptr) {
     this->busy_pin_->setup();

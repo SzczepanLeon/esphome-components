@@ -83,7 +83,7 @@ CONFIG_SCHEMA = (
             cv.GenerateID(CONF_RADIO_ID): cv.declare_id(RadioTransceiver),
             cv.Required(CONF_RADIO_TYPE): _validate_radio_type,
             # Changed to gpio_output_pin_schema to support I/O expanders
-            cv.Required(CONF_RESET_PIN): pins.gpio_output_pin_schema,
+            cv.Optional(CONF_RESET_PIN): pins.gpio_output_pin_schema,
             cv.Required(CONF_IRQ_PIN): pins.internal_gpio_input_pin_schema,
             # Optional BUSY pin for SX1262
             cv.Optional(CONF_BUSY_PIN): pins.gpio_input_pin_schema,
@@ -107,7 +107,7 @@ CONFIG_SCHEMA = (
             ),
         }
     )
-    .extend(spi.spi_device_schema())
+    .extend(spi.spi_device_schema(default_data_rate=1e6, default_mode="MODE0"))
     .extend(cv.COMPONENT_SCHEMA)
 )
 
@@ -120,8 +120,9 @@ async def to_code(config):
     )
     radio_var = cg.new_Pvariable(config[CONF_RADIO_ID])
 
-    reset_pin = await cg.gpio_pin_expression(config[CONF_RESET_PIN])
-    cg.add(radio_var.set_reset_pin(reset_pin))
+    if CONF_RESET_PIN in config:
+        reset_pin = await cg.gpio_pin_expression(config[CONF_RESET_PIN])
+        cg.add(radio_var.set_reset_pin(reset_pin))
 
     irq_pin = await cg.gpio_pin_expression(config[CONF_IRQ_PIN])
     cg.add(radio_var.set_irq_pin(irq_pin))
