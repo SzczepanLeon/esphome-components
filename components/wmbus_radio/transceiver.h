@@ -51,7 +51,7 @@ public:
   // SX1262: returns length (entire buffer at once)
   virtual size_t get_frame(uint8_t *buffer, size_t length, uint32_t offset) { return 0; }
 
-  bool read_in_task(uint8_t *buffer, size_t length, uint32_t offset);
+  virtual bool read_in_task(uint8_t *buffer, size_t length, uint32_t offset);
 
   void set_spi(spi::SPIDelegate *spi);
   void set_reset_pin(GPIOPin *reset_pin);

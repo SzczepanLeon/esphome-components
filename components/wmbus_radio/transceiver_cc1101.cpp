@@ -269,5 +269,63 @@ int8_t CC1101::get_rssi() {
 
 const char *CC1101::get_name() { return TAG; }
 
+bool CC1101::read_in_task(uint8_t *buffer, size_t length, uint32_t offset) {
+  size_t total = 0;
+  uint32_t last_progress = millis();
+
+  while (total < length) {
+    // Check for FIFO overflow
+    uint8_t rxbytes_raw = this->read_status_register(CC1101_RXBYTES);
+    if (rxbytes_raw & 0x80) {
+      ESP_LOGW(TAG, "RX FIFO overflow");
+      this->restart_rx();
+      return false;
+    }
+
+    uint8_t available = rxbytes_raw & 0x7F;
+    size_t remaining = length - total;
+
+    if (available > 0) {
+      // CC1101 errata: don't empty FIFO completely when more data expected
+      size_t to_read = (remaining > 1 && available > 1)
+                       ? std::min((size_t)(available - 1), remaining)
+                       : std::min((size_t)available, remaining);
+
+      if (to_read > 0) {
+        if (total == 0 && offset == 0) {
+          this->last_rssi_ = (int8_t)this->read_status_register(CC1101_RSSI);
+        }
+        this->read_burst(CC1101_RXFIFO, buffer + total, to_read);
+        total += to_read;
+        last_progress = millis();
+      }
+    }
+
+    // Check end-of-packet via MARCSTATE (IDLE or RX_END = packet done)
+    if (total > 0 && total < length) {
+      uint8_t marcstate = this->read_status_register(CC1101_MARCSTATE) & 0x1F;
+      if (marcstate == CC1101_MARCSTATE_IDLE || marcstate == CC1101_MARCSTATE_RX_END) {
+        // Packet finished, drain remaining FIFO
+        uint8_t final_bytes = this->read_status_register(CC1101_RXBYTES) & 0x7F;
+        if (final_bytes > 0 && total + final_bytes <= length) {
+          this->read_burst(CC1101_RXFIFO, buffer + total, final_bytes);
+          total += final_bytes;
+        }
+        break;
+      }
+    }
+
+    // Timeout: 500ms without progress
+    if (millis() - last_progress > 500) {
+      ESP_LOGW(TAG, "RX timeout after %zu bytes (need %zu)", total + offset, length + offset);
+      return false;
+    }
+
+    delayMicroseconds(200);
+  }
+
+  return (total == length);
+}
+
 } // namespace wmbus_radio
 } // namespace esphome

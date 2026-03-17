@@ -7,12 +7,12 @@ Version 5 based on Kuba's dirty [fork](https://github.com/IoTLabs-pl/esphome-com
 
 
 # TODO:
-- Add backward support for CC1101
 - Prepare packages for ready made boards (like UltimateReader) with displays, leds etc.
 - Aggresive cleanup of wmbusmeters classes/structs
 - Refactor traces/logs
 
 # DONE:
+- Add CC1101 support with FIFO overflow handling and errata workaround
 - Add support for SX1262 (with limited frame length)
 - Reuse CRCs and frame parsers from wmbusmeters
 - Refactor 3out6 decoder
@@ -190,6 +190,23 @@ text_sensor:
 ```
 
 ## Radio Configuration
+
+### CC1101
+For CC1101 radio, configure the SPI bus and specify the chip select and IRQ (GDO0) pins. The CC1101 has no hardware reset pin — it uses a software reset (SRES strobe) automatically. See [ESP32-C3_SuperMini_CC1101.yaml](ESP32-C3_SuperMini_CC1101.yaml) for a complete working example.
+
+```yaml
+spi:
+  clk_pin: GPIO5
+  mosi_pin: GPIO6
+  miso_pin: GPIO7
+
+wmbus_radio:
+  radio_type: CC1101
+  cs_pin: GPIO4
+  irq_pin: GPIO3
+```
+
+Tested on ESP32-C3 Super Mini + CC1101 v2.0 (E07-M1101D-SMA) blue board.
 
 ### SX1276
 For SX1276 radio you need to configure SPI instance as usual in ESPHome and additionally specify reset pin and IRQ pin (as DIO1). Interrupts are triggered on non empty FIFO.
