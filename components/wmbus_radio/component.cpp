@@ -83,12 +83,8 @@ void Radio::wakeup_receiver_task_from_isr(TaskHandle_t *arg) {
 }
 
 void Radio::receive_frame() {
-  // Restart necessary for SX1276, otherwise the RX will repeatedly run into
-  // the 60s timeout and receive a frame only every minute.
-  this->radio->restart_rx();
-
   if (!ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(60000))) {
-    ESP_LOGD(TAG, "Radio interrupt timeout");
+    this->radio->restart_rx();
     return;
   }
 
