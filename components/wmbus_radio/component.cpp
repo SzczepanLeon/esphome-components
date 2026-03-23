@@ -22,8 +22,15 @@ static const char *TAG = "wmbus";
 void Radio::setup() {
   ASSERT_SETUP(this->packet_queue_ = xQueueCreate(3, sizeof(Packet *)));
 
+  // High priority to avoid FIFO overflow (fills in 5.12ms at 100kbps).
+  // Pin to core 1 on dual-core to avoid WiFi ISR preemption on core 0.
+#if portNUM_PROCESSORS > 1
+  ASSERT_SETUP(xTaskCreatePinnedToCore((TaskFunction_t)this->receiver_task, "radio_recv",
+                           8 * 1024, this, 24, &(this->receiver_task_handle_), 1));
+#else
   ASSERT_SETUP(xTaskCreate((TaskFunction_t)this->receiver_task, "radio_recv",
-                           3 * 1024, this, 2, &(this->receiver_task_handle_)));
+                           8 * 1024, this, 24, &(this->receiver_task_handle_)));
+#endif
 
   ESP_LOGI(TAG, "Receiver task created [%p]", this->receiver_task_handle_);
 
@@ -83,16 +90,26 @@ void Radio::receive_frame() {
 
   auto packet = std::make_unique<Packet>();
 
-  if (!this->radio->read_in_task(packet->rx_data_ptr(), packet->rx_capacity(), 0))
+  if (!this->radio->read_in_task(packet->rx_data_ptr(), packet->rx_capacity(), 0)) {
+    this->radio->restart_rx();
     return;
+  }
 
-  if (!packet->calculate_payload_size())
+  if (!packet->calculate_payload_size()) {
+    this->radio->restart_rx();
     return;
+  }
 
-  if (!this->radio->read_in_task(packet->rx_data_ptr(), packet->rx_capacity(), 3))
+  if (!this->radio->read_in_task(packet->rx_data_ptr(), packet->rx_capacity(), 3)) {
+    this->radio->restart_rx();
     return;
+  }
 
   packet->set_rssi(this->radio->get_rssi());
+
+  // Re-arm sync word detector for next packet
+  this->radio->restart_rx();
+
   auto packet_ptr = packet.get();
 
   if (xQueueSend(this->packet_queue_, &packet_ptr, 0) == pdTRUE) {
@@ -105,7 +122,6 @@ void Radio::receive_frame() {
 }
 
 void Radio::receiver_task(Radio *arg) {
-  int counter = 0;
   while (true)
     arg->receive_frame();
 }
