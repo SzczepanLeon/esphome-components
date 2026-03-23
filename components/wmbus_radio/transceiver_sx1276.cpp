@@ -89,7 +89,7 @@ void SX1276::setup() {
   this->spi_write(0x0E, rssi_smoothing);
 
   ESP_LOGVV(TAG, "restart RX");
-  this->radio->restart_rx();
+  this->restart_rx();
 
   ESP_LOGV(TAG, "SX1276 setup done");
 }
