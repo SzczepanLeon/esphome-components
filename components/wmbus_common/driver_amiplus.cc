@@ -22,6 +22,12 @@ namespace
     struct Driver : public virtual MeterCommonImplementation
     {
         Driver(MeterInfo &mi, DriverInfo &di);
+
+        bool probe(const std::vector<unsigned char> &telegram, const std::vector<unsigned char> &decrypted) override {
+            // Ignorujemy sprawdzanie nagłówków producenta (60 9B zamiast 2F 2F),
+            // akceptując ramkę na tym etapie
+            return true;
+        }
     };
 
 static bool ok = registerDriver([](DriverInfo&di)
