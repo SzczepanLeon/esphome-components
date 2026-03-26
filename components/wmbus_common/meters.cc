@@ -103,17 +103,24 @@ void addRegisteredDriver(DriverInfo di)
     (*registered_drivers_list_).push_back(lookupDriver(di.name().str()));
 }
 
-bool DriverInfo::detect(uint16_t mfct, uchar type, uchar version)
-{
-    for (auto &dd : detect_)
-    {
-        if (dd.mfct == 0 && dd.type == 0 && dd.version == 0) continue; // Ignore drivers with no detection.
-        // Some weird meters (aptor08 and itronheat) send a mfct where the first character is lower case,
-        // which results in mfct which are bigger than 32767, therefore restrict mfct to correct range
-        // and the normal check will work.
-        if ((dd.mfct & 0x7fff) == (mfct & 0x7fff) && dd.type == type && dd.version == version) return true;
-    }
-    return false;
+bool DriverInfo::detect(uint16_t mfct, uchar type, uchar version) {
+  // HACK: Wyłącz detekcję dla amiplus - akceptuj każdą ramkę
+  if (name_.str() == "amiplus") {
+    return true;
+  }
+  
+  for (auto &dd : detect_) {
+    if (dd.mfct == 0 && dd.type == 0 && dd.version == 0)
+      continue; // Ignore drivers with no detection.
+    // Some weird meters (aptor08 and itronheat) send a mfct where the first
+    // character is lower case, which results in mfct which are bigger than
+    // 32767, therefore restrict mfct to correct range and the normal check will
+    // work.
+    if ((dd.mfct & 0x7fff) == (mfct & 0x7fff) && dd.type == type &&
+        dd.version == version)
+      return true;
+  }
+  return false;
 }
 
 bool DriverInfo::isValidMedia(uchar type)
