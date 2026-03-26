@@ -24,7 +24,7 @@ namespace
         Driver(MeterInfo &mi, DriverInfo &di);
     };
 
-    static bool ok = registerDriver([](DriverInfo&di)
+static bool ok = registerDriver([](DriverInfo&di)
     {
         di.setName("amiplus");
         di.setDefaultFields("name,id,total_energy_consumption_kwh,current_power_consumption_kw,total_energy_production_kwh,current_power_production_kw,voltage_at_phase_1_v,voltage_at_phase_2_v,voltage_at_phase_3_v,total_energy_consumption_tariff_1_kwh,total_energy_consumption_tariff_2_kwh,total_energy_consumption_tariff_3_kwh,total_energy_production_tariff_1_kwh,total_energy_production_tariff_2_kwh,total_energy_production_tariff_3_kwh,timestamp");
@@ -38,7 +38,8 @@ namespace
         // Frames with APA are successfully decoded by this driver
         // Frames with APT are not - and their content is unknown - perhaps it broadcasts two data formats?
         di.addDetection(MANUFACTURER_APA,  0x02,  0x01);
-        //di.addDetection(MANUFACTURER_APT,  0x02,  0x01);
+        // Dodana obsługa licznika KPL (Kompakt)
+        di.addDetection(0x0CAE, 0x01, 0x02);
         di.setConstructor([](MeterInfo& mi, DriverInfo& di){ return shared_ptr<Meter>(new Driver(mi, di)); });
     });
 
