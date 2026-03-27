@@ -1,6 +1,7 @@
 /*
  Copyright (C) 2019-2023 Fredrik Öhrström (gpl-3.0-or-later)
  Extended 2025 to support frame 0x03 (BATTERY_VOLTAGE FRAUD_DATE)
+ Extended 2026 to support frame 0x0F (BATTERY_VOLTAGE FRAUD_DATE BACKFLOW)
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -39,6 +40,7 @@ namespace {
         di.addDetection(MANUFACTURER_BMT, 0x06, 0x17);
         di.addDetection(MANUFACTURER_BMT, 0x07, 0x13);
         di.addDetection(MANUFACTURER_BMT, 0x07, 0x15);
+        di.addDetection(MANUFACTURER_BMT, 0x07, 0x1e);
         di.addDetection(MANUFACTURER_BMT, 0x07, 0x17);
         di.usesProcessContent();
         di.setConstructor([](MeterInfo &mi, DriverInfo &di) {
@@ -61,25 +63,25 @@ namespace {
                 VifScaling::Auto, DifSignedness::Signed,
                 FieldMatcher::build().set(MeasurementType::Instantaneous).set(
                         VIFRange::DateTime), Unit::DateTimeLT);
-        
+
         addStringField("contents", "Contents of this telegrams",
                 DEFAULT_PRINT_PROPERTIES);
-        
+
         addNumericField("voltage", Quantity::Voltage, DEFAULT_PRINT_PROPERTIES,
                 "Voltage of the battery inside the meter", Unit::Volt);
-        
+
         addStringField("fraud_date", "Date of fraud/tampering detected by meter",
                 DEFAULT_PRINT_PROPERTIES);
-        
+
         addStringField("fraud_type", "Type of fraud/tampering detected",
                 DEFAULT_PRINT_PROPERTIES);
-        
+
         addStringField("leak_date", "Date of leakage detected by meter",
                 DEFAULT_PRINT_PROPERTIES);
-        
+
         addNumericField("backflow", Quantity::Volume, DEFAULT_PRINT_PROPERTIES,
                 "Backflow detected by the meter", Unit::M3);
-        
+
         addNumericField("January_total", Quantity::Volume,
                 DEFAULT_PRINT_PROPERTIES, "Total value at the end of January",
                 Unit::M3);
@@ -161,7 +163,7 @@ namespace {
     }
 
     double getVoltage(uchar voltage_byte) {
-        uchar relevant_half = voltage_byte & 0x0F; // ensure dumping of top half
+        uchar relevant_half = voltage_byte & 0x0F;
         switch (relevant_half) {
             case 0x01:
                 return 1.9;
@@ -195,21 +197,18 @@ namespace {
     }
 
     string getFraudType(uchar fraud_byte1, uchar fraud_byte2, uchar fraud_byte3) {
-        // Check if all bytes are 0x00 (no fraud detected)
         if (fraud_byte1 == 0x00 && fraud_byte2 == 0x00 && fraud_byte3 == 0x00) {
             return "no type info";
         }
-        // If there's any non-zero value, it indicates some type of fraud
-        // The actual fraud type encoding needs to be documented by manufacturer
         return "detected";
     }
 
     void Driver::processContent(Telegram *t) {
-        if (t->mfct_0f_index == -1) return; // Check that there is mfct data.
+        if (t->mfct_0f_index == -1) return;
         int offset = t->header_size + t->mfct_0f_index;
 
         vector<uchar> bytes;
-        t->extractMfctData(&bytes); // Extract raw frame data after the DIF 0x0F.
+        t->extractMfctData(&bytes);
 
         debugPayload("(hydrodigit mfct)", bytes);
 
@@ -218,13 +217,20 @@ namespace {
 
         if (i >= len) return;
         uchar frame_identifier = bytes[i];
-        
-        // Frame 0x03: BATTERY_VOLTAGE FRAUD_DATE
-        if (frame_identifier == 0x03) {
+
+        // Frame 0x03 / 0x0F: BATTERY_VOLTAGE FRAUD_DATE [BACKFLOW]
+        if (frame_identifier == 0x03 || frame_identifier == 0x0F) {
             t->addSpecialExplanation(i + offset, 1, KindOfData::PROTOCOL,
                     Understanding::FULL, "*** %02X frame content: %s",
-                    frame_identifier, "Battery voltage and fraud date");
-            setStringValue("contents", "BATTERY_VOLTAGE FRAUD_DATE");
+                    frame_identifier,
+                    frame_identifier == 0x0F ?
+                        "Battery voltage, fraud date and backflow" :
+                        "Battery voltage and fraud date");
+
+            setStringValue("contents",
+                    frame_identifier == 0x0F ?
+                        "BATTERY_VOLTAGE FRAUD_DATE BACKFLOW" :
+                        "BATTERY_VOLTAGE FRAUD_DATE");
             i++;
 
             // Process voltage
@@ -238,38 +244,43 @@ namespace {
             setNumericValue("voltage", Unit::Volt, voltage);
             i++;
 
-            // Process fraud date (3 bytes: DD MM YY in BCD format)
+            // Process fraud date (3 bytes: DD MM YY)
             if (i + 2 >= len) return;
-            uchar fraud_day = bytes[i];
+            uchar fraud_day   = bytes[i];
             uchar fraud_month = bytes[i + 1];
-            uchar fraud_year = bytes[i + 2];
-            
-            // Determine fraud type
+            uchar fraud_year  = bytes[i + 2];
+
             string fraud_type = getFraudType(fraud_day, fraud_month, fraud_year);
             setStringValue("fraud_type", fraud_type);
-            
-            // Format fraud date
+
             char fraud_buffer[17];
             memset(fraud_buffer, 0, sizeof(fraud_buffer));
             if (fraud_day == 0x00 && fraud_month == 0x00 && fraud_year == 0x00) {
-                // No fraud detected
                 snprintf(fraud_buffer, 16, "2000-00-00");
-                t->addSpecialExplanation(i + offset, 3, KindOfData::CONTENT,
-                        Understanding::FULL,
-                        "*** %02X%02X%02X fraud date: %02X.%02X.20%02X [%s]",
-                        fraud_day, fraud_month, fraud_year,
-                        fraud_day, fraud_month, fraud_year, fraud_type.c_str());
             } else {
-                // Fraud detected - format as proper date
                 snprintf(fraud_buffer, 16, "20%02X-%02X-%02X", fraud_year, fraud_month, fraud_day);
-                t->addSpecialExplanation(i + offset, 3, KindOfData::CONTENT,
-                        Understanding::FULL,
-                        "*** %02X%02X%02X fraud date: %02X.%02X.20%02X [%s]",
-                        fraud_day, fraud_month, fraud_year,
-                        fraud_day, fraud_month, fraud_year, fraud_type.c_str());
             }
+            t->addSpecialExplanation(i + offset, 3, KindOfData::CONTENT,
+                    Understanding::FULL,
+                    "*** %02X%02X%02X fraud date: %02X.%02X.20%02X [%s]",
+                    fraud_day, fraud_month, fraud_year,
+                    fraud_day, fraud_month, fraud_year, fraud_type.c_str());
             setStringValue("fraud_date", fraud_buffer);
             i += 3;
+
+            // Process backflow (only for frame 0x0F)
+            if (frame_identifier == 0x0F) {
+                if (i + 3 < len) {
+                    double backflow = fromBackflow(bytes[i], bytes[i+1], bytes[i+2], bytes[i+3]);
+                    t->addSpecialExplanation(i + offset, 4, KindOfData::CONTENT,
+                            Understanding::FULL,
+                            "*** %02X%02X%02X%02X backflow: %0.3f m3",
+                            bytes[i], bytes[i+1], bytes[i+2], bytes[i+3],
+                            backflow);
+                    setNumericValue("backflow", Unit::M3, backflow);
+                    i += 4;
+                }
+            }
 
             // Check for additional unknown data
             if (i < len) {
@@ -280,18 +291,18 @@ namespace {
                         unknown);
                 i++;
             }
-            
-            return; // End processing for frame 0x03
+
+            return;
         }
-        
+
         // Frame 0x15: Backflow, alarms and monthly data
         else if (frame_identifier == 0x15) {
             t->addSpecialExplanation(i + offset, 1, KindOfData::PROTOCOL,
                     Understanding::FULL, "*** %02X frame content: %s",
                     frame_identifier, "Backflow, alarms and monthly data");
             setStringValue("contents", "Backflow, alarms and monthly data");
-        } 
-        
+        }
+
         // Frame 0x95: Backflow, leak date, alarms and monthly data
         else if (frame_identifier == 0x95) {
             t->addSpecialExplanation(i + offset, 1, KindOfData::PROTOCOL,
@@ -300,8 +311,8 @@ namespace {
                     "Backflow, leak date, alarms and monthly data");
             setStringValue("contents",
                     "Backflow, leak date, alarms and monthly data");
-        } 
-        
+        }
+
         // Unknown frame
         else {
             t->addSpecialExplanation(i + offset, 1, KindOfData::PROTOCOL,
@@ -328,21 +339,19 @@ namespace {
         // Process leak date (only for frame 0x95)
         if (frame_identifier == 0x95) {
             if (i + 2 >= len) return;
-            uchar leak_year = bytes[i];
+            uchar leak_year  = bytes[i];
             uchar leak_month = bytes[i + 1];
-            uchar leak_day = bytes[i + 2];
-            
+            uchar leak_day   = bytes[i + 2];
+
             t->addSpecialExplanation(i + offset, 3, KindOfData::CONTENT,
                     Understanding::FULL,
                     "*** %02X%02X%02X date of leakage: %02X.%02X.20%02X",
-                    bytes[i],
-                    bytes[i + 1], bytes[i + 2], leak_day, leak_month,
-                    leak_year);
+                    bytes[i], bytes[i + 1], bytes[i + 2],
+                    leak_day, leak_month, leak_year);
             char buffer[17];
             memset(buffer, 0, sizeof(buffer));
             snprintf(buffer, 16, "%02X.%02X.20%02X", leak_day, leak_month, leak_year);
             setStringValue("leak_date", buffer);
-
             i += 3;
         }
 
@@ -355,7 +364,6 @@ namespace {
                 bytes[i], bytes[i + 1], bytes[i + 2], bytes[i + 3],
                 backflow);
         setNumericValue("backflow", Unit::M3, backflow);
-
         i += 4;
 
         // Process monthly data (for frames 0x15 and 0x95)
@@ -366,21 +374,19 @@ namespace {
             month_field_name.clear();
             month_field_name.append(getMonth(month)).append("_total");
             monthData = fromMonthly(bytes[i], bytes[i + 1], bytes[i + 2]);
-            
-            // FFFFFF (167772,15) means module was not active back then (before installation) - translates to 0
+
             if (monthData >= 100000) monthData = 0;
-            
+
             t->addSpecialExplanation(i + offset, 3, KindOfData::CONTENT,
                     Understanding::FULL,
                     "*** %02X%02X%02X total consumption at the end of %s: %0.2f m3",
                     bytes[i], bytes[i + 1], bytes[i + 2],
-                    getMonth(month).c_str(),
-                    monthData);
+                    getMonth(month).c_str(), monthData);
             setNumericValue(month_field_name, Unit::M3, monthData);
             i += 3;
         }
 
-        // Process unknown trailing byte (for frames 0x15 and 0x95)
+        // Process unknown trailing byte
         if (i >= len) return;
         uchar unknown = bytes[i];
         t->addSpecialExplanation(i + offset, 1, KindOfData::CONTENT,
@@ -419,3 +425,9 @@ namespace {
 // telegram=|2144B4093639270317077A23000000_0C1310000000046D0C2F263B0F030000000000|
 // {"contents":"BATTERY_VOLTAGE FRAUD_DATE","fraud_date":"2000-00-00","fraud_type":"no type info","id":"03273936","media":"water","meter":"hydrodigit","meter_datetime":"2025-11-06 15:12","name":"HydroFrame03","timestamp":"1111-11-11T11:11:11Z","total_m3":0.01,"voltage_v":3.7}
 // |HydroFrame03;03273936;0.01;2025-11-06 15:12;1111-11-11 11:11.11
+
+// Test: HydroFrame0F hydrodigit 03686770 00000000000000000000000000000000
+// Comment: Frame 0x0F - Battery voltage, fraud date and backflow (HYDRODIGIT-S1 ver 0x1e)
+// telegram=|4144B409706768031E078C20607A62003025239CE18FB6340427DBC5DA66F6BC1AEE0DCF10CD0FE83BDC1F772ED529C7FE765BF1256599AE80E7A3953B70C602BE45173B09F55643FE09|
+// {"backflow_m3":0,"contents":"BATTERY_VOLTAGE FRAUD_DATE BACKFLOW","fraud_date":"2004-00-00","fraud_type":"no type info","id":"03686770","media":"water","meter":"hydrodigit","meter_datetime":"2026-03-27 14:11","name":"HydroFrame0F","timestamp":"1111-11-11T11:11:11Z","total_m3":0.051,"voltage_v":3.7}
+// |HydroFrame0F;03686770;0.051;2026-03-27 14:11;1111-11-11 11:11.11
