@@ -27,6 +27,7 @@ CONF_ON_FRAME = "on_frame"
 CONF_RADIO_TYPE = "radio_type"
 CONF_MARK_AS_HANDLED = "mark_as_handled"
 CONF_BUSY_PIN = "busy_pin"
+CONF_FREQUENCY = "frequency"
 CONF_RX_GAIN = "rx_gain"
 CONF_RF_SWITCH = "rf_switch"
 CONF_SYNC_MODE = "sync_mode"
@@ -87,6 +88,11 @@ CONFIG_SCHEMA = (
             cv.Required(CONF_IRQ_PIN): pins.internal_gpio_input_pin_schema,
             # Optional BUSY pin for SX1262
             cv.Optional(CONF_BUSY_PIN): pins.gpio_input_pin_schema,
+            # Operating frequency (CC1101 only). Range: 300–928 MHz. Default: 868.95 MHz
+            cv.Optional(CONF_FREQUENCY, default="868.95MHz"): cv.All(
+                cv.frequency,
+                cv.Range(min=300e6, max=928e6),
+            ),
             # Optional RX gain mode for SX1262 (default: BOOSTED for better sensitivity)
             cv.Optional(CONF_RX_GAIN, default="BOOSTED"): cv.one_of(
                 *RX_GAIN_OPTIONS, upper=True
@@ -131,6 +137,9 @@ async def to_code(config):
     if CONF_BUSY_PIN in config:
         busy_pin = await cg.gpio_pin_expression(config[CONF_BUSY_PIN])
         cg.add(radio_var.set_busy_pin(busy_pin))
+
+    # Operating frequency
+    cg.add(radio_var.set_frequency_hz(int(config[CONF_FREQUENCY])))
 
     # RX gain mode
     cg.add(radio_var.set_rx_gain_mode(RX_GAIN_OPTIONS[config[CONF_RX_GAIN]]))
