@@ -12,6 +12,7 @@ Version 5 based on Kuba's dirty [fork](https://github.com/IoTLabs-pl/esphome-com
 - Refactor traces/logs
 
 # DONE:
+- Add configurable frequency for CC1101 (300–928 MHz, default 868.95 MHz)
 - Add CC1101 support with FIFO overflow handling and errata workaround
 - Add support for SX1262 (with limited frame length)
 - Reuse CRCs and frame parsers from wmbusmeters
@@ -204,7 +205,15 @@ wmbus_radio:
   radio_type: CC1101
   cs_pin: GPIO4
   irq_pin: GPIO3
+  frequency: 868.95MHz   # Optional. Range: 300–928 MHz. Default: 868.95 MHz
 ```
+
+| Option | Required | Default | Description |
+|---|---|---|---|
+| `radio_type` | yes | — | Must be `CC1101` |
+| `cs_pin` | yes | — | SPI chip select pin |
+| `irq_pin` | yes | — | Interrupt pin (GDO0) |
+| `frequency` | no | `868.95MHz` | Operating frequency, 300–928 MHz |
 
 Tested on ESP32-C3 Super Mini + CC1101 v2.0 (E07-M1101D-SMA) blue board.
 

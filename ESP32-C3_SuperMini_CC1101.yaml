@@ -72,6 +72,7 @@ wmbus_radio:
   radio_type: CC1101
   cs_pin: GPIO4
   irq_pin: GPIO3
+  # frequency: 868.95MHz   # Optional. Range: 300–928 MHz. Default: 868.95 MHz
   on_frame:
     - then:
         - logger.log:

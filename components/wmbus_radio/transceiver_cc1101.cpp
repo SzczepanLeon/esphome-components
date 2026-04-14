@@ -67,10 +67,8 @@ void CC1101::setup() {
   this->write_register(CC1101_FSCTRL0, 0x00);
 
   ESP_LOGVV(TAG, "setting radio frequency");
-  // Frequency: 868.95 MHz
-  // FREQ = (f_carrier * 2^16) / f_xtal = (868950000 * 65536) / 26000000 = 0x216BD0
-  const uint32_t frequency = 868950000;
-  uint32_t freq_reg = ((uint64_t)frequency << 16) / F_XTAL;
+  // FREQ = (f_carrier * 2^16) / f_xtal
+  uint32_t freq_reg = ((uint64_t)this->frequency_hz_ << 16) / F_XTAL;
   this->write_register(CC1101_FREQ2, BYTE(freq_reg, 2));
   this->write_register(CC1101_FREQ1, BYTE(freq_reg, 1));
   this->write_register(CC1101_FREQ0, BYTE(freq_reg, 0));
@@ -254,15 +252,15 @@ void CC1101::restart_rx() {
 }
 
 int8_t CC1101::get_rssi() {
-  // Convert RSSI_dec to dBm
-  // RSSI_dBm = (RSSI_dec / 2) - RSSI_offset
-  // RSSI_offset is typically 74 for 868 MHz
+  // Convert RSSI_dec to dBm: RSSI_dBm = (RSSI_dec / 2) - RSSI_offset
+  // RSSI offset per TI DN505: 74 dBm for 868 MHz, 76 dBm for 433 MHz
+  int8_t rssi_offset = (this->frequency_hz_ < 600000000u) ? 76 : 74;
   int8_t rssi_dec = this->last_rssi_;
   int16_t rssi_dbm;
   if (rssi_dec >= 128) {
-    rssi_dbm = ((int16_t)(rssi_dec - 256) / 2) - 74;
+    rssi_dbm = ((int16_t)(rssi_dec - 256) / 2) - rssi_offset;
   } else {
-    rssi_dbm = (rssi_dec / 2) - 74;
+    rssi_dbm = (rssi_dec / 2) - rssi_offset;
   }
   return (int8_t)rssi_dbm;
 }
