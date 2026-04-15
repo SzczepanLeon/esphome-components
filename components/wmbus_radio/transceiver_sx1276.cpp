@@ -88,6 +88,9 @@ void SX1276::setup() {
   uint8_t rssi_smoothing = 0b111;
   this->spi_write(0x0E, rssi_smoothing);
 
+  ESP_LOGVV(TAG, "restart RX");
+  this->restart_rx();
+
   ESP_LOGV(TAG, "SX1276 setup done");
 }
 
