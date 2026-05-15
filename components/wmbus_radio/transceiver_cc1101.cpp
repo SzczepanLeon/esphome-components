@@ -53,11 +53,8 @@ void CC1101::setup() {
   this->write_register(CC1101_PKTLEN, 0xFF);
   // Packet control 1: No address check, no append status, no CRC autoflush
   this->write_register(CC1101_PKTCTRL1, 0x00);
-  // Packet control 0: Infinite packet length, no whitening, no CRC.
-  // Length is bounded by manual SIDLE after expected_size bytes; fixed mode
-  // (0x00) with PKTLEN=0xFF would keep RX filling FIFO with noise for ~20ms
-  // after the real packet ends → FIFO overflow.
-  this->write_register(CC1101_PKTCTRL0, 0x02);
+  // Packet control 0: Variable packet length, no whitening, no CRC
+  this->write_register(CC1101_PKTCTRL0, 0x00);
 
   // No device address filtering
   this->write_register(CC1101_ADDR, 0x00);
