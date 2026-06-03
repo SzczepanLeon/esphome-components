@@ -71,17 +71,6 @@ namespace
             });
 
         addNumericFieldWithExtractor(
-            "meter",
-            "Device date time.",
-            DEFAULT_PRINT_PROPERTIES,
-            Quantity::PointInTime,
-            VifScaling::Auto, DifSignedness::Signed,
-            FieldMatcher::build()
-            .set(MeasurementType::Instantaneous)
-            .set(VIFRange::DateTime)
-            );
-
-        addNumericFieldWithExtractor(
             "total",
             "The total water consumption recorded by this meter.",
             DEFAULT_PRINT_PROPERTIES,
@@ -227,7 +216,6 @@ namespace
 // {"_":"telegram","media":"warm water","meter":"waterstarm","name":"Water","id":"22996221","meter_datetime":"2020-07-30 10:40","total_m3":0.106,"total_backwards_m3":0,"current_status":"LEAKAGE_OR_NO_USAGE POWER_LOW","status":"LEAKAGE_OR_NO_USAGE POWER_LOW","meter_version":"000008","parameter_set":"1100","timestamp":"1111-11-11T11:11:11Z"}
 // |Water;22996221;0.106;0;LEAKAGE_OR_NO_USAGE POWER_LOW;1111-11-11 11:11.11
 
-
 // Test: Water waterstarm 11559999 NOKEY
 // telegram=|2E44FA129999551100077A070020252F2F_046D0F28C22404139540000002FD17000001FD481D2F2F2F2F2F2F2F2F2F|
 // {"_":"telegram","media":"water","meter":"waterstarm","name":"Water","id":"11559999","meter_datetime":"2022-04-02 08:15","total_m3":16.533,"current_status":"OK","status":"OK","battery_v":2.9,"timestamp":"1111-11-11T11:11:11Z"}
@@ -237,7 +225,6 @@ namespace
 // telegram=|9644FA126606052000067A1E000020_046D3B2ED729041340D8000002FD17000001FD481D426CBF2C4413026C000084011348D20000C40113F3CB0000840213DCC40000C40213B8B60000840313849B0000C403138B8C0000840413E3800000C4041337770000840513026C0000C40513D65F00008406134F560000C40613604700008407139D370000C407137F3300008408135B2C0000|
 // {"_":"telegram","battery_v":2.9,"consumption_at_history_10_m3":24.534,"consumption_at_history_11_m3":22.095,"consumption_at_history_12_m3":18.272,"consumption_at_history_13_m3":14.237,"consumption_at_history_14_m3":13.183,"consumption_at_history_15_m3":11.355,"consumption_at_history_1_m3":53.832,"consumption_at_history_2_m3":52.211,"consumption_at_history_3_m3":50.396,"consumption_at_history_4_m3":46.776,"consumption_at_history_5_m3":39.812,"consumption_at_history_6_m3":35.979,"consumption_at_history_7_m3":32.995,"consumption_at_history_8_m3":30.519,"consumption_at_history_9_m3":27.65,"consumption_at_set_date_m3":27.65,"current_status":"OK","status":"OK","history_10_date":"2021-11-23","history_11_date":"2021-10-23","history_12_date":"2021-09-23","history_13_date":"2021-08-23","history_14_date":"2021-07-23","history_15_date":"2021-06-23","history_1_date":"2022-08-23","history_2_date":"2022-07-23","history_3_date":"2022-06-23","history_4_date":"2022-05-23","history_5_date":"2022-04-23","history_6_date":"2022-03-23","history_7_date":"2022-02-23","history_8_date":"2022-01-23","history_9_date":"2021-12-23","id":"20050666","media":"warm water","meter":"waterstarm","meter_datetime":"2022-09-23 14:59","name":"WarmLorenz","set_date":"2021-12-31","timestamp":"1111-11-11T11:11:11Z","total_m3":55.36}
 // |WarmLorenz;20050666;55.36;null;OK;1111-11-11 11:11.11
-
 
 // Test: ColdLorenz waterstarm 20065160 NOKEY
 // telegram=|9644FA126051062000077A78000020_046D392DD7290413901A000002FD17000001FD481D426CBF2C4413D312000084011399190000C40113841800008402130C180000C40213EC16000084031395150000C40313E3140000840413BD130000C404134C130000840513D3120000C4051322120000840613AF110000C4061397100000840713D00F0000C40713890E0000840813980C0000|
