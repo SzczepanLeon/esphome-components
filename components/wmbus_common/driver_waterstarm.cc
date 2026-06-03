@@ -192,7 +192,7 @@ namespace
             "The historic date.",
             DEFAULT_PRINT_PROPERTIES,
             Quantity::PointInTime,
-            "meter_datetime - ((storage_counter - 1 counter) * 1 month)",
+            "meter_datetime - ((storage_counter-1counter) * 1 month)",
             FieldMatcher::build()
             .set(MeasurementType::Instantaneous)
             .set(VIFRange::Volume)
