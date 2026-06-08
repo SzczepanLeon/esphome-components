@@ -81,7 +81,7 @@ namespace wmbus {
         }
         //
         auto *sensor = this->wmbus_listeners_[meter_id];
-        if ( ((mbus_data.mode == 'T') && 
+        if ( ((mbus_data.mode == 'T') &&
               ((sensor->framemode == MODE_T1) || (sensor->framemode == MODE_T1C1))) ||
             ((mbus_data.mode == 'C') &&
               ((sensor->framemode == MODE_C1) || (sensor->framemode == MODE_T1C1)))
@@ -187,26 +187,28 @@ namespace wmbus {
         this->led_blink();
       }
       for (auto & client : this->clients_) {
+        char ip_buf[esphome::network::IP_ADDRESS_BUFFER_SIZE];
+        client.ip.str_to(ip_buf);
         switch (client.format) {
           case FORMAT_HEX:
             {
               switch (client.transport) {
                 case TRANSPORT_TCP:
                   {
-                    ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
-                    if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                    ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via TCP", ip_buf, client.port);
+                    if (this->tcp_client_.connect(ip_buf, client.port)) {
                       this->tcp_client_.write((const uint8_t *) frame.data(), frame.size());
                       this->tcp_client_.stop();
                     }
                     else {
-                      ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", client.ip.str().c_str(), client.port);
+                      ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", ip_buf, client.port);
                     }
                   }
                   break;
                 case TRANSPORT_UDP:
                   {
-                    ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
-                    this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                    ESP_LOGV(TAG, "Will send HEX telegram to %s:%d via UDP", ip_buf, client.port);
+                    this->udp_client_.beginPacket(ip_buf, client.port);
                     this->udp_client_.write((const uint8_t *) frame.data(), frame.size());
                     this->udp_client_.endPacket();
                   }
@@ -225,8 +227,8 @@ namespace wmbus {
               switch (client.transport) {
                 case TRANSPORT_TCP:
                   {
-                    ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", client.ip.str().c_str(), client.port);
-                    if (this->tcp_client_.connect(client.ip.str().c_str(), client.port)) {
+                    ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via TCP", ip_buf, client.port);
+                    if (this->tcp_client_.connect(ip_buf, client.port)) {
                       this->tcp_client_.printf("%s;1;1;%s;%d;;;0x",
                                               frameMode,
                                               telegram_time,
@@ -238,14 +240,14 @@ namespace wmbus {
                       this->tcp_client_.stop();
                     }
                     else {
-                      ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", client.ip.str().c_str(), client.port);
+                      ESP_LOGE(TAG, "Can't connect via TCP to %s:%d", ip_buf, client.port);
                     }
                   }
                   break;
                 case TRANSPORT_UDP:
                   {
-                    ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", client.ip.str().c_str(), client.port);
-                    this->udp_client_.beginPacket(client.ip.str().c_str(), client.port);
+                    ESP_LOGV(TAG, "Will send RTLWMBUS telegram to %s:%d via UDP", ip_buf, client.port);
+                    this->udp_client_.beginPacket(ip_buf, client.port);
                     this->udp_client_.printf("%s;1;1;%s;%d;;;0x",
                                             frameMode,
                                             telegram_time,
@@ -373,9 +375,11 @@ namespace wmbus {
     if (this->clients_.size() > 0) {
       ESP_LOGCONFIG(TAG, "  Clients:");
       for (auto & client : this->clients_) {
+        char ip_buf[esphome::network::IP_ADDRESS_BUFFER_SIZE];
+        client.ip.str_to(ip_buf);
         ESP_LOGCONFIG(TAG, "    %s: %s:%d %s [%s]",
                       client.name.c_str(),
-                      client.ip.str().c_str(),
+                      ip_buf,
                       client.port,
                       LOG_STR_ARG(transport_to_string(client.transport)),
                       LOG_STR_ARG(format_to_string(client.format)));
