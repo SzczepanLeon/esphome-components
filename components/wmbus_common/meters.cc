@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <memory>
 #include <memory.h>
 #include <numeric>
 #include <stdexcept>
@@ -758,7 +759,8 @@ std::string concatFields(Meter *m, Telegram *t, char c,
 bool MeterCommonImplementation::handleTelegram(
     AboutTelegram &about, std::vector<uchar> input_frame, bool simulated,
     std::vector<Address> *addresses, bool *id_match, Telegram *out_analyzed) {
-  Telegram t;
+  std::unique_ptr<Telegram> tp(new Telegram());
+  Telegram &t = *tp;
   t.about = about;
   bool ok = t.parseHeader(input_frame);
 

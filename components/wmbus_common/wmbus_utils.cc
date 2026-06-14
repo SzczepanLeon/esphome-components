@@ -75,7 +75,7 @@ bool decrypt_ELL_AES_CTR(Telegram *t, std::vector<uchar> &frame,
     AES_ECB_encrypt(iv, safeButUnsafeVectorPtr(aeskey), xordata, 16);
 
     // Xor the data with the pseudo-random bits to decrypt into tmp.
-    uchar tmp[block_size];
+    uchar tmp[16];
     xorit(xordata, &encrypted_bytes[offset], tmp, block_size);
 
     debug("(ELL) block %d block_size %d offset %zu\n", block, block_size,
@@ -195,19 +195,19 @@ bool decrypt_TPL_AES_CBC_IV(Telegram *t, std::vector<uchar> &frame,
   std::string s = bin2hex(ivv);
   debug("(TPL) IV %s\n", s.c_str());
 
-  uchar buffer_data[num_bytes_to_decrypt];
-  memcpy(buffer_data, safeButUnsafeVectorPtr(buffer), num_bytes_to_decrypt);
-  uchar decrypted_data[num_bytes_to_decrypt];
+  std::vector<uchar> buffer_data(num_bytes_to_decrypt);
+  memcpy(buffer_data.data(), safeButUnsafeVectorPtr(buffer), num_bytes_to_decrypt);
+  std::vector<uchar> decrypted_data(num_bytes_to_decrypt);
 
-  AES_CBC_decrypt_buffer(decrypted_data, buffer_data, num_bytes_to_decrypt,
+  AES_CBC_decrypt_buffer(decrypted_data.data(), buffer_data.data(), num_bytes_to_decrypt,
                          safeButUnsafeVectorPtr(aeskey), iv);
 
   // Remove the encrypted bytes.
   frame.erase(pos, frame.end());
 
   // Insert the decrypted bytes.
-  frame.insert(frame.end(), decrypted_data,
-               decrypted_data + num_bytes_to_decrypt);
+  frame.insert(frame.end(), decrypted_data.begin(),
+               decrypted_data.begin() + num_bytes_to_decrypt);
 
   debugPayload("(TPL) decrypted ", frame, pos);
 
@@ -273,19 +273,19 @@ bool decrypt_TPL_AES_CBC_NO_IV(Telegram *t, std::vector<uchar> &frame,
   std::string s = bin2hex(ivv);
   debug("(TPL) IV %s\n", s.c_str());
 
-  uchar buffer_data[num_bytes_to_decrypt];
-  memcpy(buffer_data, safeButUnsafeVectorPtr(buffer), num_bytes_to_decrypt);
-  uchar decrypted_data[num_bytes_to_decrypt];
+  std::vector<uchar> buffer_data(num_bytes_to_decrypt);
+  memcpy(buffer_data.data(), safeButUnsafeVectorPtr(buffer), num_bytes_to_decrypt);
+  std::vector<uchar> decrypted_data(num_bytes_to_decrypt);
 
-  AES_CBC_decrypt_buffer(decrypted_data, buffer_data, num_bytes_to_decrypt,
+  AES_CBC_decrypt_buffer(decrypted_data.data(), buffer_data.data(), num_bytes_to_decrypt,
                          safeButUnsafeVectorPtr(aeskey), iv);
 
   // Remove the encrypted bytes and any potentially not decryptes bytes after.
   frame.erase(pos, frame.end());
 
   // Insert the decrypted bytes.
-  frame.insert(frame.end(), decrypted_data,
-               decrypted_data + num_bytes_to_decrypt);
+  frame.insert(frame.end(), decrypted_data.begin(),
+               decrypted_data.begin() + num_bytes_to_decrypt);
 
   debugPayload("(TPL) decrypted ", frame, pos);
 

@@ -57,6 +57,7 @@ public:
   void set_reset_pin(GPIOPin *reset_pin);
   void set_irq_pin(InternalGPIOPin *irq_pin);
   void set_busy_pin(GPIOPin *busy_pin);
+  void set_frequency_hz(uint32_t hz);
   void set_rx_gain_mode(const std::string &mode);
   void set_rf_switch(bool enable);
   void set_sync_mode(const std::string &mode);
@@ -66,6 +67,7 @@ protected:
   GPIOPin *reset_pin_{nullptr};
   InternalGPIOPin *irq_pin_{nullptr};
   GPIOPin *busy_pin_{nullptr};  // Optional, used by SX1262
+  uint32_t frequency_hz_{868950000};  // Default: 868.95 MHz
   RxGainMode rx_gain_mode_{RX_GAIN_BOOSTED};
   bool rf_switch_{false};  // Use DIO2 as RF switch control (SX1262)
   SyncMode sync_mode_{SYNC_MODE_NORMAL};

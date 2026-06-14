@@ -3024,7 +3024,8 @@ std::string vifType(int vif) {
     return "Active Energy 0.1 MWh";
   case 0x7B01:
     return "Active Energy 1 MWh";
-
+  case 0x7B02:
+    return "Reactive Energy 0.1 MWh";
   case 0x7B1A:
     return "Relative humidity 0.1%";
   case 0x7B1B:
@@ -3330,12 +3331,18 @@ double vifScale(int vif) {
     double exp = (vif & 0x1) + 2;
     return pow(10.0, -exp);
   }
+  case 0x7b02:
+    return 1000.0;
 
     // Active energy 0.1 or 1 GJ normalize to 100 MJ or 1000 MJ
     // 7b08 19 -> 1.9 G -> 1 900 KWh
     // 7b09 19 -> 19 GJ -> 19 000 MJ
   case 0x7b08:
   case 0x7b09: {
+    double exp = (vif & 0x1) + 2;
+    return pow(10.0, -exp);
+  }
+  case 0x7b14:{
     double exp = (vif & 0x1) + 2;
     return pow(10.0, -exp);
   }
@@ -4946,7 +4953,9 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload,
     crc2_pos = len - 2;
   }
 
-  uint16_t calc_crc = crc16_EN13757(safeButUnsafeVectorPtr(payload), crc1_pos);
+  uchar *from1 = &payload[0];
+  size_t len1 = crc1_pos;
+  uint16_t calc_crc = crc16_EN13757(from1, len1);
   uint16_t check_crc = payload[crc1_pos] << 8 | payload[crc1_pos + 1];
 
   if (calc_crc != check_crc && !FUZZING) {
@@ -4964,7 +4973,9 @@ bool trimCRCsFrameFormatBInternal(std::vector<uchar> &payload,
   }
 
   if (crc2_pos > 0) {
-    calc_crc = crc16_EN13757(&payload[crc1_pos + 2], crc2_pos);
+    uchar *from2 = &payload[crc1_pos+2];
+    size_t len2 = crc2_pos-crc1_pos-2;
+    calc_crc = crc16_EN13757(from2, len2);
     check_crc = payload[crc2_pos] << 8 | payload[crc2_pos + 1];
 
     if (calc_crc != check_crc && !FUZZING) {

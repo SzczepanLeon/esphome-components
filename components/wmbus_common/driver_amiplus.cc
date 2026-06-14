@@ -27,7 +27,8 @@ namespace
     static bool ok = registerDriver([](DriverInfo&di)
     {
         di.setName("amiplus");
-        di.setDefaultFields("name,id,total_energy_consumption_kwh,current_power_consumption_kw,total_energy_production_kwh,current_power_production_kw,voltage_at_phase_1_v,voltage_at_phase_2_v,voltage_at_phase_3_v,total_energy_consumption_tariff_1_kwh,total_energy_consumption_tariff_2_kwh,total_energy_consumption_tariff_3_kwh,total_energy_production_tariff_1_kwh,total_energy_production_tariff_2_kwh,total_energy_production_tariff_3_kwh,timestamp");
+        di.setDefaultFields("name,id,total_energy_consumption_kwh,current_power_consumption_kw,total_energy_production_kwh,current_power_production_kw,voltage_at_phase_1_v,voltage_at_phase_2_v,voltage_at_phase_3_v,total_energy_consumption_tariff_1_kwh,total_energy_consumption_tariff_2_kwh,total_energy_consumption_tariff_3_kwh,total_energy_production_tariff_1_kwh,total_energy_production_tariff_2_kwh,total_energy_production_tariff_3_kwh,total_rective_power_l_kvarh,total_rective_power_c_kvarh,current_rective_power_l_var,current_rective_power_c_var,current_at_phase_1_a,current_at_phase_2_a,current_at_phase_3_a,timestamp");
+
         di.setMeterType(MeterType::ElectricityMeter);
         di.addLinkMode(LinkMode::T1);
         di.addDetection(MANUFACTURER_APA,  0x02,  0x02);
@@ -208,6 +209,79 @@ namespace
             .set(VIFRange::AnyPowerVIF)
             );
 
+        addNumericFieldWithExtractor(
+            "total_rective_power_l",
+            "Reactive energy (L).",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Reactive_Energy,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(DifVifKey("0EFB8273"))
+        );
+
+        addNumericFieldWithExtractor(
+            "total_rective_power_c",
+            "Reactive energy (c).",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Reactive_Energy,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(DifVifKey("0EFB82F33C"))
+        );
+
+        addNumericFieldWithExtractor(
+            "current_rective_power_l",
+            "Current ractive power (L).",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Reactive_Power,
+            VifScaling::None, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(DifVifKey("0BFB14")),
+            Unit::VAR
+        );
+
+        addNumericFieldWithExtractor(
+            "current_rective_power_c",
+            "Current ractive power (C).",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Reactive_Power,
+            VifScaling::None, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(DifVifKey("0BFB943C")),
+            Unit::VAR
+        );
+
+        addNumericFieldWithExtractor(
+            "current_at_phase_1",
+            "Instantaneous current in the L1 phase.",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Amperage,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(DifVifKey("0BFDDAFC01"))
+        );
+
+        addNumericFieldWithExtractor(
+            "current_at_phase_2",
+            "Instantaneous current in the L2 phase.",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Amperage,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(MeasurementType::Instantaneous)
+            .set(VIFRange::Amperage)
+            .set(DifVifKey("0BFDDAFC02"))
+        );
+
+        addNumericFieldWithExtractor(
+            "current_at_phase_3",
+            "Instantaneous current in the L3 phase.",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Amperage,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(DifVifKey("0BFDDAFC03"))
+        );
     }
 }
 
@@ -243,3 +317,6 @@ namespace
 // telegram=|9e4401060445915601027a3d0390052f2f066dc076091935800c78044591560e032088300000008e10032088300000008e20030000000000008e30030000000000008e8010030000000000000e833c2702000000008e10833c2702000000008e20833c0000000000008e30833c0000000000008e8010833c0000000000000afdc8fc0136240afdc8fc0262240afdc8fc0389222f2f2f2f2f2f2f2f2f2f2f2f|
 // {"_":"telegram","media":"electricity","meter":"amiplus","name":"MyElectricity5","id":"56914504","total_energy_consumption_kwh":308.82,"total_energy_consumption_tariff_1_kwh":308.82,"total_energy_consumption_tariff_2_kwh":0,"total_energy_consumption_tariff_3_kwh":0,"total_energy_production_kwh":0.227,"total_energy_production_tariff_1_kwh":0.227,"total_energy_production_tariff_2_kwh":0,"total_energy_production_tariff_3_kwh":0,"voltage_at_phase_1_v":243.6,"voltage_at_phase_2_v":246.2,"voltage_at_phase_3_v":228.9,"device_date_time":"2024-05-25 09:54:00","timestamp":"1111-11-11T11:11:11Z"}
 // |MyElectricity5;56914504;308.82;null;0.227;null;243.6;246.2;228.9;308.82;0;0;0.227;0;0;1111-11-11 11:11.11
+
+// Test: Apator Otus3 amiplus 56859196 NOKEY
+// telegram=|CE4401069691855601027AC600C0052F2F066D4073124234800C78969185560E032050260600008E10032050260600000E833C9299930700008E10833C9299930700000EFB82736461630100008E10FB82736461630100000EFB82F33C9248050500008E10FB82F33C9248050500000B2B6800000BAB3C0300000BFB142303000BFB943C1803000AFDC8FC0197220AFDC8FC0231230AFDC8FC035123146DADAA423414ED3C80AB42340BFDDAFC011400000BFDDAFC023401000BFDDAFC030302002F2F2F2F2F2F2F2F2F2F2F2F2F2F|
