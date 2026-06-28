@@ -34,7 +34,8 @@ namespace
         di.addDetection(MANUFACTURER_MAD,  0x06,  0x50);
         di.addDetection(MANUFACTURER_MAD,  0x07,  0x50);
         di.addDetection(MANUFACTURER_MAD,  0x16,  0x50);
-
+        // Short-frame "Type 173" variant (Diehl/Maddalena DME 0x63):
+        di.addDetection(MANUFACTURER_DME,  0x07,  0x63);
     });
 
     Driver::Driver(MeterInfo &mi, DriverInfo &di) : MeterCommonImplementation(mi, di)
@@ -63,6 +64,17 @@ namespace
 
         addOptionalLibraryFields("fabrication_no");
         addOptionalLibraryFields("total_m3");
+
+        addNumericFieldWithExtractor(
+            "flow_temperature",
+            "The water flow temperature.",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Temperature,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(MeasurementType::Instantaneous)
+            .set(VIFRange::FlowTemperature)
+            );
 
         addNumericFieldWithExtractor(
             "consumption_at_set_date",
@@ -142,6 +154,8 @@ namespace
             .set(StorageNr(8),StorageNr(19))
             );
 
+        // Primary history reference: full-frame meters send VIFRange::Date (VIF 0x6C)
+        // at StorageNr(8).  Exactly one of the two registrations below fires per telegram.
         addNumericFieldWithExtractor(
             "history_reference",
             "Reference date for history.",
@@ -151,6 +165,23 @@ namespace
             FieldMatcher::build()
             .set(MeasurementType::Instantaneous)
             .set(VIFRange::Date)
+            .set(StorageNr(8)),
+            Unit::DateLT
+            );
+
+        // Fallback history reference: short-frame variant (DME 0x63) sends
+        // VIFRange::DateTime (VIF 0x6D) at StorageNr(8) instead of Date.
+        // Without this second registration, history_reference_date stays unset
+        // and the formula engine below hangs rather than returning nan cleanly.
+        addNumericFieldWithExtractor(
+            "history_reference",
+            "Reference date for history (DateTime variant).",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::PointInTime,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(MeasurementType::Instantaneous)
+            .set(VIFRange::DateTime)
             .set(StorageNr(8)),
             Unit::DateLT
             );
