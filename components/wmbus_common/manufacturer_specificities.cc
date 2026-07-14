@@ -24,7 +24,7 @@
 
 std::set<int> diehl_manufacturers = {MANUFACTURER_DME, MANUFACTURER_EWT,
                                      MANUFACTURER_HYD, MANUFACTURER_SAP,
-                                     MANUFACTURER_SPL};
+                                     MANUFACTURER_SPL, MANUFACTURER_MAD};
 
 // Default keys for Izar/PRIOS and Sharky meters
 #define PRIOS_DEFAULT_KEY1 "39BC8A10E66D83F8"
@@ -74,6 +74,10 @@ DiehlFrameInterpretation detectDiehlFrameInterpretation(uchar c_field,
       case 0xA0: // Manufacturer specific
       case 0xA1: // Manufacturer specific
       case 0xA2: // Manufacturer specific
+        if (m_field == MANUFACTURER_MAD)
+           {
+             return DiehlFrameInterpretation::PRIOS;
+           }   
       case 0xA3: // Manufacturer specific
       case 0xA4: // Manufacturer specific
       case 0xA5: // Manufacturer specific
@@ -164,8 +168,8 @@ std::vector<uchar> decodeDiehlLfsr(const std::vector<uchar> &origin,
                                    DiehlLfsrCheckMethod check_method,
                                    uint32_t check_value) {
   // modify seed key with header values
-  key ^= uint32FromBytes(origin, 2); // manufacturer + address[0-1]
-  key ^= uint32FromBytes(origin, 6); // address[2-3] + version + type
+  key ^= uint32FromBytes(frame, 2); // manufacturer + address[0-1]
+  key ^= uint32FromBytes(frame, 6); // address[2-3] + version + type 
   key ^=
       uint32FromBytes(frame, 10); // ci + some more bytes from the telegram...
 
