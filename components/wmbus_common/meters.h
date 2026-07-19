@@ -281,7 +281,7 @@ struct PrintProperties {
 
   bool hasREQUIRED() { return props_ & PrintProperty::REQUIRED; }
   bool hasDEPRECATED() { return props_ & PrintProperty::DEPRECATED; }
-  bool hasSTATUS() { return props_ & PrintProperty::STATUS; }
+  bool hasSTATUS() { return props_ & PrintProperty::WMBUS_STATUS; }
   bool hasINCLUDETPLSTATUS() {
     return props_ & PrintProperty::INCLUDE_TPL_STATUS;
   }
