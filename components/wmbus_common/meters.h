@@ -262,7 +262,7 @@ enum PrintProperty {
                 // or null.
   DEPRECATED = 2, // This field is about to be removed or changed in a newer
                   // driver, which will have a new name.
-  STATUS = 4, // This is >the< status field and it should read OK of not error
+  STATUS_FIELD = 4, // This is >the< status field and it should read OK of not error
               // flags are set.
   INCLUDE_TPL_STATUS = 8,  // This text field also includes the tpl status
                            // decoding. multiple OK:s collapse to a single OK.
@@ -281,7 +281,7 @@ struct PrintProperties {
 
   bool hasREQUIRED() { return props_ & PrintProperty::REQUIRED; }
   bool hasDEPRECATED() { return props_ & PrintProperty::DEPRECATED; }
-  bool hasSTATUS() { return props_ & PrintProperty::STATUS; }
+  bool hasSTATUS() { return props_ & PrintProperty::STATUS_FIELD; }
   bool hasINCLUDETPLSTATUS() {
     return props_ & PrintProperty::INCLUDE_TPL_STATUS;
   }

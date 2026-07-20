@@ -169,7 +169,7 @@ namespace
         addStringFieldWithExtractorAndLookup(
             "status",
             "Status. OK if no error flags are set.",
-            PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS,
+            PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS,
             FieldMatcher::build()
             .set(MeasurementType::Instantaneous)
             .set(VIFRange::ErrorFlags),

@@ -38,7 +38,7 @@ namespace
         addStringFieldWithExtractorAndLookup(
             "status",
             "Meter status from manufacturer status and tpl status field.",
-            PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS,
+            PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS,
             FieldMatcher::build()
             .set(DifVifKey("047F")),
             {

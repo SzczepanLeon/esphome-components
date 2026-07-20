@@ -39,7 +39,7 @@ namespace
         addStringFieldWithExtractorAndLookup(
             "status",
             "Status of meter.",
-            DEFAULT_PRINT_PROPERTIES  | PrintProperty::STATUS,
+            DEFAULT_PRINT_PROPERTIES  | PrintProperty::STATUS_FIELD,
             FieldMatcher::build()
             .set(MeasurementType::Instantaneous)
             .set(VIFRange::ErrorFlags),

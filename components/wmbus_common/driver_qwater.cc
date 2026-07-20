@@ -64,7 +64,7 @@ namespace
         addStringField(
             "status",
             "Meter status tpl status field.",
-            DEFAULT_PRINT_PROPERTIES | PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS);
+            DEFAULT_PRINT_PROPERTIES | PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS);
 
         addNumericFieldWithExtractor(
             "due_date",

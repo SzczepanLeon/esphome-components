@@ -46,7 +46,7 @@ namespace
         addStringFieldWithExtractorAndLookup(
             "status",
             "Meter error flags. IMPORTANT! Smoke alarm is NOT reported here! You MUST check last alarm date and counter!",
-            PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS,
+            PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS,
             FieldMatcher::build()
             .set(VIFRange::ErrorFlags),
             Translate::Lookup(

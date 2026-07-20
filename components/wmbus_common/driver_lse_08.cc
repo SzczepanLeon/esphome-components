@@ -43,7 +43,7 @@ namespace
             "status",
             "Meter status from tpl status field.",
             DEFAULT_PRINT_PROPERTIES   |
-            PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS,
+            PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS,
             FieldMatcher::build()
             .set(DifVifKey("01FD73")),
             Translate::Lookup(
