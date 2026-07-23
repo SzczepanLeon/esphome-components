@@ -40,7 +40,7 @@ namespace
             "status",
             "Meter status. Reports OK if neither tpl sts nor error flags have bits set.",
             DEFAULT_PRINT_PROPERTIES   |
-            PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS,
+            PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS,
             FieldMatcher::build()
             .set(DifVifKey("02FD971D")),
             Translate::Lookup({

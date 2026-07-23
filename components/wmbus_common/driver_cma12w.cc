@@ -44,7 +44,7 @@ namespace
         addStringField(
             "status",
             "Meter status from tpl status field.",
-            PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS);
+            PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS);
 
         addNumericFieldWithExtractor(
             "current_temperature",

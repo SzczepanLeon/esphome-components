@@ -39,7 +39,7 @@ namespace
       addStringField(
             "status",
             "Status, error, warning and alarm flags.",
-            DEFAULT_PRINT_PROPERTIES | PrintProperty::INCLUDE_TPL_STATUS | PrintProperty::STATUS);
+            DEFAULT_PRINT_PROPERTIES | PrintProperty::INCLUDE_TPL_STATUS | PrintProperty::STATUS_FIELD);
 
         addNumericFieldWithExtractor(
             "total_energy_consumption",

@@ -45,7 +45,7 @@ namespace
         addStringFieldWithExtractorAndLookup(
             "status",
             "Status and error flags.",
-            DEFAULT_PRINT_PROPERTIES | PrintProperty::INCLUDE_TPL_STATUS | PrintProperty::STATUS,
+            DEFAULT_PRINT_PROPERTIES | PrintProperty::INCLUDE_TPL_STATUS | PrintProperty::STATUS_FIELD,
             FieldMatcher::build()
             .set(VIFRange::ErrorFlags),
             {
@@ -96,7 +96,7 @@ namespace
         addStringFieldWithExtractorAndLookup(
             "current_status",
             "Status and error flags. (Deprecated use status instead.)",
-            DEFAULT_PRINT_PROPERTIES | PrintProperty::INCLUDE_TPL_STATUS | PrintProperty::STATUS | PrintProperty::DEPRECATED,
+            DEFAULT_PRINT_PROPERTIES | PrintProperty::INCLUDE_TPL_STATUS | PrintProperty::STATUS_FIELD | PrintProperty::DEPRECATED,
             FieldMatcher::build()
             .set(VIFRange::ErrorFlags),
             {

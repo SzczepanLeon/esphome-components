@@ -48,7 +48,7 @@ namespace
             "status",
             "Meter status from tpl status field.",
             DEFAULT_PRINT_PROPERTIES   |
-            PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS);
+            PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS);
 
         /* Doubles have a 52 bit significand 11 bit exp and 1 bit sign,
            so double is good for incremental pulses up to 2^52 counts

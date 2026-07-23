@@ -49,7 +49,7 @@ namespace
             "status",
             "Meter status from tpl status field.",
             DEFAULT_PRINT_PROPERTIES   |
-            PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS);
+            PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS);
 
         addNumericFieldWithExtractor(
             "total_routed_messages",

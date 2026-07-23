@@ -45,7 +45,7 @@ namespace
             "status",
             "Meter status. Includes both meter error field and tpl status field.",
             DEFAULT_PRINT_PROPERTIES   |
-            PrintProperty::STATUS | PrintProperty::INCLUDE_TPL_STATUS,
+            PrintProperty::STATUS_FIELD | PrintProperty::INCLUDE_TPL_STATUS,
             FieldMatcher::build()
             .set(VIFRange::ErrorFlags),
             Translate::Lookup(
