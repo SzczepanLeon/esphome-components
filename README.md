@@ -1,11 +1,5 @@
 Version 5 based on Kuba's dirty [fork](https://github.com/IoTLabs-pl/esphome-components).
 
-> **_NOTE:_**  Component with CC1101 support is here:
-[version 4](https://github.com/SzczepanLeon/esphome-components/tree/version_4)
-[version 3](https://github.com/SzczepanLeon/esphome-components/tree/version_3)
-[version 2](https://github.com/SzczepanLeon/esphome-components/tree/version_2)
-
-
 # TODO:
 - Prepare packages for ready made boards (like UltimateReader) with displays, leds etc.
 - Aggresive cleanup of wmbusmeters classes/structs
@@ -216,6 +210,25 @@ wmbus_radio:
 | `frequency` | no | `868.95MHz` | Operating frequency, 300–928 MHz |
 
 Tested on ESP32-C3 Super Mini + CC1101 v2.0 (E07-M1101D-SMA) blue board.
+
+
+Another tested device: NodeMCU-32S (ESP-32S) Development Board, ESP-WROOM-32, ESP32 Dev Board + CC1101:
+
+```yaml
+spi:
+  clk_pin: GPIO33
+  mosi_pin: GPIO32
+  miso_pin: GPIO19
+
+wmbus_radio:
+  radio_type: CC1101
+  cs_pin: GPIO23
+  irq_pin: GPIO22
+  frequency: 868.95MHz   # Optional. Range: 300–928 MHz. Default: 868.95 MHz
+```
+
+For full example see: [ESP32-NodeMcu-32s_CC1101.yaml](ESP32-NodeMcu-32s_CC1101.yaml)
+
 
 ### SX1276
 For SX1276 radio you need to configure SPI instance as usual in ESPHome and additionally specify reset pin and IRQ pin (as DIO1). Interrupts are triggered on non empty FIFO.
