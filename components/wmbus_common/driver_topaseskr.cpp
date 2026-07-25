@@ -162,3 +162,6 @@ namespace
 // telegram=|4E44B40553021969F1077A0C0040052F2F_01FD08800C13914544004C1393673500CC101300000000CC201393673500426CDF2C0B3B0100F002FD747912025AAE00C4016D3B17FF25CC011325584100|
 // {"_":"telegram","access_counter": 128,"battery_y": 12.947562,"current_flow_m3h": -0.001,"id": "69190253","media": "water","meter": "topaseskr","meter_month_period_end_datetime": "2023-05-31 23:59","meter_year_period_end_date": "2022-12-31","name": "Woter","reverse_volume_year_period_m3": 0,"temperature_c": 17.4,"timestamp": "1111-11-11T11:11:11Z","total_m3": 444.591,"volume_month_period_m3": 415.825,"volume_year_period_m3": 356.793}
 // |Woter;69190253;444.591;17.4;-0.001;356.793;0;2022-12-31;415.825;2023-05-31 23:59;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(topaseskr);

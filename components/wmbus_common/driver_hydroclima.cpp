@@ -252,3 +252,6 @@ namespace
 // telegram=|2D44B009233739743308780F9D1300023ED97AEC7BC5908A32C15D8A32C126915AC15AC126912691269187912689|
 // {"_":"telegram","media":"heat cost allocation","meter":"hydroclima","name":"HCAA","id":"74393723","timestamp":"1111-11-11T11:11:11Z"}
 // |HCAA;74393723;null;null;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(hydroclima);

@@ -225,3 +225,6 @@ namespace
 // telegram=|33446850341211119480A2_0F9F292D005024040011BD08380904000000070000000000000000000000000001000000000003140E|
 // {"_":"telegram","media":"heat cost allocator","meter":"fhkvdataiii","name":"Rooom","id":"11111234","current_hca":4,"current_date":"2021-02-05T02:00:00Z","previous_hca":45,"previous_date":"2020-12-31T02:00:00Z","temp_room_c":22.37,"temp_radiator_c":23.6,"timestamp":"1111-11-11T11:11:11Z"}
 // |Rooom;11111234;4;2021-02-05T02:00:00Z;45;2020-12-31T02:00:00Z;22.37;23.6;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(fhkvdataiii);

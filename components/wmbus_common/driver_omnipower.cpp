@@ -114,3 +114,6 @@ namespace
 // telegram=|27442D2C5768663230028D20E900C91C2011BA79138CCCFB_1A030000000000000300000000000000|
 // {"_":"telegram","media":"electricity","meter":"omnipower","name":"myomnipower","id":"32666857","total_energy_consumption_kwh":7.94,"total_energy_production_kwh":0,"current_power_consumption_kw":0.003,"current_power_production_kw":0,"timestamp":"1111-11-11T11:11:11Z"}
 // |myomnipower;32666857;7.94;0;0.003;0;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(omnipower);

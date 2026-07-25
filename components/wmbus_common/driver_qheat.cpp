@@ -226,3 +226,6 @@ namespace
 // telegram=|5344934411345678233778077998765431934423040dff5f350082fe00005f0107c005ffff68223500df2c80253200fe24251535005c03030000000000af03f508e91e1d2efc236e1fa218fe142f046d1911f225|
 // {"_":"telegram","media":"heat","meter":"qheat","name":"Qheatoo","id":"31547698","status":"OK","total_energy_consumption_kwh":35226.8,"last_month_date":"2023-04-30","last_month_energy_consumption_kwh":35152.5,"last_year_date":"2022-12-31","last_year_energy_consumption_kwh":32258,"device_date_time":"2023-05-18 17:25","timestamp":"1111-11-11T11:11:11Z"}
 // |Qheatoo;31547698;35226.8;2023-04-30;35152.5;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(qheat);

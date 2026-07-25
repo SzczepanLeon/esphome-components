@@ -223,3 +223,6 @@ namespace
 // telegram=5E44A51139259471410D7A720050052F2F_0C06742400008C1006000000000C13823522008C2013494400000B3B0000000C2B000000000A5A22030A5E91020AA61800004C0619130000CC100600000000426CDF252F2F2F2F2F2F2F2F2F2F2F
 // {"_":"telegram","cooling_at_set_date_kwh": 0,"energy_at_set_date_kwh": 1319,"flow_temperature_c": 32.2,"id": "71942539","media": "heat/cooling load","meter": "sharky774","name": "Coolo","operating_time_in_error_h": 0,"power_kw": 0,"return_temperature_c": 29.1,"set_date": "2022-05-31","timestamp": "1111-11-11T11:11:11Z","total_cooling_consumption_kwh": 0,"total_cooling_volume_m3": 4.449,"total_energy_consumption_kwh": 2474,"total_volume_m3": 223.582,"volume_flow_m3h": 0}
 // |Coolo;71942539;2474;1319;2022-05-31;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(sharky774);

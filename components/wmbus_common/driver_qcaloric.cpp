@@ -273,3 +273,6 @@ namespace
 // telegram=|49449344825253303608780DFF5F350082430035E3DFC4EAC97A58B8610713D93549E2601258D617D267E7515C764B002A88CD341A9F9DF3C6034DE5B6D1FAB3619CBA9F046D250DDA2C|
 // {"_":"telegram","device_date_time": "2022-12-26 13:37","id": "30535282","media": "heat cost allocation","meter": "qcaloric","name": "HCA55","status": "OK","timestamp": "1111-11-11T11:11:11Z"}
 // |HCA55;30535282;null;null;null;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(qcaloric);

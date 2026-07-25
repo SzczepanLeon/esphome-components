@@ -194,3 +194,6 @@ namespace
 // telegram=|29441486333737370408B60EFFFFF1460186EC1B934EE91BA57BA0A1000059009C250100322DE413B415|
 // {"_":"telegram","media":"heat cost allocation","meter":"apatoreitn","name":"HCA3","id":"37373733","current_hca":1,"previous_hca":89,"current_date":"2022-09-18T02:00:00Z","season_start_date":"2016-05-01T02:00:00Z","esb_date":"2018-12-28T02:00:00Z","temp_room_avg_c":21.703125,"temp_room_prev_avg_c":19.890625,"timestamp":"1111-11-11T11:11:11Z"}
 // |HCA3;37373733;1;89;2022-09-18T02:00:00Z;2016-05-01T02:00:00Z;2018-12-28T02:00:00Z;21.703125;19.890625;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(apatoreitn);

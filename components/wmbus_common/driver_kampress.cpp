@@ -128,3 +128,6 @@ namespace
 // telegram=|27442D2C1703007701188D289554F295224ED579DE73188A_650066006600E80EA43A6B97A3BA0800|
 // {"media":"pressure","meter":"kampress","name":"Pressing","id":"77000317","status":"LOW","pressure_bar":1.02,"max_pressure_bar":1.02,"min_pressure_bar":1.01,"alfa_counter":0.001252,"beta_counter":-0.001248,"timestamp":"1111-11-11T11:11:11Z"}
 // |Pressing;77000317;LOW;1.02;1.02;1.01;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(kampress);
