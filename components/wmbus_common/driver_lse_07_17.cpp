@@ -215,6 +215,4 @@ namespace
 // |Water2;09993623;323.323;277.651;2022-12-31;OK;2127-15-31;2023-11-13 10:19;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(lse_07_17);

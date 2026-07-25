@@ -280,6 +280,4 @@ namespace
 // |Vadden;44556677;20.015;null;0.317;2;3;OK;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(multical21);

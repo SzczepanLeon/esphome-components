@@ -135,6 +135,4 @@ namespace
 // |T2;00060041;-15.73;44;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(lansenth);

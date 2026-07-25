@@ -132,6 +132,4 @@ namespace
 // |HCA2;04998541;2003-01-31;321;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(lse_08);

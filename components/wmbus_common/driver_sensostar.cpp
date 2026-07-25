@@ -227,6 +227,4 @@ namespace
 //WMZ;02752560;5699;389.136000;OK;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(sensostar);

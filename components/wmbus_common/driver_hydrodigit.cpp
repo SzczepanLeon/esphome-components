@@ -432,6 +432,4 @@ namespace {
 // {"backflow_m3":0,"contents":"BATTERY_VOLTAGE FRAUD_DATE BACKFLOW","fraud_date":"2004-00-00","fraud_type":"no type info","id":"03686770","media":"water","meter":"hydrodigit","meter_datetime":"2026-03-27 14:11","name":"HydroFrame0F","timestamp":"1111-11-11T11:11:11Z","total_m3":0.051,"voltage_v":3.7}
 // |HydroFrame0F;03686770;0.051;2026-03-27 14:11;1111-11-11 11:11.11
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(hydrodigit);

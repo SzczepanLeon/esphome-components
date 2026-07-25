@@ -85,6 +85,4 @@ namespace
 // |Elen3;55995599;41.1718;2.126;0.1863;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(ehzp);

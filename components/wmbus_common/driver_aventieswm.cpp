@@ -129,6 +129,4 @@ namespace
 // |Vatten;61070072;466.472;ERROR_FLAGS_1100 HF MEASUREMENT;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(aventieswm);

@@ -88,6 +88,4 @@ namespace
 // |Vattur;0014a807;7179;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(apator172);

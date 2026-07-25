@@ -89,6 +89,4 @@ namespace
 // |Vattenn;27604781;37.299;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(weh_07);

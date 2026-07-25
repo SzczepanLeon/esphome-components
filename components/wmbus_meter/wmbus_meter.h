@@ -32,8 +32,7 @@ protected:
   time::RealTimeClock *rtc;
   wmbus_radio::Radio *radio;
 
-  // Kept separately so the component can still report what it was *supposed*
-  // to be when the meter could not be created.
+  // Retained so the component can identify itself when meter is null.
   std::string meter_id_;
   std::string driver_name_;
 

@@ -164,6 +164,4 @@ namespace
 // |Woter;69190253;444.591;17.4;-0.001;356.793;0;2022-12-31;415.825;2023-05-31 23:59;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(topaseskr);

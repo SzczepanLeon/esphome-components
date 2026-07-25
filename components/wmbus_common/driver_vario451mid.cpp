@@ -104,6 +104,4 @@ namespace
 // |Heato;94430412;18377;0;17960;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(vario451mid);

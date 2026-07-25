@@ -318,6 +318,4 @@ namespace
 // |IzarWater6;48500375;null;null;521.602;519.147;2021-11-15;9;no_alarm;leakage;8;null;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(izar);

@@ -106,6 +106,4 @@ namespace
 // |Water;95969798;3.122;2.337;OK;0;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(ultrimis);

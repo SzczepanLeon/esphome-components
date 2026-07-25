@@ -49,12 +49,8 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID], sorted(_registered_drivers))
     await cg.register_component(var, config)
 
-    # Each driver registers itself from a file-scope static initializer and
-    # nothing references its translation unit. ESPHome archives the sources
-    # into a static library for native ESP-IDF builds, so the linker drops
-    # those archive members and the drivers are never registered - the build
-    # succeeds and every meter ends up with a null driver on the device.
-    # Referencing one symbol per driver from main.cpp keeps the object files.
+    # Reference each selected driver's KEEP_DRIVER symbol from main.cpp so the
+    # linker keeps its object file; see KEEP_DRIVER in meters.h.
     drivers = sorted(_registered_drivers)
     if not drivers:
         return

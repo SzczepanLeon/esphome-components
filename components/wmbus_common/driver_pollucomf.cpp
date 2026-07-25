@@ -190,6 +190,4 @@ namespace
 // |Heat;14175439;OK;0;0.049;0;0.001;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(pollucomf);

@@ -221,6 +221,4 @@ void Driver::processContent(Telegram *t) {
 // |QWddd;13334995;39.729;30.358;2023-12-31;OK;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(qwater);

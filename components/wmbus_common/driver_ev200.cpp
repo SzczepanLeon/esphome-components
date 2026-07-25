@@ -67,6 +67,4 @@ namespace
 // |Voda;99993030;49.5849;45.7555;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(ev200);

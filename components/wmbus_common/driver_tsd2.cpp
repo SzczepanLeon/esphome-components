@@ -96,6 +96,4 @@ namespace
 // |Smokey;91633569;SMOKE;2019-12-31T02:00:00Z;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(tsd2);

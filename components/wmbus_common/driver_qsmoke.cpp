@@ -151,6 +151,4 @@ namespace
 // |QSmokep;48128850;OK;2127-15-31;0;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(qsmoke);

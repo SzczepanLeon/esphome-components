@@ -114,6 +114,4 @@ namespace
 // |Wasser;74737271;188.56;2020-03-31 10:04:59;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(rfmtx1);

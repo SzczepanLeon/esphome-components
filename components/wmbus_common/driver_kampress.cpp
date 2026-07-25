@@ -130,6 +130,4 @@ namespace
 // |Pressing;77000317;LOW;1.02;1.02;1.01;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(kampress);

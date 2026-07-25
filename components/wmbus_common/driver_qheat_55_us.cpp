@@ -165,6 +165,4 @@ namespace
 // {"_":"telegram","media":"heat","meter":"qheat_55_us","name":"Heat","id":"70639638","device_date_time":"2023-01-02 15:42","total_energy_consumption_kwh":60800,"key_date":"2022-12-31 23:59","key_date_kwh":60691,"prev_month":"2022-12-31 23:59","prev_1_month_kwh":60691,"prev_2_month_kwh":57022,"prev_3_month_kwh":54367,"prev_4_month_kwh":52512,"prev_5_month_kwh":51812,"prev_6_month_kwh":51382,"prev_7_month_kwh":50936,"prev_8_month_kwh":50508,"prev_9_month_kwh":49660,"prev_10_month_kwh":47359,"prev_11_month_kwh":44100,"prev_12_month_kwh":40579,"prev_13_month_kwh":36393,"actuality_duration_h":0.001111,"time_without_measurement_h":0,"timestamp":"1111-11-11T11:11:11Z"}
 // |Heat;70639638;60800;60691;1111-11-11 11:11.11
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(qheat_55_us);

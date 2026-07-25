@@ -164,6 +164,4 @@ namespace
 // {"_":"telegram","media":"heat/cooling load","meter":"hydrocalm3","name":"HeatCool","id":"71727374","status": "SABOTAGE_ENCLOSURE","total_heating_kwh":4460.833333,"total_cooling_kwh":0,"device_datetime":"2021-09-25 22:29","total_heating_m3":479.967,"total_cooling_m3":0.059,"c1_volume_m3":0,"c2_volume_m3":0,"supply_temperature_c":21.8,"return_temperature_c":21.1,"timestamp":"1111-11-11T11:11:11Z"}
 // |HeatCool;71727374;4460.833333;0;1111-11-11 11:11.11
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(hydrocalm3);

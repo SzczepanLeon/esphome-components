@@ -25,15 +25,8 @@ void Meter::set_meter_params(std::string id, std::string driver,
 
 void Meter::setup() {
   if (this->meter == nullptr) {
-    ESP_LOGE(TAG,
-             "Meter 0x%s was not created - driver '%s' is not available in this "
-             "firmware.",
+    ESP_LOGE(TAG, "Meter 0x%s was not created - no driver '%s'",
              this->meter_id_.c_str(), this->driver_name_.c_str());
-    ESP_LOGE(TAG,
-             "Add it explicitly to your YAML and recompile:\n"
-             "  wmbus_common:\n"
-             "    drivers: [%s]",
-             this->driver_name_.c_str());
     this->mark_failed();
   }
 }
@@ -43,8 +36,7 @@ void Meter::set_radio(wmbus_radio::Radio *radio) {
       [this](wmbus_radio::Frame *frame) { return this->handle_frame(frame); });
 }
 void Meter::dump_config() {
-  // Note: ESPHome still calls dump_config() on failed components, so this must
-  // survive this->meter being null.
+  // Failed components still get dumped, so this has to survive a null meter.
   ESP_LOGCONFIG(TAG, "wM-Bus Meter:");
 
   if (this->meter == nullptr) {
@@ -88,8 +80,7 @@ std::string Meter::get_key() {
 }
 
 void Meter::handle_frame(wmbus_radio::Frame *frame) {
-  // Called from the radio's frame handler, not from loop() - a failed
-  // component does not get skipped here.
+  // Runs from the radio callback, not loop(), so mark_failed() does not stop it.
   if (this->meter == nullptr)
     return;
 

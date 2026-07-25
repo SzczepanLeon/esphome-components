@@ -122,6 +122,4 @@ namespace
 // |MyEl;01135263;212.637;null;null;null;null;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(ebzwmbe);

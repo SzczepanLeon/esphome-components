@@ -152,6 +152,4 @@ Driver::Driver(MeterInfo &mi, DriverInfo &di)
 // |GasMeter;00043094;917;911.32;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(unismart);

@@ -224,6 +224,4 @@ namespace
 // |Wasser;21031894;34.134;OK;25.296;2023-12-31;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(evo868);

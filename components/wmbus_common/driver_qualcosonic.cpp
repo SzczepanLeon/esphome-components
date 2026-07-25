@@ -153,6 +153,4 @@ namespace
 // |qualcoe4long;98499485;OK;1845;0;0.362;2023-01-31 23:59;1843.611111;0;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(qualcosonic);

@@ -267,6 +267,4 @@ namespace
 // |Elen2;02020202;0.1;null;0;0;0.1;null;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(em24);

@@ -104,6 +104,4 @@ namespace
 // |aerius_gas;99657098;6842.784;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(aerius);

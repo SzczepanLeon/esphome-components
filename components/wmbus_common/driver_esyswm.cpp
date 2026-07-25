@@ -160,6 +160,4 @@ namespace
 // |Elen2;77997799;1643.4165;0.43832;0.1876;1643.2;0.21;0.0281;0.02565;0.38456;1ESY9887654321;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(esyswm);

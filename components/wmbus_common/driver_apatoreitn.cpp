@@ -196,6 +196,4 @@ namespace
 // |HCA3;37373733;1;89;2022-09-18T02:00:00Z;2016-05-01T02:00:00Z;2018-12-28T02:00:00Z;21.703125;19.890625;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(apatoreitn);

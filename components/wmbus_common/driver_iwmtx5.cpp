@@ -59,6 +59,4 @@ namespace
 // |WarmWater2;23329344;OK;2.007;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(iwmtx5);

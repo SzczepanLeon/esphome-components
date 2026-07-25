@@ -344,6 +344,4 @@ namespace
 // |Smokey;01097274;TAMPER_WHILE_REMOVED;2022-05-24;1;1111-11-11 11:11.11
 
 
-// Keep this translation unit when the sources are archived into a static
-// library - see KEEP_DRIVER in meters.h.
 KEEP_DRIVER(ei6500);
