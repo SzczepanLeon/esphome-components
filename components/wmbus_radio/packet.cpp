@@ -20,12 +20,15 @@ Packet::Packet() { this->data_.reserve(WMBUS_PREAMBLE_SIZE); }
 
 // Determine the link mode based on the first byte of the data
 LinkMode Packet::link_mode() {
-  if (this->link_mode_ == LinkMode::UNKNOWN)
-    if (this->data_.size())
-      if (this->data_[0] == WMBUS_MODE_C_PREAMBLE)
+  if (this->link_mode_ == LinkMode::UNKNOWN) {
+    if (this->data_.size()) {
+      if (this->data_[0] == WMBUS_MODE_C_PREAMBLE) {
         this->link_mode_ = LinkMode::C1;
-      else
+      } else {
         this->link_mode_ = LinkMode::T1;
+      }
+    }
+  }
 
   return this->link_mode_;
 }
