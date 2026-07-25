@@ -70,7 +70,7 @@ bool RadioTransceiver::wait_busy(uint32_t timeout_ms) {
   uint32_t start = millis();
   while (this->busy_pin_->digital_read()) {
     if (millis() - start > timeout_ms) {
-      ESP_LOGE(TAG, "BUSY pin timeout after %u ms", timeout_ms);
+      ESP_LOGE(TAG, "BUSY pin timeout after %lu ms", timeout_ms);
       this->mark_failed();
       return false;
     }

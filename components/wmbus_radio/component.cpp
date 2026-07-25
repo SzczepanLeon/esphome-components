@@ -7,7 +7,7 @@
   {                                                                            \
     auto result = (expr);                                                      \
     if (!!result != expected) {                                                \
-      ESP_LOGE(TAG, "Assertion failed: %s -> %d", #expr, result);              \
+      ESP_LOGE(TAG, "Assertion failed: %s -> %d", #expr, (int)(uintptr_t)result);              \
       before_exit;                                                             \
       return;                                                                  \
     }                                                                          \

@@ -371,13 +371,13 @@ void logTelegram(std::vector<uchar> &original, std::vector<uchar> &parsed,
   std::string header = parsed_hex.substr(0, header_size * 2);
   std::string content = parsed_hex.substr(header_size * 2);
   if (suffix_size == 0) {
-    notice("telegram=|%s_%s|+%ld\n", header.c_str(), content.c_str(), diff);
+    notice("telegram=|%s_%s|+%lld\n", header.c_str(), content.c_str(), (long long)diff);
   } else {
     assert((suffix_size * 2) < (int)content.size());
     std::string content2 = content.substr(0, content.size() - suffix_size * 2);
     std::string suffix = content.substr(content.size() - suffix_size * 2);
-    notice("telegram=|%s_%s_%s|+%ld\n", header.c_str(), content2.c_str(),
-           suffix.c_str(), diff);
+    notice("telegram=|%s_%s_%s|+%lld\n", header.c_str(), content2.c_str(),
+           suffix.c_str(), (long long)diff);
   }
 }
 
@@ -407,7 +407,7 @@ std::string eatTo(std::vector<uchar> &v, std::vector<uchar>::iterator &i, int c,
 void padWithZeroesTo(std::vector<uchar> *content, size_t len,
                      std::vector<uchar> *full_content) {
   if (content->size() < len) {
-    warning("Padded with zeroes.", (int)len);
+    warning("Padded with zeroes to %d bytes.", (int)len);
     size_t old_size = content->size();
     content->resize(len);
     for (size_t i = old_size; i < len; ++i) {
