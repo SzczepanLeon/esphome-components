@@ -120,3 +120,8 @@ namespace
 // telegram=|544409076391820510077ABF100000046D2A0DC62C0420E80F430104130000000004933B0000000004933C00000000023B00000259F0D8446D0000C12C44130000000044933B0000000044933C0000000001FD7461|
 // {"_":"telegram","backward_at_set_date_m3": 0,"battery_pct": 97,"consumption_at_set_date_m3": 0,"flow_temperature_c": -100,"forward_at_set_date_m3": 0,"id": "05829163","media": "water","meter": "q400","meter_datetime": "2022-12-06 13:42","name": "M","on_time_h": 5881.166667,"set_datetime": "2022-12-01 00:00","status": "TEMPORARY_ERROR","timestamp": "1111-11-11T11:11:11Z","total_backward_m3": 0,"total_forward_m3": 0,"total_m3": 0,"volume_flow_m3h": 0}
 // |M;05829163;0;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(q400);

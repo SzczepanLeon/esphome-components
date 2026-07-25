@@ -97,3 +97,8 @@ namespace
 // telegram=|2E44333004020100031A7ADE0020052F2F_02FD971D040004FD086502000004FD3A010000002F2F2F2F2F2F2F2F2F2F|
 // {"_":"telegram","media":"smoke detector","meter":"lansensm","name":"SMOKEA","id":"00010204","status":"SMOKE","async_msg_id_counter":613,"minutes_since_last_manual_test_counter":1,"timestamp":"1111-11-11T11:11:11Z"}
 // |SMOKEA;00010204;SMOKE;1;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(lansensm);

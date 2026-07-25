@@ -102,3 +102,8 @@ namespace
 // telegram=|2F446850200141029562A2_06702901006017030004000300000000000000000000000000000000000000000000000000|
 // {"_":"telegram","media":"warm water","meter":"mkradio4","name":"Duschagain","id":"02410120","total_m3":0.4,"target_m3":0.1,"timestamp":"1111-11-11T11:11:11Z"}
 // |Duschagain;02410120;0.4;0.1;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(mkradio4);

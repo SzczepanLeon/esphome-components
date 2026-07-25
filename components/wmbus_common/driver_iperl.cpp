@@ -73,3 +73,8 @@ namespace
 // telegram=|1844AE4C4455223368077A55000000_041389E20100023B0000|
 // {"media":"water","meter":"iperl","name":"WaterWater","id":"33225544","total_m3":123.529,"max_flow_m3h":0,"timestamp":"1111-11-11T11:11:11Z"}
 // |WaterWater;33225544;123.529;0;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(iperl);

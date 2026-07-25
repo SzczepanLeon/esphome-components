@@ -340,3 +340,8 @@ namespace
 // telegram=|5E4401061202960405077A790050852F2F0F78A599983B0200435000805771165771160103000010653A00007919321E0000620000006200000000000000000000000000000000000000000000000000000000000000A0422C6004FFFF2FBF|
 // {"_": "telegram","id": "04960212","media": "water","meter": "apator162","name": "has79","timestamp": "1111-11-11T11:11:11Z","total_m3": 14.949}
 // |has79;04960212;14.949;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(apator162);

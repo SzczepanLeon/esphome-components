@@ -40,3 +40,8 @@ std::shared_ptr<Meter> createAuto(MeterInfo &mi)
     di.setName("auto");
     return std::shared_ptr<Meter>(new MeterAuto(mi, di));
 }
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(auto);

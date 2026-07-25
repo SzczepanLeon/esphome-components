@@ -151,3 +151,8 @@ namespace
 // telegram=|9A440907859449980C0D7A8C000000_046D3201E122346D0000010134FD17000000000420BB776802042490776802048E3BF2190000048E3C00000000041329860100042B6A010000043B0B0000000259F615025D1E0B0261D80A0C788594499884086D3B17FF21820859BC1382085D720B840824915D680284088E3BED19000084088E3C00000000840813028601008408BE5800000000027F00AD|
 // {"_":"telegram","media":"heat/cooling load","meter":"qualcosonic","name":"qualcoe4long","id":"98499485","fabrication_no":"98499485","operating_time_h":11222.44,"on_time_h":11222.451944,"meter_datetime":"2023-02-01 01:50","meter_datetime_at_error":"2000-01-01 00:00","total_m3":99.881,"flow_temperature_c":56.22,"return_temperature_c":28.46,"flow_return_temperature_difference_c":27.76,"volume_flow_m3h":0.011,"status":"OK","total_heat_energy_kwh":1845,"total_cooling_energy_kwh":0,"power_kw":0.362,"target_datetime":"2023-01-31 23:59","target_heat_energy_kwh":1843.611111,"target_cooling_energy_kwh":0,"timestamp":"1111-11-11T11:11:11Z"}
 // |qualcoe4long;98499485;OK;1845;0;0.362;2023-01-31 23:59;1843.611111;0;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(qualcosonic);

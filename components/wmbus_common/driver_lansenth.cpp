@@ -133,3 +133,8 @@ namespace
 // telegram=|2E44333041000600091B7AA70020252F2F_0265DBF94265FC04820165610901FB1B2C41FB1B238101FB1B290223BB00|+0
 // {"_":"telegram","media":"room sensor","meter":"lansenth","name":"T2","id":"00060041","status":"OK","current_temperature_c":-15.73,"current_relative_humidity_rh":44,"average_temperature_1h_c":12.76,"average_relative_humidity_1h_rh":35,"average_temperature_24h_c":24.01,"average_relative_humidity_24h_rh":41,"on_time_h":4488,"timestamp":"1111-11-11T11:11:11Z"}
 // |T2;00060041;-15.73;44;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(lansenth);

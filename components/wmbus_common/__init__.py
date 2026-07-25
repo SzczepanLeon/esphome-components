@@ -40,6 +40,31 @@ def FILTER_SOURCE_FILES():
     return {f"driver_{name}.cpp" for name in AVAILABLE_DRIVERS - _registered_drivers}
 
 
+def _keep_symbol(driver):
+    """Symbol defined by KEEP_DRIVER() in driver_<name>.cpp."""
+    return f"wmbus_driver_{driver.replace('-', '_')}_linked"
+
+
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID], sorted(_registered_drivers))
     await cg.register_component(var, config)
+
+    # Each driver registers itself from a file-scope static initializer and
+    # nothing references its translation unit. ESPHome archives the sources
+    # into a static library for native ESP-IDF builds, so the linker drops
+    # those archive members and the drivers are never registered - the build
+    # succeeds and every meter ends up with a null driver on the device.
+    # Referencing one symbol per driver from main.cpp keeps the object files.
+    drivers = sorted(_registered_drivers)
+    if not drivers:
+        return
+
+    for driver in drivers:
+        cg.add_global(cg.RawStatement(f"extern bool {_keep_symbol(driver)};"))
+
+    refs = ", ".join(f"&{_keep_symbol(driver)}" for driver in drivers)
+    cg.add_global(
+        cg.RawStatement(
+            f"static bool *const wmbus_kept_drivers[] __attribute__((used)) = {{{refs}}};"
+        )
+    )

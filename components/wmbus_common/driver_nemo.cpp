@@ -457,3 +457,8 @@ namespace
 // telegram=|689E9E6808657209760600A5251D02020000008540ABFF0100360B478540ABFF02002CFA468540ABFF030074ED46858040ABFF0100C0E244858040ABFF0200405A45858040ABFF030060364505FDBAFF0178BE7F3F05FDBAFF0240357E3F05FDBAFF0353B87E3F05FDC8FF0400907A4505FDC8FF0500707B4505FDC8FF0600807B4505FDD9FF0400502A4705FF5A0000FA4302FD3AC80002FD3A0A000F00000000008B16|
 // {"_":"telegram","media":"electricity", "meter":"nemo", "name":"Elen", "id":"00067609", "total_active_positive_3phase_kwh":6735835, "active_positive_3phase_kw":97.83, "total_reactive_positive_3phase_kwh":1254529, "reactive_positive_3phase_kw":8.254, "total_active_partial_3phase_kwh":0, "active_negative_3phase_kw":0, "total_reactive_partial_3phase_kwh":89, "reactive_negative_3phase_kw":0, "power_factor":-200, "status":"OK", "current_at_phase_1_a":155.6, "current_at_phase_2_a":140, "current_at_phase_3_a":132.8, "voltage_at_phase_1_v":231.6, "voltage_at_phase_2_v":232.4, "voltage_at_phase_3_v":232.5, "active_power_at_phase_1_kw":35.638, "active_power_at_phase_2_kw":32.022, "active_power_at_phase_3_kw":30.394, "reactive_power_at_phase_1_kw":1.814, "reactive_power_at_phase_2_kw":3.492, "reactive_power_at_phase_3_kw":2.918, "at_phase_1_power_factor":-0.999, "at_phase_2_power_factor":-0.993, "at_phase_3_power_factor":-0.995, "voltage_l1_l2_v":400.9, "voltage_l2_l3_v":402.3, "voltage_l3_l1_v":402.4, "current_in_neutral_a":43.6, "frequency_hz":50, "timestamp":"1111-11-11T11:11:11Z"}
 // |Elen;00067609;OK;6735835;97.83;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(nemo);

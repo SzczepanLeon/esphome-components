@@ -342,3 +342,8 @@ namespace
 // telegram=|58442515747209010C1A7A940000000BFD0F070101046D0007D82502FD17000082206CD825426CD0238440FF2C420F11008250FD61010082506CD8258260FD6101008360FD3101000082606CD8258270FD61020082706CD825|
 // {"_":"telegram","media":"smoke detector","meter":"ei6500","name":"Smokey","id":"01097274","status":"TAMPER_WHILE_REMOVED","last_alarm_date":"2022-05-24","alarm_counter":1,"software_version":"010107","message_datetime":"2022-05-24 07:00","duration_removed_h":0.016667,"last_remove_date":"2022-05-24","removed_counter":1,"test_button_last_date":"2022-05-24","test_button_counter":2,"installation_date":"2022-05-24","last_sound_check_date":"2022-03-16","dust_level":"DUST_2","battery_level":"3.00V","obstacle_distance":"","timestamp":"1111-11-11T11:11:11Z"}
 // |Smokey;01097274;TAMPER_WHILE_REMOVED;2022-05-24;1;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(ei6500);

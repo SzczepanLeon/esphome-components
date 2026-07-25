@@ -124,3 +124,8 @@ namespace
 // telegram=|68383868080072840200102941011B06000000_02653F0A4265000A820165CA0902FB1A4F0142FB1A53018201FB1A5E010C788402001002FD0F21000F1916|
 // {"_":"telegram","media":"room sensor","meter":"piigth","name":"Tempo","id":"10000284","fabrication_no":"10000284","software_version":"0021","status":"OK","temperature_c":26.23,"average_temperature_1h_c":25.6,"average_temperature_24h_c":25.06,"relative_humidity_rh":33.5,"relative_humidity_1h_rh":33.9,"relative_humidity_24h_rh":35,"timestamp":"1111-11-11T11:11:11Z"}
 // |Tempo;10000284;OK;26.23;33.5;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(piigth);

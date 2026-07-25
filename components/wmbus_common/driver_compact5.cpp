@@ -123,3 +123,8 @@ namespace
 // telegram=|37446850792055673943A2_109F2F13C500608F1D00008066E8A69B26988D335F6411450C564C5145145CA0F1DA35B9DD37A1936BBF3D31D8|
 // {"_": "telegram","current_kwh": 7567,"id": "67552079","media": "heat","meter": "compact5","name": "vario","previous_kwh": 50451,"timestamp": "1111-11-11T11:11:11Z","total_kwh": 58018}
 // |vario;67552079;58018;7567;50451;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(compact5);

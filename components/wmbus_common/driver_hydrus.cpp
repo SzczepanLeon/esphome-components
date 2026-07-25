@@ -195,3 +195,8 @@ namespace
 // telegram=|6344A5112018646470078C00D7900F002C256AB59B00F0F13032019092DE7A6A004007102F2F0C13896729004C1323462400CC101300000000CC201323462400426CDF2C0B3B0200F002FD742F0D025AC100C4016D3B17FE29CC01132841290001FD089F|
 // {"_":"telegram","at_date": "2022-12-31","target_datetime": "2023-09-30 23:59","flow_m3h": -0.002,"flow_temperature_c": 19.3,"id": "64641820","media": "water","meter": "hydrus","name": "HydrusFoo","remaining_battery_life_y": 9.240436,"status": "OK","timestamp": "1111-11-11T11:11:11Z","total_at_date_m3":244.623,"target_m3": 294.128,"total_m3": 296.789,"total_tariff1_at_date_m3": 0,"total_tariff2_at_date_m3": 244.623}
 // |HydrusFoo;64641820;296.789;244.623;OK;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(hydrus);

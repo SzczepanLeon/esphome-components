@@ -40,3 +40,8 @@ std::shared_ptr<Meter> createUnknown(MeterInfo &mi)
     di.setName("unknown");
     return std::shared_ptr<Meter>(new MeterUnknown(mi, di));
 }
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(unknown);

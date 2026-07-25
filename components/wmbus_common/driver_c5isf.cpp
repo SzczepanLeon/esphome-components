@@ -302,3 +302,8 @@ namespace
 // telegram=|5E44496A4420003288047AFC0050052F2F_0406D00E00000413B28A05008404060000000082046CC121043B00000000042D000000000259E719025D051402FD17000084800106C00C00008280016CC125948001AE25090000002F2F2F2F2F2F|
 // {"_":"telegram","media":"heat","meter":"c5isf","name":"Heat","id":"32002044","total_energy_consumption_kwh":3792,"total_volume_m3":363.186,"status":"OK","prev_1_month":"2022-05-01","prev_1_month_kwh":3264,"due_energy_consumption_kwh":0,"due_date":"2022-01-01","volume_flow_m3h":0,"power_kw":0,"total_energy_consumption_last_month_kwh":3264,"max_power_last_month_kw":9,"flow_temperature_c":66.31,"return_temperature_c":51.25,"timestamp":"1111-11-11T11:11:11Z"}
 // |Heat;32002044;3792;363.186;OK;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(c5isf);

@@ -120,3 +120,8 @@ namespace
 // telegram=|4B445A146450000002378C20F3900F002C25F38B00006CBB07CEB215901172635213015A140102F3002007102F2F#04039D3E03000429E82201000DFD110E333632353331313031305A424531|
 // {"_":"telegram","media":"electricity","meter":"ebzwmbe","name":"MyEl","id":"01135263","total_energy_consumption_kwh":212.637,"customer":"1EBZ0101135263","current_power_consumption_kw":null,"timestamp":"1111-11-11T11:11:11Z"}
 // |MyEl;01135263;212.637;null;null;null;null;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(ebzwmbe);

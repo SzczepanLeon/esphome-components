@@ -196,3 +196,8 @@ namespace
 // telegram=|54443330465903000B327A2B0400402F2F04FD3A946709008240FD3A600002FD0F9500818040FD3A0184C040FD3A8838000042FD3A28008201FD3A8C05C101FD3A088202FD3A3804066D35122EFB2B0002FD46D00C|
 // {"_":"telegram","media":"reserved","meter":"lansenrp","name":"REPEAT","id":"00035946","battery_v":3.28,"listen_timer_value_counter":40,"pause_timer_value_counter":1420,"seconds_to_mode_change_counter":14472,"start_time_value_counter":1080,"total_routed_messages_counter":616340,"used_router_slots_counter":96,"is_repeater_listening":"YES","meter_datetime":"2023-11-27 14:18:53","repeater_listening_on_weekdays":"WE","software_version":"0095","status":"POWER_LOW","timestamp":"1111-11-11T11:11:11Z"}
 // |REPEAT;00035946;POWER_LOW;616340;96;YES;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(lansenrp);

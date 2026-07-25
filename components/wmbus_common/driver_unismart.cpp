@@ -150,3 +150,8 @@ Driver::Driver(MeterInfo &mi, DriverInfo &di)
 // 4GGU","supplier_info":"00","parameter_set":"02","meter_timestamp":"2021-09-15
 // 13:18:30","timestamp":"1111-11-11T11:11:11Z"}
 // |GasMeter;00043094;917;911.32;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(unismart);

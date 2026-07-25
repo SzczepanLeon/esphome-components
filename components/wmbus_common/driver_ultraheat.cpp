@@ -136,3 +136,8 @@ namespace
 // telegram=|3b44a7320556637104047afa2000202f2f0c06774202000c14399956000b2d0200f00b3b3018000a5a51030a5e520302fd170000066d0c080af42500|
 // {"_":"telegram","flow_c": 35.1,"flow_m3h": 1.83,"heat_kwh": 24277,"id": "71635605","media": "heat","meter": "ultraheat","meter_datetime": "2023-05-20 10:08:12","name": "MyUltra2","power_kw": -0.2,"return_c": 35.2,"status": "UNKNOWN_20","timestamp": "1111-11-11T11:11:11Z","volume_m3": 5699.39}
 // |MyUltra2;71635605;24277;1111-11-11 11:11.11
+
+
+// Keep this translation unit when the sources are archived into a static
+// library - see KEEP_DRIVER in meters.h.
+KEEP_DRIVER(ultraheat);
