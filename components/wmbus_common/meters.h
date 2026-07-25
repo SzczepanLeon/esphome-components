@@ -225,6 +225,15 @@ public:
 };
 
 bool registerDriver(std::function<void(DriverInfo &di)> setup);
+
+// A driver registers itself from a file-scope static initializer, and nothing
+// references any symbol inside a driver_*.cpp. Once the sources are archived
+// into a static library - as they are for native ESP-IDF builds - the linker
+// has no reason to pull those members in, so no driver ever registers and the
+// build still succeeds. KEEP_DRIVER exports a symbol that codegen references
+// from main.cpp, keeping the object file and its registration.
+#define KEEP_DRIVER(name) bool wmbus_driver_##name##_linked = true
+
 // Lookup (and load if necessary) driver from memory or disk.
 DriverInfo *lookupDriver(std::string name);
 bool lookupDriverInfo(const std::string &driver, DriverInfo *di = NULL);

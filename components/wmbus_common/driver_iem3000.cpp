@@ -1659,3 +1659,6 @@ namespace
 
     }
 }
+
+
+KEEP_DRIVER(iem3000);

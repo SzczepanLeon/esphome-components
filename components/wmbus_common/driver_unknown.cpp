@@ -40,3 +40,6 @@ std::shared_ptr<Meter> createUnknown(MeterInfo &mi)
     di.setName("unknown");
     return std::shared_ptr<Meter>(new MeterUnknown(mi, di));
 }
+
+
+KEEP_DRIVER(unknown);

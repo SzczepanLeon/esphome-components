@@ -81,3 +81,6 @@ namespace
     }
 
 }
+
+
+KEEP_DRIVER(wme5);

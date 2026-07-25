@@ -86,3 +86,6 @@ namespace
 // telegram=|1C440106813591041407A0B000266A705474DDB80D9A0EB9AE2EF29D96|
 // {"_":"telegram","media":"water","meter":"apatorna1","name":"ApNa1","id":"04913581","total_m3":345.312,"timestamp":"1111-11-11T11:11:11Z"}
 // |ApNa1;04913581;345.312;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(apatorna1);

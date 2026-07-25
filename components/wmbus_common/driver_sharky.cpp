@@ -209,3 +209,6 @@ namespace
 // telegram=|5e44a5116969696940047aBe0050052f2f0c06975100008c1006000000000c13849345000c2B000000000B3B0000000a5a06020a5e08020a6202f00B26110201cc020623500000cc021329554400c2026cdf2c2f2f2f2f2f2f2f2f2f2f2f2f|
 // {"_":"telegram","flow_temperature_c": 20.6,"id": "69696969","media": "heat","meter": "sharky","name": "Heato","operating_time_h": 10211,"power_kw": 0,"return_temperature_c": 20.8,"target_date": "2022-12-31","target_energy_consumption_kwh": 5023,"target_volume_m3": 445.529,"temperature_difference_c": -0.2,"timestamp": "1111-11-11T11:11:11Z","total_energy_consumption_kwh": 5197,"total_energy_consumption_tariff1_kwh": 0,"total_volume_m3": 459.384, "volume_flow_m3h": 0}
 // |Heato;69696969;5197;0;459.384;null;0;0;20.6;20.8;-0.2;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(sharky);

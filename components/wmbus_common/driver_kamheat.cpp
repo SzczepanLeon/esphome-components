@@ -382,3 +382,6 @@ namespace
 // {"_":"telegram","media":"heat/cooling load","meter":"kamheat","name":"Kamstrup_MC303_Heat_AND_COOLING","id":"30303030","flow_return_temperature_difference_c":1.1,"forward_energy_m3c":1394,"max_flow_m3h":1.146,"max_power_kw":18,"on_time_h":2697,"on_time_at_error_h":0,"power_kw":1.4,"return_energy_m3c":1260,"t1_temperature_c":29.3,"t2_temperature_c":28.2,"target_energy_kwh":0,"target_volume_m3":0,"total_energy_backward_kwh":0,"total_energy_consumption_kwh":154,"total_volume_m3":39.49,"volume_flow_m3h":1.128,"status":"OK","target_date":"2000-00-00","timestamp":"1111-11-11T11:11:11Z"}
 // |Kamstrup_MC303_Heat_AND_COOLING;30303030;154;39.49;OK;1111-11-11 11:11.11
 
+
+
+KEEP_DRIVER(kamheat);

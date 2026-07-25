@@ -168,3 +168,6 @@ namespace
 // telegram=|3644D7084774700002087AE1C000002F2F481F0144010014700000000000000000000000000000000000000000379B0144AC0100040321|
 // {"_":"telegram","media":"heat cost allocation","meter":"bfw240radio","name":"bfwww","id":"00707447","current_hca":256,"prev_hca":324,"prev_01_hca":256,"prev_02_hca":172,"prev_03_hca":324,"prev_04_hca":155,"prev_05_hca":55,"prev_06_hca":0,"prev_07_hca":0,"prev_08_hca":0,"prev_09_hca":0,"prev_10_hca":0,"prev_11_hca":0,"prev_12_hca":0,"prev_13_hca":0,"prev_14_hca":0,"prev_15_hca":0,"prev_16_hca":0,"prev_17_hca":0,"prev_18_hca":0,"device_date":"2021-03-04","timestamp":"1111-11-11T11:11:11Z"}
 // |bfwww;00707447;256;324;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(bfw240radio);

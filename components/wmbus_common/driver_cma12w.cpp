@@ -88,3 +88,6 @@ namespace
 // telegram=|2744961566666666201B7AF9000020_2F2F02651E094265180902FD1B30030DFD0F05302E302E340F|
 // {"_":"telegram","media":"room sensor","meter":"cma12w","name":"Tempo","id":"66666666","software_version":"4.0.0","status":"OK","current_temperature_c":23.34,"average_temperature_1h_c":23.28,"battery":"BATTERY_330","timestamp":"1111-11-11T11:11:11Z"}
 // |Tempo;66666666;23.34;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(cma12w);

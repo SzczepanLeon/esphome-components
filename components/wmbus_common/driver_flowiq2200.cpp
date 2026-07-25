@@ -329,3 +329,6 @@ namespace
 // telegram=|3244372C763081233C168D2057D2ED11205a817905095480_0008000000000000000008900008F0FFC12B0A1B23001F0F000013|
 // {"_":"telegram","media":"cold water","meter":"flowiq2200","name":"Votten","id":"23813076","status":"ERROR_FLAGS_800","total_m3":3.871,"target_m3":0,"target_date":"2022-11-01","flow_m3h":0.035,"max_external_temperature_c":27,"min_external_temperature_c":10,"max_flow_m3h":0,"timestamp":"1111-11-11T11:11:11Z"}
 // |Votten;23813076;ERROR_FLAGS_800;3.871;0;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(flowiq2200);

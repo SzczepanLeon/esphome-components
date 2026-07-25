@@ -40,3 +40,6 @@ std::shared_ptr<Meter> createAuto(MeterInfo &mi)
     di.setName("auto");
     return std::shared_ptr<Meter>(new MeterAuto(mi, di));
 }
+
+
+KEEP_DRIVER(auto);

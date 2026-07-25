@@ -265,3 +265,6 @@ namespace
 // telegram=|8144361C0202020200028C20357A351070252F2F_04050100000004FB82750000000004FB82F53C00000000042A0000000004FB140000000004FB943C0000000004FDD9FC010000000004FDD9FC020000000004FDD9FC030000000004FDC8FC011709000004FDC8FC02EC04000004FDC8FC03EC04000002FB2EF40101FD17002F2F2F|
 // {"_":"telegram","amperage_at_phase_1_a": 0,"amperage_at_phase_2_a": 0,"amperage_at_phase_3_a": 0,"error": "","frequency_hz": 50,"id": "02020202","media": "electricity","meter": "em24","name": "Elen2","power_kw": 0,"status": "OK","timestamp": "1111-11-11T11:11:11Z","total_apparent_energy_consumption_kvah": 0.1,"total_apparent_energy_production_kvah": null,"total_energy_consumption_kwh": 0.1,"total_reactive_energy_consumption_kvarh": 0,"total_reactive_energy_production_kvarh": 0,"voltage_at_phase_1_v": 232.7,"voltage_at_phase_2_v": 126,"voltage_at_phase_3_v": 126}
 // |Elen2;02020202;0.1;null;0;0;0.1;null;1111-11-11 11:11.11
+
+
+KEEP_DRIVER(em24);
