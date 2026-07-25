@@ -15,6 +15,7 @@ public:
                         std::initializer_list<LinkMode> linkModes);
   void set_radio(wmbus_radio::Radio *radio);
 
+  void setup() override;
   void dump_config() override;
   std::string get_id();
   std::string get_driver();
@@ -30,6 +31,11 @@ protected:
   LinkModeSet link_modes_;
   time::RealTimeClock *rtc;
   wmbus_radio::Radio *radio;
+
+  // Kept separately so the component can still report what it was *supposed*
+  // to be when the meter could not be created.
+  std::string meter_id_;
+  std::string driver_name_;
 
   std::shared_ptr<::Meter> meter;
   std::unique_ptr<Telegram> last_telegram;

@@ -1485,24 +1485,36 @@ std::shared_ptr<Meter> createMeter(MeterInfo *mi) {
 
   DriverInfo *di = lookupDriver(mi->driver_name.str());
 
-  if (di != NULL) {
-    std::shared_ptr<Meter> newm = di->construct(*mi);
-    for (std::string &j : mi->extra_calculated_fields) {
-      newm->addExtraCalculatedField(j);
-    }
-    newm->setPollInterval(mi->poll_interval);
-    if (mi->selected_fields.size() > 0) {
-      newm->setSelectedFields(mi->selected_fields);
-    } else {
-      newm->setSelectedFields(di->defaultFields());
-    }
-
-    std::string aesc = AddressExpression::concat(mi->address_expressions);
-    verbose("(meter) created %s %s %s %s\n", mi->name.c_str(),
-            di->name().str().c_str(), aesc.c_str(), keymsg);
-
+  if (di == NULL) {
+    // No driver with that name is linked into the firmware. Returning an empty
+    // pointer here used to be silent, which turned into a null dereference the
+    // first time anything touched the meter.
+    error("(meter) no driver named \"%s\" is registered, cannot create meter "
+          "%s\n",
+          mi->driver_name.str().c_str(), mi->name.c_str());
     return newm;
   }
+
+  newm = di->construct(*mi);
+  if (!newm) {
+    error("(meter) driver \"%s\" failed to construct meter %s\n",
+          di->name().str().c_str(), mi->name.c_str());
+    return newm;
+  }
+
+  for (std::string &j : mi->extra_calculated_fields) {
+    newm->addExtraCalculatedField(j);
+  }
+  newm->setPollInterval(mi->poll_interval);
+  if (mi->selected_fields.size() > 0) {
+    newm->setSelectedFields(mi->selected_fields);
+  } else {
+    newm->setSelectedFields(di->defaultFields());
+  }
+
+  std::string aesc = AddressExpression::concat(mi->address_expressions);
+  verbose("(meter) created %s %s %s %s\n", mi->name.c_str(),
+          di->name().str().c_str(), aesc.c_str(), keymsg);
 
   return newm;
 }
@@ -1526,8 +1538,11 @@ bool is_driver_and_extras(const std::string &t, DriverName *out_driver_name,
       *out_extras = "";
       return true;
     }
+    // Not a registered driver. Do not claim it as one - otherwise the caller
+    // proceeds with an empty driver_name and createMeter() cannot find
+    // anything.
     *out_extras = "";
-    return true;
+    return false;
   }
 
   // Parentheses must be last.
@@ -1539,9 +1554,10 @@ bool is_driver_and_extras(const std::string &t, DriverName *out_driver_name,
 
   bool found = lookupDriverInfo(type, &di);
 
-  if (found) {
-    *out_driver_name = di.name();
-  }
+  if (!found)
+    return false;
+
+  *out_driver_name = di.name();
 
   std::string extras = t.substr(ps + 1, pe - ps - 1);
   *out_extras = extras;
