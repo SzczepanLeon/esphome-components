@@ -1504,6 +1504,9 @@ std::shared_ptr<Meter> createMeter(MeterInfo *mi) {
     return newm;
   }
 
+  error("(meter) no driver \"%s\" registered, cannot create meter %s\n",
+        mi->driver_name.str().c_str(), mi->name.c_str());
+
   return newm;
 }
 
@@ -1526,8 +1529,10 @@ bool is_driver_and_extras(const std::string &t, DriverName *out_driver_name,
       *out_extras = "";
       return true;
     }
+    // Not a registered driver - do not claim it as one, or the caller carries
+    // on with an empty driver_name.
     *out_extras = "";
-    return true;
+    return false;
   }
 
   // Parentheses must be last.
@@ -1539,9 +1544,10 @@ bool is_driver_and_extras(const std::string &t, DriverName *out_driver_name,
 
   bool found = lookupDriverInfo(type, &di);
 
-  if (found) {
-    *out_driver_name = di.name();
-  }
+  if (!found)
+    return false;
+
+  *out_driver_name = di.name();
 
   std::string extras = t.substr(ps + 1, pe - ps - 1);
   *out_extras = extras;
