@@ -1,0 +1,217 @@
+substitutions:
+  name: "wmbus-reader"
+  friendlyname: "wmbus reader"
+  id: "wmbus-reader"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendlyname}
+  name_add_mac_suffix: false
+
+esp32:
+  board: nodemcu-32s
+  framework:
+    type: esp-idf
+
+external_components:
+  - source: github://SzczepanLeon/esphome-components@main
+    components: [wmbus_radio, wmbus_common, wmbus_meter]
+    refresh: 0s
+
+mdns:
+  disabled: false
+
+time:
+  - platform: homeassistant
+
+logger:
+  level: DEBUG
+  logs:
+    packet: INFO      # Mute "Have data from radio (... bytes)"
+    wmbusmeters: INFO # Mute "raw packet", "trimming frame", "checkWMBUSFrame"
+    main: INFO        # Mute raw "Frame received"
+    CC1101: ERROR     # Mute warnings "RX timeout after 0 bytes"
+
+
+api:
+  encryption:
+    key: !secret api_key
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+#web_server:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  output_power: 8.5dB
+  reboot_timeout: 5min
+  ap:
+    ssid: $id
+    password: !secret failover_password
+
+  power_save_mode: none
+
+captive_portal:
+
+web_server:
+  port: 80
+  version: 3
+
+# SPI Configuration for CC1101
+spi:
+  mosi_pin: GPIO32
+  clk_pin: GPIO33
+  miso_pin: GPIO19
+
+# CC1101 Radio Configuration
+# Note: CC1101 has no hardware reset pin - do not configure reset_pin
+wmbus_radio:
+  radio_type: CC1101
+  irq_pin: GPIO22
+  cs_pin: GPIO23
+
+  frequency: 868.950MHz
+  sync_mode: NORMAL
+
+  on_frame:
+    - then:
+        - logger.log:
+            format: "Frame received: RSSI=%ddBm, Mode=%s, Data=%s"
+            args: [ 'frame->rssi()', 'toString(frame->link_mode())', 'frame->as_hex().c_str()' ]
+
+# Uncomment and list only the drivers you need to save flash space
+wmbus_common:
+  drivers:
+    - apator162
+
+
+# Define your water meter
+wmbus_meter:
+  - id: water_meter
+    meter_id:  0x12345678
+    type: apator162
+    key: "00000000000000000000000000000000"
+    # mode:
+    #   - C1
+    on_telegram:
+      - logger.log:
+          format: "Telegram received from water meter"
+
+sensor:
+  - platform: wifi_signal
+    name: ${friendlyname} WiFi Signal
+    id: wifi_signal_db
+    update_interval: 120s
+    entity_category: diagnostic
+    unit_of_measurement: "dBm"
+    device_class: signal_strength
+    state_class: measurement
+    accuracy_decimals: 0
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "%"
+    entity_category: "diagnostic"
+
+
+
+  - platform: uptime
+    name: ${friendlyname} Uptime
+    filters:
+      - lambda: return x / 3600;
+    unit_of_measurement: "h"
+    entity_category: diagnostic
+
+  # RSSI
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: rssi_dbm
+    name: "RSSI APATOR"
+    unit_of_measurement: "dBm"
+    device_class: signal_strength
+    state_class: measurement
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    icon: "mdi:signal"
+
+  # Water meter total consumption
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: total_m3
+    name: "Zimna woda"
+    unit_of_measurement: "m³"
+    device_class: water
+    state_class: total_increasing
+    accuracy_decimals: 3
+    icon: "mdi:water"
+
+  # Target/Last month reading
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: target_m3
+    name: "Water Target"
+    unit_of_measurement: "m³"
+    accuracy_decimals: 3
+    icon: "mdi:counter"
+
+  # Flow temperature
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: flow_temperature_c
+    name: "Water Temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+
+  # External/Ambient temperature
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: external_temperature_c
+    name: "Meter Ambient Temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    accuracy_decimals: 1
+
+
+text_sensor:
+  - platform: version
+    name: ${friendlyname} Version
+    entity_category: diagnostic
+
+  - platform: wifi_info
+    ip_address:
+      name: ip
+    ssid:
+      name: ssid
+    bssid:
+      name: bssid
+
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: current_alarms
+    name: "Water Meter Alarms"
+
+  - platform: wmbus_meter
+    parent_id: water_meter
+    field: status
+    name: "Water Meter Status"
+
+binary_sensor:
+  - platform: status
+    name: ${friendlyname} Status
+    entity_category: diagnostic
+
+button:
+  - platform: safe_mode
+    name: "${friendlyname} Restart (Safe Mode)"
+    entity_category: diagnostic
+
+
+  - platform: restart
+    name: "${friendlyname} Restart"
+    entity_category: diagnostic
