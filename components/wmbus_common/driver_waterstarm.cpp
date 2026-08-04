@@ -175,30 +175,36 @@ namespace
             .set(StorageNr(1))
             );
 
-        addNumericFieldWithExtractor(
-            "consumption_at_history_{storage_counter - 1 counter}",
-            "The total water consumption at the historic date.",
-            DEFAULT_PRINT_PROPERTIES,
-            Quantity::Volume,
-            VifScaling::Auto, DifSignedness::Signed,
-            FieldMatcher::build()
-            .set(MeasurementType::Instantaneous)
-            .set(VIFRange::Volume)
-            .set(StorageNr(2),StorageNr(16))
+        // Historical monthly consumption values.
+        //
+        // Static registration avoids the formula/string interpolation parser
+        // during driver initialization.
+        for (int history = 1; history <= 15; history++) {
+            const int storage_number = history + 1;
+	    
+            const std::string field_name =
+                "consumption_at_history_" + std::to_string(history);
+	    
+            const std::string description =
+                "The total water consumption "
+                + std::to_string(history)
+                + (history == 1
+                       ? " month ago."
+                       : " months ago.");
+	    
+            addNumericFieldWithExtractor(
+                field_name,
+                description,
+                DEFAULT_PRINT_PROPERTIES,
+                Quantity::Volume,
+                VifScaling::Auto,
+                DifSignedness::Signed,
+                FieldMatcher::build()
+                    .set(MeasurementType::Instantaneous)
+                    .set(VIFRange::Volume)
+                    .set(StorageNr(storage_number))
             );
-
-        addNumericFieldWithCalculatorAndMatcher(
-            "history_{storage_counter - 1 counter}",
-            "The historic date.",
-            DEFAULT_PRINT_PROPERTIES,
-            Quantity::PointInTime,
-            "meter_datetime - ((storage_counter-1counter) * 1 month)",
-            FieldMatcher::build()
-            .set(MeasurementType::Instantaneous)
-            .set(VIFRange::Volume)
-            .set(StorageNr(2),StorageNr(16)),
-            Unit::DateLT
-            );
+		}
     }
 }
 
