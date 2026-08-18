@@ -1,5 +1,6 @@
 #include "transceiver_sx1276.h"
 
+#include <algorithm>
 #include <cstring>
 #include "esp_timer.h"
 #include "esphome/core/log.h"
@@ -95,59 +96,40 @@ void SX1276::setup() {
 }
 
 optional<uint8_t> SX1276::read() {
-  // Read single byte from FIFO if data available (DIO1 low = FIFO not empty)
-  if (this->irq_pin_->digital_read() == false)
-    return this->spi_read(0x00);
+  if (this->irq_pin_->digital_read())
+    return {};
 
-  return {};
+  uint8_t fifo_len = this->spi_read(0x13);
+  if (fifo_len == 0)
+    return {};
+
+  auto value = this->spi_read(0x00);
+  this->signal_rssi_ = this->spi_read(0x11);
+  this->signal_rssi_valid_ = true;
+  return value;
 }
 
 size_t SX1276::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
   if (this->irq_pin_->digital_read())
     return 0;
 
-  // Timer-paced batch reads: at 100 kbps each byte arrives every 80 us.
-  // DIO1 polling only for the first byte; subsequent batches rely on timing.
-  static const size_t BATCH = 32;
+  uint8_t fifo_len = this->spi_read(0x13);
+  if (fifo_len == 0)
+    return 0;
+
+  const size_t to_read = std::min<size_t>(length, fifo_len);
+  if (to_read == 0)
+    return 0;
+
   this->delegate_->begin_transaction();
-  this->cs_->digital_write(true);
-
-  uint32_t t0 = (uint32_t) esp_timer_get_time();
-  size_t count = 0;
-  while (count < length) {
-    size_t batch = length - count;
-    if (batch > BATCH)
-      batch = BATCH;
-
-    // Wait until enough bytes have arrived in the FIFO
-    uint32_t target = t0 + (count + batch - 1) * 80;
-    uint32_t now;
-    while ((now = (uint32_t) esp_timer_get_time()) - t0 < target - t0)
-      ;
-
-    // SPI transfer: address byte (0x00) + data bytes
-    static uint8_t txbuf[BATCH + 1];
-    static uint8_t rxbuf[BATCH + 1];
-    memset(txbuf, 0, 1 + batch);
-    this->cs_->digital_write(false);
-    this->delegate_->transfer(txbuf, rxbuf, 1 + batch);
-    this->cs_->digital_write(true);
-
-    for (size_t i = 0; i < batch; i++)
-      buffer[count++] = rxbuf[1 + i];
-  }
-
+  this->delegate_->transfer(0x00);
+  for (size_t i = 0; i < to_read; i++)
+    buffer[i] = this->delegate_->transfer(0x00);
   this->delegate_->end_transaction();
 
-  // Capture the RSSI for the packet itself, regardless of the read offset.
-  // Keep an explicit validity flag because a real packet RSSI can legitimately be
-  // 0 dBm, which must not be treated as “missing data”.
-  if (count > 0) {
-    this->signal_rssi_ = this->spi_read(0x11);
-    this->signal_rssi_valid_ = true;
-  }
-
-  return count;
+  this->signal_rssi_ = this->spi_read(0x11);
+  this->signal_rssi_valid_ = true;
+  return to_read;
 }
 
 void SX1276::restart_rx() {
