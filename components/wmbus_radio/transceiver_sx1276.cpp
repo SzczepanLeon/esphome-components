@@ -81,9 +81,12 @@ void SX1276::setup() {
   uint8_t packet_mode = 0;
   this->spi_write(0x32, packet_mode);
 
-  ESP_LOGVV(TAG, "set fifo empty flag on DIO1");
-  uint8_t fifo_empty_flag = 0b01 << 4;
-  this->spi_write(0x40, fifo_empty_flag);
+  ESP_LOGVV(TAG, "map DIO1 to packet-ready instead of FIFO-empty");
+  // The driver waits on DIO1 for a valid RX event. Mapping it to FIFO-empty
+  // makes the wake-up happen on stale FIFO state and produces false-positive
+  // reads/noisy RSSI at low signal levels. RX_DONE is the reliable signal for a
+  // complete packet in WMBus FSK mode.
+  this->spi_write(0x40, 0x00);
 
   ESP_LOGVV(TAG, "set RRSI smoothing");
   uint8_t rssi_smoothing = 0b111;
@@ -135,6 +138,9 @@ size_t SX1276::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
 void SX1276::restart_rx() {
   this->signal_rssi_valid_ = false;
   this->signal_rssi_ = 0;
+
+  // Clear all pending IRQ flags before re-entering RX to avoid stale wake-ups.
+  this->spi_write(0x3F, 0xFF);
 
   // Standby mode
   this->spi_write(0x01, (uint8_t)0b001);
