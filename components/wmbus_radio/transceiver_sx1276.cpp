@@ -139,8 +139,12 @@ size_t SX1276::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
 
   this->delegate_->end_transaction();
 
-  // Capture RSSI while signal is still present
-  if (count > 0 && offset == 3 && this->signal_rssi_ == 0)
+  // Capture the RSSI for the packet itself, regardless of the read offset.
+  // The offset-based gating was unreliable and could leave signal_rssi_ unset,
+  // causing the code to fall back to a near-constant noise-floor value for every
+  // meter. Reading the packet RSSI whenever data was received keeps the result
+  // tied to the actual frame being processed.
+  if (count > 0)
     this->signal_rssi_ = this->spi_read(0x11);
 
   return count;
@@ -161,7 +165,9 @@ void SX1276::restart_rx() {
 
 int8_t SX1276::get_rssi() {
   uint8_t rssi_now = this->spi_read(0x11);
-  // Prefer signal RSSI captured during reception over current (noise floor)
+  // Prefer the RSSI captured while the frame was being received. If there was no
+  // packet-specific reading, fall back to the current value, but do not silently
+  // collapse all meters to the same near-constant noise floor.
   uint8_t rssi = this->signal_rssi_ ? this->signal_rssi_ : rssi_now;
   this->signal_rssi_ = 0;
 
