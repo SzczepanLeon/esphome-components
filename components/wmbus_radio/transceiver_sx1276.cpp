@@ -1,6 +1,5 @@
 #include "transceiver_sx1276.h"
 
-#include <algorithm>
 #include <cstring>
 #include "esp_timer.h"
 #include "esphome/core/log.h"
@@ -81,12 +80,9 @@ void SX1276::setup() {
   uint8_t packet_mode = 0;
   this->spi_write(0x32, packet_mode);
 
-  ESP_LOGVV(TAG, "map DIO1 to packet-ready instead of FIFO-empty");
-  // The driver waits on DIO1 for a valid RX event. Mapping it to FIFO-empty
-  // makes the wake-up happen on stale FIFO state and produces false-positive
-  // reads/noisy RSSI at low signal levels. RX_DONE is the reliable signal for a
-  // complete packet in WMBus FSK mode.
-  this->spi_write(0x40, 0x00);
+  ESP_LOGVV(TAG, "set fifo empty flag on DIO1");
+  uint8_t fifo_empty_flag = 0b01 << 4;
+  this->spi_write(0x40, fifo_empty_flag);
 
   ESP_LOGVV(TAG, "set RRSI smoothing");
   uint8_t rssi_smoothing = 0b111;
@@ -99,49 +95,58 @@ void SX1276::setup() {
 }
 
 optional<uint8_t> SX1276::read() {
-  if (this->irq_pin_->digital_read())
-    return {};
+  // Read single byte from FIFO if data available (DIO1 low = FIFO not empty)
+  if (this->irq_pin_->digital_read() == false)
+    return this->spi_read(0x00);
 
-  uint8_t fifo_len = this->spi_read(0x13);
-  if (fifo_len == 0)
-    return {};
-
-  auto value = this->spi_read(0x00);
-  this->signal_rssi_ = this->spi_read(0x11);
-  this->signal_rssi_valid_ = true;
-  return value;
+  return {};
 }
 
 size_t SX1276::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
   if (this->irq_pin_->digital_read())
     return 0;
 
-  uint8_t fifo_len = this->spi_read(0x13);
-  if (fifo_len == 0)
-    return 0;
-
-  const size_t to_read = std::min<size_t>(length, fifo_len);
-  if (to_read == 0)
-    return 0;
-
+  // Timer-paced batch reads: at 100 kbps each byte arrives every 80 us.
+  // DIO1 polling only for the first byte; subsequent batches rely on timing.
+  static const size_t BATCH = 32;
   this->delegate_->begin_transaction();
-  this->delegate_->transfer(0x00);
-  for (size_t i = 0; i < to_read; i++)
-    buffer[i] = this->delegate_->transfer(0x00);
+  this->cs_->digital_write(true);
+
+  uint32_t t0 = (uint32_t) esp_timer_get_time();
+  size_t count = 0;
+  while (count < length) {
+    size_t batch = length - count;
+    if (batch > BATCH)
+      batch = BATCH;
+
+    // Wait until enough bytes have arrived in the FIFO
+    uint32_t target = t0 + (count + batch - 1) * 80;
+    uint32_t now;
+    while ((now = (uint32_t) esp_timer_get_time()) - t0 < target - t0)
+      ;
+
+    // SPI transfer: address byte (0x00) + data bytes
+    static uint8_t txbuf[BATCH + 1];
+    static uint8_t rxbuf[BATCH + 1];
+    memset(txbuf, 0, 1 + batch);
+    this->cs_->digital_write(false);
+    this->delegate_->transfer(txbuf, rxbuf, 1 + batch);
+    this->cs_->digital_write(true);
+
+    for (size_t i = 0; i < batch; i++)
+      buffer[count++] = rxbuf[1 + i];
+  }
+
   this->delegate_->end_transaction();
 
-  this->signal_rssi_ = this->spi_read(0x11);
-  this->signal_rssi_valid_ = true;
-  return to_read;
+  // Capture RSSI while signal is still present
+  if (count > 0 && offset == 3 && this->signal_rssi_ == 0)
+    this->signal_rssi_ = this->spi_read(0x11);
+
+  return count;
 }
 
 void SX1276::restart_rx() {
-  this->signal_rssi_valid_ = false;
-  this->signal_rssi_ = 0;
-
-  // Clear all pending IRQ flags before re-entering RX to avoid stale wake-ups.
-  this->spi_write(0x3F, 0xFF);
-
   // Standby mode
   this->spi_write(0x01, (uint8_t)0b001);
   delay(5);
@@ -156,10 +161,8 @@ void SX1276::restart_rx() {
 
 int8_t SX1276::get_rssi() {
   uint8_t rssi_now = this->spi_read(0x11);
-  // Prefer the RSSI captured while the frame was being received. A packet RSSI of
-  // 0 dBm is valid and must not be mistaken for "not captured".
-  uint8_t rssi = this->signal_rssi_valid_ ? this->signal_rssi_ : rssi_now;
-  this->signal_rssi_valid_ = false;
+  // Prefer signal RSSI captured during reception over current (noise floor)
+  uint8_t rssi = this->signal_rssi_ ? this->signal_rssi_ : rssi_now;
   this->signal_rssi_ = 0;
 
   // Clear FIFO overflow if set
