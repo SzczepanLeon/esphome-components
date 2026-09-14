@@ -4679,6 +4679,10 @@ bool Telegram::findFormatBytesFromKnownMeterSignatures(
     hex2bin("04FF2304134413426C023B92013BA2013B06FF1BA1015B91015BA10167",
             format_bytes);
     debug("(wmbus) using hard coded format for hash f3a9\n");
+  } else if (format_signature == 0x07dd || format_signature == 0xdd07) {
+    // Kamstrup FlowIQ2200 compact frame variant seen with signature dd07.
+    hex2bin("02FF2004134413426C", format_bytes);
+    debug("(wmbus) using hard coded format for hash dd07\n");
   } else {
     ok = false;
   }

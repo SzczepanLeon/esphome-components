@@ -66,6 +66,29 @@ namespace
                 },
             });
 
+        addStringFieldWithExtractorAndLookup(
+            "status",
+            "Status of meter.",
+            DEFAULT_PRINT_PROPERTIES | PrintProperty::STATUS_FIELD,
+            FieldMatcher::build()
+            .set(DifVifKey("02FF20")),
+            {
+                {
+                    {
+                        "ERROR_FLAGS",
+                        Translate::MapType::BitToString,
+                        AlwaysTrigger, MaskBits(0x000f),
+                        "OK",
+                        {
+                            { 0x01 , "DRY" },
+                            { 0x02 , "REVERSE" },
+                            { 0x04 , "LEAK" },
+                            { 0x08 , "BURST" },
+                        }
+                    },
+                },
+            });
+
         addNumericFieldWithExtractor(
             "total",
             "The total water consumption recorded by this meter.",
@@ -329,6 +352,12 @@ namespace
 // telegram=|3244372C763081233C168D2057D2ED11205a817905095480_0008000000000000000008900008F0FFC12B0A1B23001F0F000013|
 // {"_":"telegram","media":"cold water","meter":"flowiq2200","name":"Votten","id":"23813076","status":"ERROR_FLAGS_800","total_m3":3.871,"target_m3":0,"target_date":"2022-11-01","flow_m3h":0.035,"max_external_temperature_c":27,"min_external_temperature_c":10,"max_flow_m3h":0,"timestamp":"1111-11-11T11:11:11Z"}
 // |Votten;23813076;ERROR_FLAGS_800;3.871;0;1111-11-11 11:11.11
+
+
+// Test: FlowIQ2200_dd07 flowiq2200 12345678 NOKEY
+// telegram=|1A44372C785634123A167907DD645C8A6334CF02002BA702004138|
+// {"_":"telegram","media":"cold water","meter":"flowiq2200","name":"FlowIQ2200_dd07","id":"12345678","status":"BURST REVERSE","total_m3":184.116,"target_m3":173.867,"target_date":"2026-08-01","time_bursting":"2-3 days","time_dry":"","time_leaking":"","time_reversed":"22-31 days","timestamp":"1111-11-11T11:11:11Z"}
+// |FlowIQ2200_dd07;12345678;BURST REVERSE;184.116;173.867;1111-11-11 11:11.11
 
 
 KEEP_DRIVER(flowiq2200);
