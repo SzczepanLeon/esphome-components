@@ -27,7 +27,7 @@ namespace
     static bool ok = registerDriver([](DriverInfo&di)
     {
         di.setName("amiplus");
-        di.setDefaultFields("name,id,total_energy_consumption_kwh,current_power_consumption_kw,total_energy_production_kwh,current_power_production_kw,voltage_at_phase_1_v,voltage_at_phase_2_v,voltage_at_phase_3_v,total_energy_consumption_tariff_1_kwh,total_energy_consumption_tariff_2_kwh,total_energy_consumption_tariff_3_kwh,total_energy_production_tariff_1_kwh,total_energy_production_tariff_2_kwh,total_energy_production_tariff_3_kwh,total_rective_power_l_kvarh,total_rective_power_c_kvarh,current_rective_power_l_var,current_rective_power_c_var,current_at_phase_1_a,current_at_phase_2_a,current_at_phase_3_a,timestamp");
+        di.setDefaultFields("name,id,total_energy_consumption_kwh,current_power_consumption_kw,total_energy_production_kwh,current_power_production_kw,voltage_at_phase_1_v,voltage_at_phase_2_v,voltage_at_phase_3_v,total_energy_consumption_tariff_1_kwh,total_energy_consumption_tariff_2_kwh,total_energy_consumption_tariff_3_kwh,total_energy_production_tariff_1_kwh,total_energy_production_tariff_2_kwh,total_energy_production_tariff_3_kwh,total_rective_power_l_kvarh,total_rective_power_c_kvarh,current_rective_power_l_var,current_rective_power_c_var,reactive_power_inductive_kvar,reactive_power_capacitive_kvar,current_at_phase_1_a,current_at_phase_2_a,current_at_phase_3_a,timestamp");
 
         di.setMeterType(MeterType::ElectricityMeter);
         di.addLinkMode(LinkMode::T1);
@@ -210,7 +210,7 @@ namespace
             );
 
         addNumericFieldWithExtractor(
-            "total_rective_power_l",
+            "total_reactive_power_l",
             "Reactive energy (L).",
             DEFAULT_PRINT_PROPERTIES,
             Quantity::Reactive_Energy,
@@ -220,8 +220,8 @@ namespace
         );
 
         addNumericFieldWithExtractor(
-            "total_rective_power_c",
-            "Reactive energy (c).",
+            "total_reactive_power_c",
+            "Reactive energy (C).",
             DEFAULT_PRINT_PROPERTIES,
             Quantity::Reactive_Energy,
             VifScaling::Auto, DifSignedness::Signed,
@@ -230,8 +230,8 @@ namespace
         );
 
         addNumericFieldWithExtractor(
-            "current_rective_power_l",
-            "Current ractive power (L).",
+            "current_reactive_power_l",
+            "Current reactive power (L).",
             DEFAULT_PRINT_PROPERTIES,
             Quantity::Reactive_Power,
             VifScaling::None, DifSignedness::Signed,
@@ -241,14 +241,36 @@ namespace
         );
 
         addNumericFieldWithExtractor(
-            "current_rective_power_c",
-            "Current ractive power (C).",
+            "reactive_power_inductive",
+            "Reactive power (inductive).",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Reactive_Power,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(DifVifKey("0BFB14")),
+            Unit::KVAR
+        );
+
+        addNumericFieldWithExtractor(
+            "current_reactive_power_c",
+            "Current reactive power (C).",
             DEFAULT_PRINT_PROPERTIES,
             Quantity::Reactive_Power,
             VifScaling::None, DifSignedness::Signed,
             FieldMatcher::build()
             .set(DifVifKey("0BFB943C")),
             Unit::VAR
+        );
+
+        addNumericFieldWithExtractor(
+            "reactive_power_capacitive",
+            "Reactive power (capacitive).",
+            DEFAULT_PRINT_PROPERTIES,
+            Quantity::Reactive_Power,
+            VifScaling::Auto, DifSignedness::Signed,
+            FieldMatcher::build()
+            .set(DifVifKey("0BFB943C")),
+            Unit::KVAR
         );
 
         addNumericFieldWithExtractor(
