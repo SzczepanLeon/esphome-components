@@ -44,9 +44,6 @@ wifi:
 
 captive_portal:
 
-time:
-  - platform: homeassistant
-
 api:
 
 ota:

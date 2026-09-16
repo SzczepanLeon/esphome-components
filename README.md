@@ -57,6 +57,7 @@ api:
 web_server:
   version: 3 
 
+# Optional - only needed for the timestamp / timestamp_zulu fields below
 time:
   - platform: homeassistant
 
