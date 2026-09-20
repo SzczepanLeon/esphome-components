@@ -39,13 +39,14 @@
 #define MARCSTATE_RXTX_SWITCH      0x15
 #define MARCSTATE_TXFIFO_UNDERFLOW 0x16
 
+// Call for attention as soon as 4 bytes have arrived, which is early enough to read the header out
+// of any telegram. Nothing is written to this register afterwards.
 #define RX_FIFO_START_THRESHOLD    0
-#define RX_FIFO_THRESHOLD          10  // 44 bytes in Rx FIFO
+// How full the 64-byte buffer has to get before a telegram too long to fit is drained mid-flight.
+// Chosen to leave room for the handful of bytes that arrive while the drain is happening.
+#define RX_FIFO_DRAIN_AT           56
 
-#define FIXED_PACKET_LENGTH        0x00
 #define INFINITE_PACKET_LENGTH     0x02
-
-#define MAX_FIXED_LENGTH           256
 
 #define WMBUS_MODE_C_PREAMBLE      0x54
 #define WMBUS_BLOCK_A_PREAMBLE     0xCD
@@ -58,11 +59,6 @@ enum RxLoopState : uint8_t {
   READ_DATA     = 3,
 };
 
-enum Cc1101LengthMode : uint8_t {
-  INFINITE      = 0,
-  FIXED         = 1,
-};
-
 typedef struct RxLoopData {
   uint16_t bytesRx;
   uint8_t  lengthField;         // The L-field in the WMBUS packet
@@ -70,7 +66,6 @@ typedef struct RxLoopData {
   uint16_t bytesLeft;           // Bytes left to to be read from the RX FIFO
   uint8_t *pByteIndex;          // Pointer to current position in the byte array
   bool complete;                // Packet received complete
-  Cc1101LengthMode cc1101Mode;
   RxLoopState state;
 } RxLoopData;
 
@@ -96,6 +91,8 @@ namespace wmbus {
       WMbusFrame returnFrame;
 
       RxLoopData rxLoop;
+
+      uint8_t  last_in_fifo_{0xFF};  // Byte count the previous pass read, to spot an unsettled one
 
       uint32_t sync_time_{0};
       uint8_t  extra_time_{50};

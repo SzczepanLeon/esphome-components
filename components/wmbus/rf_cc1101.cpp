@@ -54,6 +54,17 @@ namespace wmbus {
 
   bool RxLoop::task() {
     do {
+      // The radio's byte count, read once a pass and used everywhere below: how full the buffer is,
+      // whether it has overflowed, and whether the telegram is all in. One read a pass, which is
+      // what this loop always did, so there is no more chatter on the wire than before.
+      uint8_t rxStatus = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES);
+      uint8_t overfl   = rxStatus & 0x80;
+      uint8_t inFifo   = rxStatus & 0x7F;
+      // The chip can hand back a count caught mid-update, so only a figure two reads running agree
+      // on is acted on (CC1101 errata SWRZ020E).
+      bool settled = (inFifo == this->last_in_fifo_);
+      this->last_in_fifo_ = inFifo;
+
       switch (rxLoop.state) {
         case INIT_RX:
           start();
@@ -118,47 +129,51 @@ namespace wmbus {
             }
 
             rxLoop.bytesLeft = rxLoop.length - 3;
-
-            if (rxLoop.length < MAX_FIXED_LENGTH) {
-              // Set CC1101 into length mode
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)rxLoop.length);
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
-              rxLoop.cc1101Mode = FIXED;
-            }
-            else {
-              // Set CC1101 into infinite mode
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTLEN, (uint8_t)(rxLoop.length%MAX_FIXED_LENGTH));
-            }
-
             rxLoop.state = READ_DATA;
             max_wait_time_ += extra_time_;
 
-            ELECHOUSE_cc1101.SpiWriteReg(CC1101_FIFOTHR, RX_FIFO_THRESHOLD);
+            // The header is now known, and with it how many bytes are still to come. Nothing is
+            // written back to the radio here.
+            //
+            // This is the whole of the fix. Switching PKTCTRL0 from infinite to fixed length in the
+            // middle of a telegram makes the CC1101 de-assert its end-of-packet output straight
+            // away, and the loop below then reads the entire rest of the telegram out of a buffer
+            // holding one to eight bytes. Nothing is wrong with what the radio received: the
+            // telegram is assembled out of whatever an under-read FIFO returns. So stay in
+            // infinite-packet mode for the whole reception and find the end by counting bytes,
+            // which the length field in the header has just told us.
+            //
+            // The count read at the top of this pass is three bytes stale now, so throw it away and
+            // let the pass end here.
+            this->last_in_fifo_ = 0xFF;
+            continue;
           }
           break;
 
         // waiting for more data in Rx FIFO buffer
         case READ_DATA:
-          if (digitalRead(this->gdo0)) { // assert when Rx FIFO buffer threshold reached
-            if ((rxLoop.bytesLeft < MAX_FIXED_LENGTH) && (rxLoop.cc1101Mode == INFINITE)) {
-              ELECHOUSE_cc1101.SpiWriteReg(CC1101_PKTCTRL0, FIXED_PACKET_LENGTH);
-              rxLoop.cc1101Mode = FIXED;
-            }
+          // Only reach into the buffer while the telegram is still arriving if it would otherwise
+          // overflow. Anything that fits in the chip's 64-byte buffer — every wM-Bus telegram up to
+          // about forty bytes of payload, which is most of them — is collected in one go below,
+          // after the transmission is over.
+          if (settled && (inFifo >= RX_FIFO_DRAIN_AT) && (rxLoop.bytesLeft > inFifo)) {
             // Do not empty the Rx FIFO (See the CC1101 SWRZ020E errata note)
-            uint8_t bytesInFIFO = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x7F;
-            ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, bytesInFIFO - 1);
-
-            rxLoop.bytesLeft  -= (bytesInFIFO - 1);
-            rxLoop.pByteIndex += (bytesInFIFO - 1);
-            rxLoop.bytesRx    += (bytesInFIFO - 1);
+            uint8_t chunk = inFifo - 1;
+            ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, chunk);
+            rxLoop.bytesLeft  -= chunk;
+            rxLoop.pByteIndex += chunk;
+            rxLoop.bytesRx    += chunk;
             max_wait_time_    += extra_time_;
+            this->last_in_fifo_ = 0xFF;
           }
           break;
       }
 
-      uint8_t overfl = ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x80;
-      // end of packet in length mode
-      if ((!overfl) && (!digitalRead(gdo2))  && (rxLoop.state > WAIT_FOR_DATA)) {
+      // The rest of the telegram is sitting in the buffer, so the transmission is over. The second
+      // read is the errata's own answer to a byte count caught mid-update, and it costs nothing that
+      // matters: by the time it happens the telegram is already in.
+      if ((!overfl) && (rxLoop.state > WAIT_FOR_DATA) && (inFifo >= rxLoop.bytesLeft) &&
+          ((ELECHOUSE_cc1101.SpiReadStatus(CC1101_RXBYTES) & 0x7F) >= rxLoop.bytesLeft)) {
         ELECHOUSE_cc1101.SpiReadBurstReg(CC1101_RXFIFO, rxLoop.pByteIndex, (uint8_t)rxLoop.bytesLeft);
         rxLoop.bytesRx += rxLoop.bytesLeft;
         data_in.length  = rxLoop.bytesRx;
@@ -216,7 +231,7 @@ namespace wmbus {
     rxLoop.bytesRx     = 0;              // Bytes read from Rx FIFO
     rxLoop.pByteIndex  = data_in.data;   // Pointer to current position in the byte array
     rxLoop.complete    = false;          // Packet received
-    rxLoop.cc1101Mode  = INFINITE;       // Infinite or fixed CC1101 packet mode
+    this->last_in_fifo_ = 0xFF;          // No byte count seen yet for this packet
 
     this->returnFrame.frame.clear();
     this->returnFrame.rssi  = 0;
