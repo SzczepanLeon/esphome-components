@@ -24,6 +24,7 @@ void Meter::set_meter_params(std::string id, std::string driver,
 }
 
 void Meter::setup() {
+  // An unknown driver should be rejected while validating the configuration, so we just make sure here
   if (this->meter == nullptr) {
     ESP_LOGE(TAG, "Meter 0x%s was not created - no driver '%s'",
              this->meter_id_.c_str(), this->driver_name_.c_str());
