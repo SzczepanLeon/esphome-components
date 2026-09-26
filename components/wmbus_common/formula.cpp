@@ -971,6 +971,8 @@ void FormulaImplementation::doMultiplication() {
   std::string rsis = right_siunit.info();
   std::string msis = mul_siunit.info();
 
+  debug("(formula) unit %s MUL %s ==> %s\n", lsis.c_str(), rsis.c_str(),
+        msis.c_str());
   pushOp(new NumericFormulaMultiplication(this, mul_siunit, left_node,
                                           right_node));
 }
