@@ -197,41 +197,59 @@ std::string safeString(std::vector<uchar> &target) {
   return str;
 }
 
+static std::string vtostrprintf(const char *fmt, va_list args) {
+  char local[256];
+
+  va_list copy;
+  va_copy(copy, args);
+  int n = vsnprintf(local, sizeof(local), fmt, copy);
+  va_end(copy);
+
+  if (n < 0) {
+    return {};
+  }
+
+  if (n < static_cast<int>(sizeof(local))) {
+    return std::string(local, static_cast<size_t>(n));
+  }
+
+  std::vector<char> buf(static_cast<size_t>(n) + 1);
+
+  va_copy(copy, args);
+  int written = vsnprintf(buf.data(), buf.size(), fmt, copy);
+  va_end(copy);
+
+  if (written < 0) {
+    return {};
+  }
+
+  return std::string(buf.data(), static_cast<size_t>(written));
+}
+
 std::string tostrprintf(const char *fmt, ...) {
-  std::string s;
-  char buf[4096];
   va_list args;
   va_start(args, fmt);
-  size_t n = vsnprintf(buf, 4096, fmt, args);
-  assert(n < 4096);
+  std::string res = vtostrprintf(fmt, args);
   va_end(args);
-  s = buf;
-  return s;
+  return res;
 }
 
 // Why a pointer here? To avoid the compiler warning:
 // warning: passing an object of reference type to 'va_start' has undefined
 // behavior [-Wvarargs]
 std::string tostrprintf(const std::string *fmt, ...) {
-  std::string s;
-  char buf[4096];
   va_list args;
   va_start(args, fmt); // <<<<< here fmt must be a native type.
-  size_t n = vsnprintf(buf, 4096, fmt->c_str(), args);
-  assert(n < 4096);
+  std::string res = vtostrprintf(fmt->c_str(), args);
   va_end(args);
-  s = buf;
-  return s;
+  return res;
 }
 
 void strprintf(std::string *s, const char *fmt, ...) {
-  char buf[4096];
   va_list args;
   va_start(args, fmt);
-  size_t n = vsnprintf(buf, 4096, fmt, args);
-  assert(n < 4096);
+  *s = vtostrprintf(fmt, args);
   va_end(args);
-  *s = buf;
 }
 
 void xorit(uchar *srca, uchar *srcb, uchar *dest, int len) {
