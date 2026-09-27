@@ -76,7 +76,7 @@ async def to_code(config):
     meter = cg.new_Pvariable(config[CONF_ID])
     cg.add(
         meter.set_meter_params(
-            str('{:08x}'.format(config[CONF_METER_ID])),
+            str('{:08d}'.format(config[CONF_METER_ID])),
             config[CONF_TYPE],
             config.get(CONF_KEY, ""),
             config[CONF_MODE],
