@@ -34,9 +34,6 @@ logger:
   hardware_uart: USB_CDC
   level: DEBUG
 
-time:
-  - platform: homeassistant
-
 api:
   encryption:
     key: !secret api_encryption_key
