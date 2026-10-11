@@ -6,6 +6,7 @@ Version 5 based on Kuba's dirty [fork](https://github.com/IoTLabs-pl/esphome-com
 - Refactor traces/logs
 
 # DONE:
+- Add long frame (>255 bytes) reception for SX1262
 - Add configurable frequency for CC1101 (300–928 MHz, default 868.95 MHz)
 - Add CC1101 support with FIFO overflow handling and errata workaround
 - Add support for SX1262 (with limited frame length)
