@@ -2,6 +2,11 @@
 
 #include "esphome/core/log.h"
 
+#include <algorithm>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 namespace esphome {
 namespace wmbus_radio {
 static const char *TAG = "SX1262";
@@ -66,11 +71,9 @@ void SX1262::setup() {
   }
 
   ESP_LOGVV(TAG, "setting IRQ parameters");
-  uint32_t irqmask = RADIOLIB_SX126X_IRQ_RX_DONE;
-  if (this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY) {
-    irqmask |= RADIOLIB_SX126X_IRQ_SYNC_WORD_VALID;
-    ESP_LOGV(TAG, "Ultra low latency mode: enabling SYNC_WORD_VALID IRQ");
-  }
+  // Trigger on sync word so the payload can be streamed out of the 256-byte
+  // buffer while it is still being received (frames longer than 255 bytes).
+  const uint32_t irqmask = RADIOLIB_SX126X_IRQ_SYNC_WORD_VALID;
   this->spi_command(RADIOLIB_SX126X_CMD_SET_DIO_IRQ_PARAMS, {
                     BYTE(irqmask, 1), BYTE(irqmask, 0),
                     BYTE(irqmask, 1), BYTE(irqmask, 0),
@@ -116,45 +119,46 @@ void SX1262::setup() {
                     BYTE(timeout, 2), BYTE(timeout, 1), BYTE(timeout, 0)
   });
 
-  this->offset = 0;
-
   ESP_LOGV(TAG, "SX1262 setup done");
 }
 
-size_t SX1262::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
-  if (this->irq_pin_->digital_read()) {
-    // In ultra low latency mode, check if RX_DONE is actually set
-    if (this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY) {
-      uint16_t irq_status = this->get_irq_status();
-      // If SYNC_WORD_VALID fired but not RX_DONE, packet isn't ready yet
-      if (!(irq_status & RADIOLIB_SX126X_IRQ_RX_DONE)) {
-        ESP_LOGVV(TAG, "SYNC_WORD_VALID fired, waiting for RX_DONE (irq: 0x%04X)", irq_status);
-        // Clear SYNC_WORD_VALID so IRQ pin goes low, allowing RX_DONE rising edge
-        const uint32_t sync_irq = RADIOLIB_SX126X_IRQ_SYNC_WORD_VALID;
-        this->spi_command(RADIOLIB_SX126X_CMD_CLEAR_IRQ_STATUS, {BYTE(sync_irq, 1), BYTE(sync_irq, 0)});
-        return 0;  // Not ready, caller will retry
+// Long packet reception (Semtech AN1200.53).
+// In fixed length mode the radio stops after REG_RX_TX_PLD_LEN bytes (max 255),
+// but T1 telegrams can be longer after 3of6 encoding. While receiving, the
+// payload length register is kept just behind the write pointer, so the end of
+// the packet is never reached and data is read from the circular buffer as it
+// arrives. Reception is restarted by the caller once the frame is complete.
+bool SX1262::read_in_task(uint8_t *buffer, size_t length, uint32_t offset) {
+  // 100 kbps -> 12.5 bytes/ms, allow plenty of margin
+  const uint32_t timeout_ms = 20 + length / 8;
+  const uint32_t start = millis();
+  size_t total = 0;
+
+  while (total < length) {
+    const uint8_t write_ptr = this->read_register(RADIOLIB_SX126X_REG_RX_ADDR_PTR);
+    this->write_register(RADIOLIB_SX126X_REG_RX_TX_PLD_LEN, uint8_t(write_ptr - 1));
+
+    const uint8_t read_ptr = uint8_t(offset + total);
+    size_t avail = uint8_t(write_ptr - read_ptr);
+    if (avail == 0) {
+      if (millis() - start > timeout_ms) {
+        ESP_LOGV(TAG, "RX stream timeout (%zu/%zu bytes at offset %u)", total, length, (unsigned) offset);
+        return false;
       }
+      vTaskDelay(1);
+      continue;
     }
 
-    spi_read_frame(RADIOLIB_SX126X_CMD_READ_BUFFER, {uint8_t(offset), 0x00}, buffer, length);
-
-    // Clear IRQ
-    if (offset > 0) {
-      uint32_t irqmask = RADIOLIB_SX126X_IRQ_RX_DONE;
-      if (this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY) {
-        irqmask |= RADIOLIB_SX126X_IRQ_SYNC_WORD_VALID;
-      }
-      this->spi_command(RADIOLIB_SX126X_CMD_CLEAR_IRQ_STATUS, {BYTE(irqmask, 1), BYTE(irqmask, 0)});
-
-      const uint32_t timeout = 0x000000; // 0xFFFFFF;
-      this->spi_command(RADIOLIB_SX126X_CMD_SET_RX, {
-                        BYTE(timeout, 2), BYTE(timeout, 1), BYTE(timeout, 0)
-      });
-    }
-    return length;
+    avail = std::min(avail, length - total);
+    // Read up to the end of the buffer, the remainder wraps to address 0
+    const size_t first = std::min<size_t>(avail, 256 - read_ptr);
+    this->spi_read_frame(RADIOLIB_SX126X_CMD_READ_BUFFER, {read_ptr, 0x00}, buffer + total, first);
+    if (avail > first)
+      this->spi_read_frame(RADIOLIB_SX126X_CMD_READ_BUFFER, {0x00, 0x00}, buffer + total + first, avail - first);
+    total += avail;
   }
 
-  return 0;
+  return true;
 }
 
 void SX1262::restart_rx() {
@@ -163,14 +167,14 @@ void SX1262::restart_rx() {
   this->spi_command(RADIOLIB_SX126X_CMD_SET_STANDBY, {RADIOLIB_SX126X_STANDBY_XOSC});
   delay(5);
 
-  // Clear all enabled IRQs
-  uint32_t irqmask = RADIOLIB_SX126X_IRQ_RX_DONE;
-  if (this->sync_mode_ == SYNC_MODE_ULTRA_LOW_LATENCY) {
-    irqmask |= RADIOLIB_SX126X_IRQ_SYNC_WORD_VALID;
-  }
+  // Clear all IRQs
+  const uint32_t irqmask = RADIOLIB_SX126X_IRQ_ALL;
   this->spi_command(RADIOLIB_SX126X_CMD_CLEAR_IRQ_STATUS, {
                     BYTE(irqmask, 1), BYTE(irqmask, 0)
   });
+
+  // Restore payload length modified by long packet reception
+  this->write_register(RADIOLIB_SX126X_REG_RX_TX_PLD_LEN, 0xff);
 
   // Enable RX
   const uint32_t timeout = 0x000000;
@@ -178,9 +182,6 @@ void SX1262::restart_rx() {
                     BYTE(timeout, 2), BYTE(timeout, 1), BYTE(timeout, 0)
   });
   delay(5);
-
-  // Start reading at buffer offset
-  this->offset = 0;
 }
 
 int8_t SX1262::get_rssi() {
@@ -200,6 +201,16 @@ uint16_t SX1262::get_irq_status() {
   status[2] = this->delegate_->transfer(0x00);  // IRQ status LSB
   this->delegate_->end_transaction();
   return (status[1] << 8) | status[2];
+}
+
+uint8_t SX1262::read_register(uint16_t address) {
+  uint8_t value = 0;
+  this->spi_read_frame(RADIOLIB_SX126X_CMD_READ_REGISTER, {BYTE(address, 1), BYTE(address, 0), 0x00}, &value, 1);
+  return value;
+}
+
+void SX1262::write_register(uint16_t address, uint8_t value) {
+  this->spi_command(RADIOLIB_SX126X_CMD_WRITE_REGISTER, {BYTE(address, 1), BYTE(address, 0), value});
 }
 } // namespace wmbus_radio
 } // namespace esphome

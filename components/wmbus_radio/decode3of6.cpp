@@ -36,7 +36,8 @@ decode3of6(std::vector<uint8_t> &coded_data) {
 
     auto it = lookupTable.find(code);
     if (it == lookupTable.end()) {
-      // ESP_LOGW(TAG, "Invalid code: 0x%02X", code);
+      ESP_LOGV(TAG, "Invalid code 0x%02X at byte %zu of %zu", code, byte_idx,
+               coded_data.size());
       return {};
     }
 
