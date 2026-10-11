@@ -3342,9 +3342,14 @@ double vifScale(int vif) {
     double exp = (vif & 0x1) + 2;
     return pow(10.0, -exp);
   }
-  case 0x7b14:{
-    double exp = (vif & 0x1) + 2;
-    return pow(10.0, -exp);
+    // Reactive power 10^(nn-3) kVAR normalize to kVAR
+    // 7b14 548 -> 548 var -> 0.548 kVAR
+  case 0x7b14:
+  case 0x7b15:
+  case 0x7b16:
+  case 0x7b17: {
+    double exp = 3 - (vif & 0x3);
+    return pow(10.0, exp);
   }
 
     // relative humidity is a dimensionless value.
