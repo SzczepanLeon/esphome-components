@@ -9,11 +9,20 @@ from esphome.const import (
     CONF_MODE,
 )
 from esphome import automation
-from esphome.components.mqtt import (
-    MQTT_PUBLISH_ACTION_SCHEMA,
-    MQTTPublishAction,
-    mqtt_publish_action_to_code,
-)
+from esphome.components.mqtt import MQTT_PUBLISH_ACTION_SCHEMA
+from esphome.const import CONF_QOS, CONF_RETAIN, CONF_TOPIC
+from esphome.core import CORE
+
+try:
+    # ESPHome < 2026.10: mqtt.publish is backed by the MQTTPublishAction class
+    from esphome.components.mqtt import (
+        MQTTPublishAction,
+        mqtt_publish_action_to_code,
+    )
+except ImportError:
+    # ESPHome >= 2026.10: MQTTPublishAction was removed and mqtt.publish
+    # is registered through automation.register_apply_action
+    MQTTPublishAction = None
 
 from ..wmbus_radio import RadioComponent
 from ..wmbus_common import validate_driver
@@ -108,8 +117,30 @@ TELEGRAM_MQTT_PUBLISH_ACTION_SCHEMA = cv.All(
 )
 
 
-automation.register_action(
-    "wmbus_meter.send_telegram_with_mqtt",
-    MQTTPublishAction,
-    TELEGRAM_MQTT_PUBLISH_ACTION_SCHEMA,
-)(mqtt_publish_action_to_code)
+if MQTTPublishAction is not None:
+    automation.register_action(
+        "wmbus_meter.send_telegram_with_mqtt",
+        MQTTPublishAction,
+        TELEGRAM_MQTT_PUBLISH_ACTION_SCHEMA,
+    )(mqtt_publish_action_to_code)
+else:
+
+    def _std_string(config, value):
+        # Same rendering as mqtt.publish: a bare literal is ambiguous between the
+        # std::string and (const char *, size_t) publish() overloads.
+        rendered = automation.flash_string(config, value)
+        return rendered if CORE.is_esp8266 else f"std::string({rendered})"
+
+    automation.register_apply_action(
+        "wmbus_meter.send_telegram_with_mqtt",
+        TELEGRAM_MQTT_PUBLISH_ACTION_SCHEMA,
+        automation.ApplyCall(
+            "publish({}, {}, {}, {})",
+            (
+                (CONF_TOPIC, "std::string", _std_string),
+                (CONF_PAYLOAD, "std::string", _std_string),
+                (CONF_QOS, cg.uint8),
+                (CONF_RETAIN, cg.bool_),
+            ),
+        ),
+    )
