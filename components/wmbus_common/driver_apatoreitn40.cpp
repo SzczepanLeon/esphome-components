@@ -1,7 +1,6 @@
 
 /*
  * Apator INT40 / E.ITN 40
- * Based on the supplied wmbusmeters telegram.
  *
  * Manufacturer: APA
  * Version: 0D
@@ -18,8 +17,11 @@ namespace
         Driver(MeterInfo &mi, DriverInfo &di);
 
         void processContent(Telegram *t);
-        uint16_t read16(const std::vector<uchar> &data,
-                        size_t pos);
+
+        uint16_t read16(
+            const std::vector<uchar> &data,
+            size_t pos);
+
         std::string dateToString(uint16_t raw);
     };
 
@@ -52,7 +54,7 @@ namespace
 
         di.setMeterType(MeterType::HeatCostAllocationMeter);
 
-        // APA, version 0D, type 08.
+        // Manufacturer APA, version 0D, type 08.
         di.addDetection(MANUFACTURER_APA, 0x08, 0x0D);
 
         di.usesProcessContent();
@@ -68,60 +70,85 @@ namespace
     Driver::Driver(MeterInfo &mi, DriverInfo &di)
         : MeterCommonImplementation(mi, di)
     {
-        addStringField("current_date",
-                       "Current date reported by meter.",
-                       DEFAULT_PRINT_PROPERTIES);
+        addStringField(
+            "current_date",
+            "Current date reported by meter.",
+            DEFAULT_PRINT_PROPERTIES);
 
-        addStringField("season_start_date",
-                       "Annual billing season start date.",
-                       DEFAULT_PRINT_PROPERTIES);
+        addStringField(
+            "season_start_date",
+            "Annual billing season start date.",
+            DEFAULT_PRINT_PROPERTIES);
 
-        addNumericField("current_hca", Quantity::HCA,
-                        DEFAULT_PRINT_PROPERTIES,
-                        "Current billing period consumption.");
+        addNumericField(
+            "current_hca",
+            Quantity::HCA,
+            DEFAULT_PRINT_PROPERTIES,
+            "Current billing period consumption.");
 
-        addNumericField("previous_hca", Quantity::HCA,
-                        DEFAULT_PRINT_PROPERTIES,
-                        "Previous billing period consumption.");
+        addNumericField(
+            "previous_hca",
+            Quantity::HCA,
+            DEFAULT_PRINT_PROPERTIES,
+            "Previous billing period consumption.");
 
-        addNumericField("current_month_hca", Quantity::HCA,
-                        DEFAULT_PRINT_PROPERTIES,
-                        "Current month consumption.");
+        addNumericField(
+            "current_month_hca",
+            Quantity::HCA,
+            DEFAULT_PRINT_PROPERTIES,
+            "Current month consumption.");
 
-        addNumericField("previous_month_hca", Quantity::HCA,
-                        DEFAULT_PRINT_PROPERTIES,
-                        "Previous closed month consumption.");
+        addNumericField(
+            "previous_month_hca",
+            Quantity::HCA,
+            DEFAULT_PRINT_PROPERTIES,
+            "Previous closed month consumption.");
 
         for (int i = 2; i <= 15; i++)
         {
             char field[32];
-            snprintf(field, sizeof(field),
-                     "previous_month_%02d_hca", i);
 
-            addNumericField(field, Quantity::HCA,
-                            DEFAULT_PRINT_PROPERTIES,
-                            "Historical monthly consumption.");
+            snprintf(
+                field,
+                sizeof(field),
+                "previous_month_%02d_hca",
+                i);
+
+            addNumericField(
+                field,
+                Quantity::HCA,
+                DEFAULT_PRINT_PROPERTIES,
+                "Historical monthly consumption.");
         }
 
-        addNumericField("previous_2y_hca", Quantity::HCA,
-                        DEFAULT_PRINT_PROPERTIES,
-                        "Consumption two billing periods ago.");
+        addNumericField(
+            "previous_2y_hca",
+            Quantity::HCA,
+            DEFAULT_PRINT_PROPERTIES,
+            "Consumption two billing periods ago.");
 
-        addNumericField("previous_3y_hca", Quantity::HCA,
-                        DEFAULT_PRINT_PROPERTIES,
-                        "Consumption three billing periods ago.");
+        addNumericField(
+            "previous_3y_hca",
+            Quantity::HCA,
+            DEFAULT_PRINT_PROPERTIES,
+            "Consumption three billing periods ago.");
 
-        addNumericField("temp_radiator_c", Quantity::Temperature,
-                        DEFAULT_PRINT_PROPERTIES,
-                        "Radiator surface temperature.");
+        addNumericField(
+            "temp_radiator_c",
+            Quantity::Temperature,
+            DEFAULT_PRINT_PROPERTIES,
+            "Radiator surface temperature.");
 
-        addNumericField("temp_room_c", Quantity::Temperature,
-                        DEFAULT_PRINT_PROPERTIES,
-                        "Ambient room temperature.");
+        addNumericField(
+            "temp_room_c",
+            Quantity::Temperature,
+            DEFAULT_PRINT_PROPERTIES,
+            "Ambient room temperature.");
 
-        addStringField("status",
-                       "Seal and sensor status.",
-                       DEFAULT_PRINT_PROPERTIES);
+        addStringField(
+            "status",
+            "Seal and sensor status.",
+            DEFAULT_PRINT_PROPERTIES);
     }
 
     uint16_t Driver::read16(
@@ -148,9 +175,14 @@ namespace
             return "";
 
         char buf[32];
-        snprintf(buf, sizeof(buf),
-                 "%04u-%02u-%02uT02:00:00Z",
-                 year, month, day);
+
+        snprintf(
+            buf,
+            sizeof(buf),
+            "%04u-%02u-%02uT02:00:00Z",
+            year,
+            month,
+            day);
 
         return buf;
     }
@@ -159,6 +191,17 @@ namespace
     {
         std::vector<uchar> content;
         t->extractPayload(&content);
+
+        // Diagnostic: CI and original payload length.
+        ESP_LOGD(
+            "apatoreitn40",
+            "CI=0x%02X, payload length=%u",
+            t->tpl_ci,
+            static_cast<unsigned>(content.size()));
+
+        debugPayload(
+            "(apatoreitn40) raw payload",
+            content);
 
         if (t->tpl_ci == 0xB6)
         {
@@ -169,76 +212,118 @@ namespace
 
             if (header_len > content.size())
             {
-                debugPayload("(apatoreitn40) invalid header",
-                             content);
+                debugPayload(
+                    "(apatoreitn40) invalid header",
+                    content);
                 return;
             }
 
-            content.erase(content.begin(),
-                          content.begin() + header_len);
+            content.erase(
+                content.begin(),
+                content.begin() + header_len);
         }
 
         if (t->tpl_ci == 0xA0)
             content.insert(content.begin(), t->tpl_ci);
 
-        // CI (1 byte) + 27 words (54 bytes).
+        ESP_LOGD(
+            "apatoreitn40",
+            "payload after CI handling: %u bytes",
+            static_cast<unsigned>(content.size()));
+
+        // Expected layout is not yet verified against a complete
+        // raw telegram. Keep this check for diagnostic purposes.
         if (content.size() != 55 || content[0] != 0xA0)
         {
-            debugPayload("(apatoreitn40) unexpected payload",
-                         content);
+            debugPayload(
+                "(apatoreitn40) unexpected payload",
+                content);
             return;
         }
 
-        // The first word after CI is padding.
-        // Word 1 begins at byte 3.
-        // Each following word occupies 2 bytes.
+        // The following word offsets are provisional.
+        // First word starts at byte 3.
         const size_t first_word = 3;
 
         auto word = [&](int word_index) -> uint16_t
         {
-            return read16(content,
-                          first_word + 2 * (word_index - 1));
+            return read16(
+                content,
+                first_word + 2 * (word_index - 1));
         };
 
         // Word 1: annual season start date.
-        setStringValue("season_start_date",
-                       dateToString(word(1)), NULL);
+        setStringValue(
+            "season_start_date",
+            dateToString(word(1)),
+            NULL);
 
-        // Words 2 and 3: raw temperatures.
-        // Room temperature 310 / 16 = 19.375 C.
-        setNumericValue("temp_radiator_c", Unit::C,
-                        word(2) / 16.0);
+        // Words 2 and 3: temperatures.
+        setNumericValue(
+            "temp_radiator_c",
+            Unit::C,
+            word(2) / 16.0);
 
-        setNumericValue("temp_room_c", Unit::C,
-                        word(3) / 16.0);
+        setNumericValue(
+            "temp_room_c",
+            Unit::C,
+            word(3) / 16.0);
 
         // Word 4: current month.
-        setNumericValue("current_month_hca", Unit::HCA,
-                        word(4));
+        setNumericValue(
+            "current_month_hca",
+            Unit::HCA,
+            word(4));
 
-        // Words 5-19: previous months 1-15.
-        setNumericValue("previous_month_hca", Unit::HCA,
-                        word(5));
+        // Word 5: previous month.
+        setNumericValue(
+            "previous_month_hca",
+            Unit::HCA,
+            word(5));
 
+        // Words 6-19: previous months 2-15.
         for (int i = 2; i <= 15; i++)
         {
             char field[32];
-            snprintf(field, sizeof(field),
-                     "previous_month_%02d_hca", i);
 
-            setNumericValue(field, Unit::HCA,
-                            word(4 + i));
+            snprintf(
+                field,
+                sizeof(field),
+                "previous_month_%02d_hca",
+                i);
+
+            setNumericValue(
+                field,
+                Unit::HCA,
+                word(4 + i));
         }
 
         // Words 20-23: current and historical billing periods.
-        setNumericValue("current_hca", Unit::HCA, word(20));
-        setNumericValue("previous_hca", Unit::HCA, word(21));
-        setNumericValue("previous_2y_hca", Unit::HCA, word(22));
-        setNumericValue("previous_3y_hca", Unit::HCA, word(23));
+        setNumericValue(
+            "current_hca",
+            Unit::HCA,
+            word(20));
+
+        setNumericValue(
+            "previous_hca",
+            Unit::HCA,
+            word(21));
+
+        setNumericValue(
+            "previous_2y_hca",
+            Unit::HCA,
+            word(22));
+
+        setNumericValue(
+            "previous_3y_hca",
+            Unit::HCA,
+            word(23));
 
         // Word 24: current date.
-        setStringValue("current_date",
-                       dateToString(word(24)), NULL);
+        setStringValue(
+            "current_date",
+            dateToString(word(24)),
+            NULL);
 
         // Word 26: seal and sensor status.
         uint16_t status = word(26);
@@ -246,9 +331,10 @@ namespace
         setStringValue(
             "status",
             status == 0x0000 ? "OK" :
-            status == 0xFFFF ? "SEAL_BROKEN" : "FAULT",
-            NULL
-        );
+            status == 0xFFFF ? "SEAL_BROKEN" :
+                               "FAULT",
+            NULL);
     }
 }
+
 KEEP_DRIVER(apatoreitn40);
