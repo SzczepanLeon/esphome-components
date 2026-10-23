@@ -54,7 +54,6 @@ namespace
 
         di.setMeterType(MeterType::HeatCostAllocationMeter);
 
-        // Manufacturer APA, version 0D, type 08.
         di.addDetection(MANUFACTURER_APA, 0x08, 0x0D);
 
         di.usesProcessContent();
@@ -192,7 +191,6 @@ namespace
         std::vector<uchar> content;
         t->extractPayload(&content);
 
-        // Diagnostic: CI and original payload length.
         ESP_LOGD(
             "apatoreitn40",
             "CI=0x%02X, payload length=%u",
@@ -231,8 +229,6 @@ namespace
             "payload after CI handling: %u bytes",
             static_cast<unsigned>(content.size()));
 
-        // Expected layout is not yet verified against a complete
-        // raw telegram. Keep this check for diagnostic purposes.
         if (content.size() != 55 || content[0] != 0xA0)
         {
             debugPayload(
@@ -241,8 +237,8 @@ namespace
             return;
         }
 
-        // The following word offsets are provisional.
-        // First word starts at byte 3.
+        // Current provisional word layout:
+        // first word starts at byte 3.
         const size_t first_word = 3;
 
         auto word = [&](int word_index) -> uint16_t
@@ -251,6 +247,19 @@ namespace
                 content,
                 first_word + 2 * (word_index - 1));
         };
+
+        // Diagnostic: print all 27 words.
+        for (int i = 1; i <= 27; i++)
+        {
+            uint16_t value = word(i);
+
+            ESP_LOGD(
+                "apatoreitn40",
+                "word[%02d] = %u (0x%04X)",
+                i,
+                value,
+                value);
+        }
 
         // Word 1: annual season start date.
         setStringValue(
@@ -298,7 +307,7 @@ namespace
                 word(4 + i));
         }
 
-        // Words 20-23: current and historical billing periods.
+        // Words 20-23: billing period values.
         setNumericValue(
             "current_hca",
             Unit::HCA,
@@ -325,7 +334,7 @@ namespace
             dateToString(word(24)),
             NULL);
 
-        // Word 26: seal and sensor status.
+        // Word 26: status.
         uint16_t status = word(26);
 
         setStringValue(
