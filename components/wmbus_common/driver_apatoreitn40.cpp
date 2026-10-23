@@ -53,7 +53,7 @@ namespace
         di.setMeterType(MeterType::HeatCostAllocationMeter);
 
         // APA, version 0D, type 08.
-        di.addDetection(MANUFACTURER_APA, 0x0D, 0x08);
+        di.addDetection(MANUFACTURER_APA, 0x08, 0x0D);
 
         di.usesProcessContent();
 
