@@ -251,3 +251,4 @@ namespace
         );
     }
 }
+KEEP_DRIVER(apatoreitn);
