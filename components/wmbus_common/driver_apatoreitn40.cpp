@@ -23,8 +23,6 @@ namespace
             const std::vector<uchar> &data,
             size_t pos
         );
-
-        std::string dateToString(uint16_t raw);
     };
 
     static bool ok = registerDriver([](DriverInfo &di)
@@ -32,7 +30,7 @@ namespace
         di.setName("apatoreitn40");
 
         di.setDefaultFields(
-            "name,id,current_date,season_start_date,"
+            "name,id,"
             "current_hca,previous_hca,"
             "current_month_hca,"
             "previous_month_hca,"
@@ -51,7 +49,9 @@ namespace
             "previous_month_14_hca,"
             "previous_month_15_hca,"
             "previous_2y_hca,previous_3y_hca,"
-            "temp_radiator_c,temp_room_c,status,timestamp"
+            "current_date,season_start_date,"
+            "temp_radiator_c,temp_room_c,"
+            "status,timestamp"
         );
 
         di.setMeterType(MeterType::HeatCostAllocationMeter);
@@ -74,13 +74,13 @@ namespace
     {
         addStringField(
             "current_date",
-            "Current date reported by meter.",
+            "Raw current date is not converted yet.",
             DEFAULT_PRINT_PROPERTIES
         );
 
         addStringField(
             "season_start_date",
-            "Annual billing season start date.",
+            "Raw season start date is not converted yet.",
             DEFAULT_PRINT_PROPERTIES
         );
 
@@ -145,23 +145,25 @@ namespace
             "Consumption three billing periods ago."
         );
 
+        // Temperature scaling has not been verified.
+        // These fields are registered but not published as Celsius yet.
         addNumericField(
             "temp_radiator_c",
             Quantity::Temperature,
             DEFAULT_PRINT_PROPERTIES,
-            "Radiator surface temperature."
+            "Radiator temperature; conversion not verified."
         );
 
         addNumericField(
             "temp_room_c",
             Quantity::Temperature,
             DEFAULT_PRINT_PROPERTIES,
-            "Ambient room temperature."
+            "Room temperature; conversion not verified."
         );
 
         addStringField(
             "status",
-            "Seal and sensor status.",
+            "Meter status.",
             DEFAULT_PRINT_PROPERTIES
         );
     }
@@ -176,32 +178,6 @@ namespace
 
         return static_cast<uint16_t>(data[pos])
              | (static_cast<uint16_t>(data[pos + 1]) << 8);
-    }
-
-    std::string Driver::dateToString(uint16_t raw)
-    {
-        if (raw == 0)
-            return "";
-
-        uint day   = raw & 0x1F;
-        uint month = (raw >> 5) & 0x0F;
-        uint year  = ((raw >> 9) & 0x1F) + 2000;
-
-        if (day < 1 || day > 31 || month < 1 || month > 12)
-            return "";
-
-        char buf[32];
-
-        snprintf(
-            buf,
-            sizeof(buf),
-            "%04u-%02u-%02uT02:00:00Z",
-            year,
-            month,
-            day
-        );
-
-        return buf;
     }
 
     void Driver::processContent(Telegram *t)
@@ -227,7 +203,8 @@ namespace
             if (content.empty())
                 return;
 
-            uint header_len = content[0] + 1;
+            const size_t header_len =
+                static_cast<size_t>(content[0]) + 1;
 
             if (header_len > content.size())
             {
@@ -244,7 +221,7 @@ namespace
             );
         }
 
-        // For CI A0, add CI byte to the beginning.
+        // For CI A0, add the CI byte to the beginning.
         if (t->tpl_ci == 0xA0)
             content.insert(content.begin(), t->tpl_ci);
 
@@ -254,7 +231,12 @@ namespace
             static_cast<unsigned>(content.size())
         );
 
-        // CI (1 byte) + 27 words (54 bytes).
+        /*
+         * Expected layout:
+         * byte 0      : CI = A0
+         * bytes 1-2   : header
+         * bytes 3-54  : 26 little-endian 16-bit words
+         */
         if (content.size() != 55 || content[0] != 0xA0)
         {
             debugPayload(
@@ -264,21 +246,23 @@ namespace
             return;
         }
 
-        // First word begins at byte 3.
         const size_t first_word = 3;
 
         auto word = [&](int word_index) -> uint16_t
         {
+            if (word_index < 1 || word_index > 26)
+                return 0;
+
             return read16(
                 content,
                 first_word + 2 * (word_index - 1)
             );
         };
 
-        // Diagnostic: display all 27 words.
-        for (int i = 1; i <= 27; i++)
+        // Diagnostic: display only the 26 valid words.
+        for (int i = 1; i <= 26; i++)
         {
-            uint16_t value = word(i);
+            const uint16_t value = word(i);
 
             ESP_LOGD(
                 "apatoreitn40",
@@ -289,51 +273,35 @@ namespace
             );
         }
 
-        // Word 1: annual season start date.
-        std::string season_date = dateToString(word(1));
+        /*
+         * Word 1: season_start_date_raw_counter.
+         * Keep it raw; date conversion is not verified.
+         */
+        ESP_LOGD(
+            "apatoreitn40",
+            "season_start_date_raw_counter = %u",
+            word(1)
+        );
 
-        setStringValue(
-            "season_start_date",
-            season_date,
-            NULL
+        /*
+         * Words 2 and 3: raw temperature counters.
+         * Do not publish these as Celsius until their scaling
+         * has been confirmed.
+         */
+        ESP_LOGD(
+            "apatoreitn40",
+            "temp_radiator_raw_counter = %u",
+            word(2)
         );
 
         ESP_LOGD(
             "apatoreitn40",
-            "SET season_start_date = %s",
-            season_date.c_str()
+            "temp_room_raw_counter = %u",
+            word(3)
         );
 
-        // Words 2 and 3: temperature values.
-        double radiator_temp = word(2) / 16.0;
-        double room_temp = word(3) / 16.0;
-
-        setNumericValue(
-            "temp_radiator_c",
-            Unit::C,
-            radiator_temp
-        );
-
-        ESP_LOGD(
-            "apatoreitn40",
-            "SET temp_radiator_c = %.2f",
-            radiator_temp
-        );
-
-        setNumericValue(
-            "temp_room_c",
-            Unit::C,
-            room_temp
-        );
-
-        ESP_LOGD(
-            "apatoreitn40",
-            "SET temp_room_c = %.2f",
-            room_temp
-        );
-
-        // Word 4: current month.
-        uint16_t current_month = word(4);
+        // Word 4: current month HCA.
+        const uint16_t current_month = word(4);
 
         setNumericValue(
             "current_month_hca",
@@ -347,8 +315,8 @@ namespace
             current_month
         );
 
-        // Word 5: previous month.
-        uint16_t previous_month = word(5);
+        // Word 5: previous month HCA.
+        const uint16_t previous_month = word(5);
 
         setNumericValue(
             "previous_month_hca",
@@ -374,7 +342,7 @@ namespace
                 i
             );
 
-            uint16_t value = word(4 + i);
+            const uint16_t value = word(4 + i);
 
             setNumericValue(
                 field,
@@ -390,11 +358,11 @@ namespace
             );
         }
 
-        // Words 20-23: current and historical billing periods.
-        uint16_t current_hca = word(20);
-        uint16_t previous_hca = word(21);
-        uint16_t previous_2y = word(22);
-        uint16_t previous_3y = word(23);
+        // Words 20-23: current and previous billing periods.
+        const uint16_t current_hca = word(20);
+        const uint16_t previous_hca = word(21);
+        const uint16_t previous_2y = word(22);
+        const uint16_t previous_3y = word(23);
 
         setNumericValue(
             "current_hca",
@@ -444,23 +412,25 @@ namespace
             previous_3y
         );
 
-        // Word 24: current date.
-        std::string current_date = dateToString(word(24));
-
-        setStringValue(
-            "current_date",
-            current_date,
-            NULL
-        );
-
+        /*
+         * Word 24: current_date_raw_counter.
+         * Log only; do not interpret it as a calendar date yet.
+         */
         ESP_LOGD(
             "apatoreitn40",
-            "SET current_date = %s",
-            current_date.c_str()
+            "current_date_raw_counter = %u",
+            word(24)
         );
 
-        // Word 26: seal and sensor status.
-        uint16_t status = word(26);
+        // Word 25: day of week counter.
+        ESP_LOGD(
+            "apatoreitn40",
+            "day_of_week_counter = %u",
+            word(25)
+        );
+
+        // Word 26: status.
+        const uint16_t status = word(26);
 
         const char *status_text =
             status == 0x0000 ? "OK" :
