@@ -56,8 +56,8 @@ namespace
 
         di.setMeterType(MeterType::HeatCostAllocationMeter);
 
-        // Manufacturer APA, version 0D, device type 08.
-        di.addDetection(MANUFACTURER_APA, 0x0D, 0x08);
+        // Manufacturer APA, device type 08, version 0D.
+        di.addDetection(MANUFACTURER_APA, 0x08, 0x0D);
 
         di.usesProcessContent();
 
