@@ -1,7 +1,6 @@
 
 /*
  * Apator INT40 / E.ITN 40
- * Custom ESPHome wM-Bus driver
  *
  * Manufacturer: APA
  * Version: 0D
@@ -21,16 +20,18 @@ namespace
 
         uint16_t read16(
             const std::vector<uchar> &data,
-            size_t pos
-        );
+            size_t pos);
+
+        std::string dateToString(uint16_t raw);
     };
 
     static bool ok = registerDriver([](DriverInfo &di)
     {
         di.setName("apatoreitn40");
 
+        // Publiczne nazwy pól używane przez wmbus_meter.
         di.setDefaultFields(
-            "name,id,"
+            "name,id,current_date,season_start_date,"
             "current_hca,previous_hca,"
             "current_month_hca,"
             "previous_month_hca,"
@@ -49,14 +50,13 @@ namespace
             "previous_month_14_hca,"
             "previous_month_15_hca,"
             "previous_2y_hca,previous_3y_hca,"
-            "current_date,season_start_date,"
             "temp_radiator_c,temp_room_c,"
             "status,timestamp"
         );
 
         di.setMeterType(MeterType::HeatCostAllocationMeter);
 
-        // Manufacturer APA, device type 08, version 0D.
+        // Potwierdzona kolejność: device type 0x08, version 0x0D.
         di.addDetection(MANUFACTURER_APA, 0x08, 0x0D);
 
         di.usesProcessContent();
@@ -74,43 +74,38 @@ namespace
     {
         addStringField(
             "current_date",
-            "Raw current date is not converted yet.",
-            DEFAULT_PRINT_PROPERTIES
-        );
+            "Current date reported by meter.",
+            DEFAULT_PRINT_PROPERTIES);
 
         addStringField(
             "season_start_date",
-            "Raw season start date is not converted yet.",
-            DEFAULT_PRINT_PROPERTIES
-        );
+            "Annual billing season start date.",
+            DEFAULT_PRINT_PROPERTIES);
 
+        // Nazwy bazowe bez końcówki jednostki.
         addNumericField(
-            "current_hca",
+            "current",
             Quantity::HCA,
             DEFAULT_PRINT_PROPERTIES,
-            "Current billing period consumption."
-        );
+            "Current billing period consumption.");
 
         addNumericField(
-            "previous_hca",
+            "previous",
             Quantity::HCA,
             DEFAULT_PRINT_PROPERTIES,
-            "Previous billing period consumption."
-        );
+            "Previous billing period consumption.");
 
         addNumericField(
-            "current_month_hca",
+            "current_month",
             Quantity::HCA,
             DEFAULT_PRINT_PROPERTIES,
-            "Current month consumption."
-        );
+            "Current month consumption.");
 
         addNumericField(
-            "previous_month_hca",
+            "previous_month",
             Quantity::HCA,
             DEFAULT_PRINT_PROPERTIES,
-            "Previous closed month consumption."
-        );
+            "Previous closed month consumption.");
 
         for (int i = 2; i <= 15; i++)
         {
@@ -119,65 +114,80 @@ namespace
             snprintf(
                 field,
                 sizeof(field),
-                "previous_month_%02d_hca",
-                i
-            );
+                "previous_month_%02d",
+                i);
 
             addNumericField(
                 field,
                 Quantity::HCA,
                 DEFAULT_PRINT_PROPERTIES,
-                "Historical monthly consumption."
-            );
+                "Historical monthly consumption.");
         }
 
         addNumericField(
-            "previous_2y_hca",
+            "previous_2y",
             Quantity::HCA,
             DEFAULT_PRINT_PROPERTIES,
-            "Consumption two billing periods ago."
-        );
+            "Consumption two billing periods ago.");
 
         addNumericField(
-            "previous_3y_hca",
+            "previous_3y",
             Quantity::HCA,
             DEFAULT_PRINT_PROPERTIES,
-            "Consumption three billing periods ago."
-        );
-
-        // Temperature scaling has not been verified.
-        // These fields are registered but not published as Celsius yet.
-        addNumericField(
-            "temp_radiator_c",
-            Quantity::Temperature,
-            DEFAULT_PRINT_PROPERTIES,
-            "Radiator temperature; conversion not verified."
-        );
+            "Consumption three billing periods ago.");
 
         addNumericField(
-            "temp_room_c",
+            "temp_radiator",
             Quantity::Temperature,
             DEFAULT_PRINT_PROPERTIES,
-            "Room temperature; conversion not verified."
-        );
+            "Radiator surface temperature.");
+
+        addNumericField(
+            "temp_room",
+            Quantity::Temperature,
+            DEFAULT_PRINT_PROPERTIES,
+            "Ambient room temperature.");
 
         addStringField(
             "status",
-            "Meter status.",
-            DEFAULT_PRINT_PROPERTIES
-        );
+            "Seal and sensor status.",
+            DEFAULT_PRINT_PROPERTIES);
     }
 
     uint16_t Driver::read16(
         const std::vector<uchar> &data,
-        size_t pos
-    )
+        size_t pos)
     {
         if (pos + 1 >= data.size())
             return 0;
 
         return static_cast<uint16_t>(data[pos])
              | (static_cast<uint16_t>(data[pos + 1]) << 8);
+    }
+
+    std::string Driver::dateToString(uint16_t raw)
+    {
+        if (raw == 0)
+            return "";
+
+        uint day   = raw & 0x1F;
+        uint month = (raw >> 5) & 0x0F;
+        uint year  = ((raw >> 9) & 0x1F) + 2000;
+
+        if (day < 1 || day > 31 || month < 1 || month > 12)
+            return "";
+
+        char buf[32];
+
+        snprintf(
+            buf,
+            sizeof(buf),
+            "%04u-%02u-%02uT02:00:00Z",
+            year,
+            month,
+            day);
+
+        return buf;
     }
 
     void Driver::processContent(Telegram *t)
@@ -189,148 +199,103 @@ namespace
             "apatoreitn40",
             "CI=0x%02X, payload length=%u",
             t->tpl_ci,
-            static_cast<unsigned>(content.size())
-        );
+            static_cast<unsigned>(content.size()));
 
         debugPayload(
             "(apatoreitn40) raw payload",
-            content
-        );
+            content);
 
-        // Handle CI B6 header, if present.
         if (t->tpl_ci == 0xB6)
         {
             if (content.empty())
                 return;
 
-            const size_t header_len =
-                static_cast<size_t>(content[0]) + 1;
+            uint header_len = content[0] + 1;
 
             if (header_len > content.size())
             {
                 debugPayload(
                     "(apatoreitn40) invalid header",
-                    content
-                );
+                    content);
                 return;
             }
 
             content.erase(
                 content.begin(),
-                content.begin() + header_len
-            );
+                content.begin() + header_len);
         }
 
-        // For CI A0, add the CI byte to the beginning.
         if (t->tpl_ci == 0xA0)
             content.insert(content.begin(), t->tpl_ci);
 
         ESP_LOGD(
             "apatoreitn40",
             "payload after CI handling: %u bytes",
-            static_cast<unsigned>(content.size())
-        );
+            static_cast<unsigned>(content.size()));
 
-        /*
-         * Expected layout:
-         * byte 0      : CI = A0
-         * bytes 1-2   : header
-         * bytes 3-54  : 26 little-endian 16-bit words
-         */
         if (content.size() != 55 || content[0] != 0xA0)
         {
             debugPayload(
                 "(apatoreitn40) unexpected payload",
-                content
-            );
+                content);
             return;
         }
 
+        // Wstępny układ danych:
+        // pierwsze słowo zaczyna się na pozycji 3.
         const size_t first_word = 3;
 
         auto word = [&](int word_index) -> uint16_t
         {
-            if (word_index < 1 || word_index > 26)
-                return 0;
-
             return read16(
                 content,
-                first_word + 2 * (word_index - 1)
-            );
+                first_word + 2 * (word_index - 1));
         };
 
-        // Diagnostic: display only the 26 valid words.
-        for (int i = 1; i <= 26; i++)
+        // Diagnostyka: wyświetl słowa z telegramu.
+        for (int i = 1; i <= 27; i++)
         {
-            const uint16_t value = word(i);
+            uint16_t value = word(i);
 
             ESP_LOGD(
                 "apatoreitn40",
                 "word[%02d] = %u (0x%04X)",
                 i,
                 value,
-                value
-            );
+                value);
         }
 
-        /*
-         * Word 1: season_start_date_raw_counter.
-         * Keep it raw; date conversion is not verified.
-         */
-        ESP_LOGD(
-            "apatoreitn40",
-            "season_start_date_raw_counter = %u",
-            word(1)
-        );
+        // Słowo 1: początek sezonu rozliczeniowego.
+        setStringValue(
+            "season_start_date",
+            dateToString(word(1)),
+            NULL);
 
-        /*
-         * Words 2 and 3: raw temperature counters.
-         * Do not publish these as Celsius until their scaling
-         * has been confirmed.
-         */
-        ESP_LOGD(
-            "apatoreitn40",
-            "temp_radiator_raw_counter = %u",
-            word(2)
-        );
-
-        ESP_LOGD(
-            "apatoreitn40",
-            "temp_room_raw_counter = %u",
-            word(3)
-        );
-
-        // Word 4: current month HCA.
-        const uint16_t current_month = word(4);
+        // Słowa 2 i 3: temperatury.
+        // Skala /16 pozostaje założeniem roboczym do potwierdzenia.
+        setNumericValue(
+            "temp_radiator",
+            Unit::C,
+            word(2) / 16.0);
 
         setNumericValue(
-            "current_month_hca",
-            Unit::HCA,
-            current_month
-        );
+            "temp_room",
+            Unit::C,
+            word(3) / 16.0);
 
-        ESP_LOGD(
-            "apatoreitn40",
-            "SET current_month_hca = %u",
-            current_month
-        );
-
-        // Word 5: previous month HCA.
-        const uint16_t previous_month = word(5);
-
+        // Słowo 4: bieżący miesiąc.
         setNumericValue(
-            "previous_month_hca",
+            "current_month",
             Unit::HCA,
-            previous_month
-        );
+            word(4));
 
-        ESP_LOGD(
-            "apatoreitn40",
-            "SET previous_month_hca = %u",
-            previous_month
-        );
+        // Słowo 5: poprzedni miesiąc.
+        setNumericValue(
+            "previous_month",
+            Unit::HCA,
+            word(5));
 
-        // Words 6-19: previous months 2-15.
+        // Słowa 6–19: poprzednie miesiące 2–15.
         for (int i = 2; i <= 15; i++)
         {
             char field[32];
@@ -338,117 +303,71 @@ namespace
             snprintf(
                 field,
                 sizeof(field),
-                "previous_month_%02d_hca",
-                i
-            );
-
-            const uint16_t value = word(4 + i);
+                "previous_month_%02d",
+                i);
 
             setNumericValue(
                 field,
                 Unit::HCA,
-                value
-            );
-
-            ESP_LOGD(
-                "apatoreitn40",
-                "SET %s = %u",
-                field,
-                value
-            );
+                word(4 + i));
         }
 
-        // Words 20-23: current and previous billing periods.
-        const uint16_t current_hca = word(20);
-        const uint16_t previous_hca = word(21);
-        const uint16_t previous_2y = word(22);
-        const uint16_t previous_3y = word(23);
+        // Słowa 20–23: wartości okresów rozliczeniowych.
+        setNumericValue(
+            "current",
+            Unit::HCA,
+            word(20));
 
         setNumericValue(
-            "current_hca",
+            "previous",
             Unit::HCA,
-            current_hca
-        );
+            word(21));
+
+        setNumericValue(
+            "previous_2y",
+            Unit::HCA,
+            word(22));
+
+        setNumericValue(
+            "previous_3y",
+            Unit::HCA,
+            word(23));
+
+        // Słowo 24: aktualna data.
+        setStringValue(
+            "current_date",
+            dateToString(word(24)),
+            NULL);
+
+        // Słowo 26: status urządzenia.
+        uint16_t status = word(26);
+
+        setStringValue(
+            "status",
+            status == 0x0000 ? "OK" :
+            status == 0xFFFF ? "SEAL_BROKEN" :
+                               "FAULT",
+            NULL);
 
         ESP_LOGD(
             "apatoreitn40",
             "SET current_hca = %u",
-            current_hca
-        );
-
-        setNumericValue(
-            "previous_hca",
-            Unit::HCA,
-            previous_hca
-        );
+            word(20));
 
         ESP_LOGD(
             "apatoreitn40",
             "SET previous_hca = %u",
-            previous_hca
-        );
-
-        setNumericValue(
-            "previous_2y_hca",
-            Unit::HCA,
-            previous_2y
-        );
+            word(21));
 
         ESP_LOGD(
             "apatoreitn40",
-            "SET previous_2y_hca = %u",
-            previous_2y
-        );
-
-        setNumericValue(
-            "previous_3y_hca",
-            Unit::HCA,
-            previous_3y
-        );
+            "SET current_month_hca = %u",
+            word(4));
 
         ESP_LOGD(
             "apatoreitn40",
-            "SET previous_3y_hca = %u",
-            previous_3y
-        );
-
-        /*
-         * Word 24: current_date_raw_counter.
-         * Log only; do not interpret it as a calendar date yet.
-         */
-        ESP_LOGD(
-            "apatoreitn40",
-            "current_date_raw_counter = %u",
-            word(24)
-        );
-
-        // Word 25: day of week counter.
-        ESP_LOGD(
-            "apatoreitn40",
-            "day_of_week_counter = %u",
-            word(25)
-        );
-
-        // Word 26: status.
-        const uint16_t status = word(26);
-
-        const char *status_text =
-            status == 0x0000 ? "OK" :
-            status == 0xFFFF ? "SEAL_BROKEN" :
-                               "FAULT";
-
-        setStringValue(
-            "status",
-            status_text,
-            NULL
-        );
-
-        ESP_LOGD(
-            "apatoreitn40",
-            "SET status = %s (0x%04X)",
-            status_text,
-            status
-        );
+            "SET previous_month_hca = %u",
+            word(5));
     }
 }
 
