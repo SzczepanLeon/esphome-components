@@ -251,4 +251,4 @@ namespace
         );
     }
 }
-KEEP_DRIVER(apatoreitn);
+KEEP_DRIVER(apatoreitn40);
