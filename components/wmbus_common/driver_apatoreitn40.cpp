@@ -6,6 +6,7 @@
  * Version: 0D
  * Device type: 08
  * CI: A0
+ * Author: Paweł Gąsior
  */
 
 #include "meters_common_implementation.h"
