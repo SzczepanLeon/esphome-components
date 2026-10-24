@@ -21,9 +21,6 @@ external_components:
 mdns:
   disabled: false
 
-time:
-  - platform: homeassistant
-
 logger:
   level: DEBUG
   logs:
