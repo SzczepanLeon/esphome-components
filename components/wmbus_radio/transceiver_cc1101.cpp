@@ -246,6 +246,8 @@ void CC1101::restart_rx() {
   // Flush RX FIFO
   this->strobe(CC1101_SFRX);
 
+  ulTaskNotifyTake(pdTRUE, 0);
+
   // Enter RX mode
   this->strobe(CC1101_SRX);
   delay(1);
