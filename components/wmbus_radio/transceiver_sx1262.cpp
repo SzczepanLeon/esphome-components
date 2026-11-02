@@ -11,6 +11,13 @@ namespace esphome {
 namespace wmbus_radio {
 static const char *TAG = "SX1262";
 
+// SPI traffic to the radio while a frame is arriving raises its noise floor
+// enough to corrupt weak frames (#464), so wait this long after the sync word
+// before the first access. Frames up to ~100 encoded bytes (12.5 bytes/ms) are
+// then read once complete; longer ones are streamed from here, well before the
+// radio reaches its 255-byte payload length at ~20 ms.
+static const uint32_t QUIET_RX_MS = 8;
+
 void SX1262::setup() {
   this->common_setup();
 
@@ -131,6 +138,8 @@ void SX1262::setup() {
 bool SX1262::read_in_task(uint8_t *buffer, size_t length, uint32_t offset) {
   // 100 kbps -> 12.5 bytes/ms, allow plenty of margin
   const uint32_t timeout_ms = 20 + length / 8;
+  if (offset == 0)
+    vTaskDelay(pdMS_TO_TICKS(QUIET_RX_MS));
   const uint32_t start = millis();
   size_t total = 0;
 
