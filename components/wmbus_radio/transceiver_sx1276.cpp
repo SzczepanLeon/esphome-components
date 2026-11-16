@@ -106,6 +106,13 @@ size_t SX1276::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
   if (this->irq_pin_->digital_read())
     return 0;
 
+  // Capture RSSI at the start of the packet. In FSK mode the SX1276 does not
+  // latch a per-packet RSSI; RegRssiValue is updated continuously. DIO1 low
+  // here means sync was detected and the first byte is in the FIFO, so the
+  // carrier is present now. Reading after the payload only yields noise.
+  if (offset == 0)
+    this->signal_rssi_ = this->spi_read(0x11);
+
   // Timer-paced batch reads: at 100 kbps each byte arrives every 80 us.
   // DIO1 polling only for the first byte; subsequent batches rely on timing.
   static const size_t BATCH = 32;
@@ -139,14 +146,13 @@ size_t SX1276::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
 
   this->delegate_->end_transaction();
 
-  // Capture RSSI while signal is still present
-  if (count > 0 && offset == 3 && this->signal_rssi_ == 0)
-    this->signal_rssi_ = this->spi_read(0x11);
-
   return count;
 }
 
 void SX1276::restart_rx() {
+  // Drop RSSI captured for an aborted/finished packet
+  this->signal_rssi_ = 0;
+
   // Standby mode
   this->spi_write(0x01, (uint8_t)0b001);
   delay(5);
