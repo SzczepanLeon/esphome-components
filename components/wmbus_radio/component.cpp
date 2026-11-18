@@ -83,7 +83,31 @@ void Radio::wakeup_receiver_task_from_isr(TaskHandle_t *arg) {
 }
 
 void Radio::receive_frame() {
-  if (!ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(60000))) {
+  // A radio may ask for its receiver to be restarted at a short interval while it
+  // waits for a frame (CC1101 does, as version_3 did). It is only restarted while idle,
+  // never once a sync word or FIFO data was seen. The overall 60 s timeout is kept.
+  const uint32_t refresh_ms = this->radio->idle_refresh_interval_ms();
+  uint32_t got = 0;
+  if (refresh_ms == 0) {
+    got = ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(60000));
+  } else {
+    const uint32_t start = millis();
+    while (true) {
+      got = ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(refresh_ms));
+      if (got)
+        break;
+      if (this->radio->idle_restart_ready()) {
+        // An interrupt may have arrived during the check: keep that packet.
+        got = ulTaskNotifyTake(pdTRUE, 0);
+        if (got)
+          break;
+        this->radio->restart_rx();
+      }
+      if (millis() - start >= 60000)
+        break;
+    }
+  }
+  if (!got) {
     this->radio->restart_rx();
     return;
   }

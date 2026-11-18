@@ -42,6 +42,10 @@ public:
   // SX1262: RISING edge (DIO1 high = packet received)
   virtual gpio::InterruptType get_interrupt_type() { return gpio::INTERRUPT_RISING_EDGE; }
   virtual void restart_rx() = 0;
+  // Restart the idle receiver every N ms while waiting for a frame; 0 = never (wait up to 60 s).
+  virtual uint32_t idle_refresh_interval_ms() { return 0; }
+  // True when the receiver is idle (no sync word, empty FIFO) and may be restarted.
+  virtual bool idle_restart_ready() { return false; }
   virtual int8_t get_rssi() = 0;
   virtual const char *get_name() = 0;
 

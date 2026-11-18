@@ -253,6 +253,17 @@ void CC1101::restart_rx() {
   delay(1);
 }
 
+bool CC1101::idle_restart_ready() {
+  // TI SWRS061I, PKTSTATUS: SFD bit 3, GDO2 bit 2, GDO0 bit 0.
+  // GDO status is non-inverted, even with IOCFG2=0x46 and IOCFG0=0x40.
+  // A set bit means sync/FIFO activity; do not refresh in that case.
+  constexpr uint8_t active_mask = (1u << 3) | (1u << 2) | (1u << 0);
+  if (this->read_status_register(CC1101_PKTSTATUS) & active_mask)
+    return false;
+  // Include the overflow bit: 0x80 must not look like an empty FIFO.
+  return this->read_status_register(CC1101_RXBYTES) == 0;
+}
+
 int8_t CC1101::get_rssi() {
   // Convert RSSI_dec to dBm: RSSI_dBm = (RSSI_dec / 2) - RSSI_offset
   // RSSI offset per TI DN505: 74 dBm for 868 MHz, 76 dBm for 433 MHz

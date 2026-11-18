@@ -166,6 +166,8 @@ public:
   bool read_in_task(uint8_t *buffer, size_t length, uint32_t offset) override;
   gpio::InterruptType get_interrupt_type() override { return gpio::INTERRUPT_FALLING_EDGE; }
   void restart_rx() override;
+  uint32_t idle_refresh_interval_ms() override { return 50; }
+  bool idle_restart_ready() override;
   int8_t get_rssi() override;
   const char *get_name() override;
 
