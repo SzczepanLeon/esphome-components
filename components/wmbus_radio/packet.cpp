@@ -1,3 +1,4 @@
+#include "esphome/core/alloc_helpers.h"
 #include "packet.h"
 
 #include <ctime>
