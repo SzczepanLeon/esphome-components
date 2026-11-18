@@ -172,6 +172,8 @@ public:
   const char *get_name() override;
 
 protected:
+  uint8_t wait_marcstate_(uint8_t state, uint32_t timeout_us);
+  uint32_t last_idle_timeout_log_{0};
   optional<uint8_t> read() override;
 
   // CC1101-specific SPI methods
