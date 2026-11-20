@@ -239,18 +239,51 @@ size_t CC1101::get_frame(uint8_t *buffer, size_t length, uint32_t offset) {
 void CC1101::restart_rx() {
   ESP_LOGVV(TAG, "Restarting RX");
 
-  // Go to IDLE state
+  // Go to IDLE state. Poll MARCSTATE instead of delay(1), bounded at 5 ms so a
+  // missing or stuck chip cannot hang the radio task.
   this->strobe(CC1101_SIDLE);
-  delay(1);
+  const uint8_t state = this->wait_marcstate_(CC1101_MARCSTATE_IDLE, 5000);
+  if (state != CC1101_MARCSTATE_IDLE && state != CC1101_MARCSTATE_RXFIFO_OVERFLOW) {
+    // SFRX is only valid in IDLE or RXFIFO_OVERFLOW: try again on the next restart.
+    const uint32_t now = millis();
+    if (now - this->last_idle_timeout_log_ >= 60000) {
+      this->last_idle_timeout_log_ = now;
+      ESP_LOGW(TAG, "CC1101 did not enter IDLE (MARCSTATE 0x%02X)", state);
+    }
+    return;
+  }
 
-  // Flush RX FIFO
+  // Flush RX FIFO (also leaves RXFIFO_OVERFLOW)
   this->strobe(CC1101_SFRX);
 
   ulTaskNotifyTake(pdTRUE, 0);
 
-  // Enter RX mode
+  // Enter RX mode (calibrates on IDLE -> RX with FS_AUTOCAL)
   this->strobe(CC1101_SRX);
-  delay(1);
+  this->wait_marcstate_(CC1101_MARCSTATE_RX, 5000);
+}
+
+// Polls MARCSTATE until it equals `state` or RXFIFO_OVERFLOW, or the timeout passes.
+// Returns the last state read.
+uint8_t CC1101::wait_marcstate_(uint8_t state, uint32_t timeout_us) {
+  const uint32_t start = micros();
+  uint8_t current;
+  do {
+    current = this->read_status_register(CC1101_MARCSTATE) & 0x1F;
+  } while (current != state && current != CC1101_MARCSTATE_RXFIFO_OVERFLOW &&
+           micros() - start < timeout_us);
+  return current;
+}
+
+bool CC1101::idle_restart_ready() {
+  // TI SWRS061I, PKTSTATUS: SFD bit 3, GDO2 bit 2, GDO0 bit 0.
+  // GDO status is non-inverted, even with IOCFG2=0x46 and IOCFG0=0x40.
+  // A set bit means sync/FIFO activity; do not refresh in that case.
+  constexpr uint8_t active_mask = (1u << 3) | (1u << 2) | (1u << 0);
+  if (this->read_status_register(CC1101_PKTSTATUS) & active_mask)
+    return false;
+  // Include the overflow bit: 0x80 must not look like an empty FIFO.
+  return this->read_status_register(CC1101_RXBYTES) == 0;
 }
 
 int8_t CC1101::get_rssi() {
