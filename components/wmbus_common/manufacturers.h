@@ -776,6 +776,7 @@
   X(KST, MANFCODE('K', 'S', 'T'), "Kundo SystemTechnik")                       \
   X(KSY, MANFCODE('K', 'S', 'Y'), "KUNDO SystemTechnik, Germany")              \
   X(KTC, MANFCODE('K', 'T', 'C'), "Kerman Tablo, Iran")                        \
+  X(KYN, MANFCODE('K', 'Y', 'N'), "Kayon, Poland")                             \
   X(KZK, MANFCODE('K', 'Z', 'K'), "KRIZIK, Czech Republic")                    \
   X(LAC, MANFCODE('L', 'A', 'C'), "Heinz Lackmann, Germany")                   \
   X(LAI, MANFCODE('L', 'A', 'I'), "Hangzhou LAISON Technology, China")         \
@@ -2180,6 +2181,7 @@
 #define MANUFACTURER_KST MANFCODE('K', 'S', 'T')
 #define MANUFACTURER_KSY MANFCODE('K', 'S', 'Y')
 #define MANUFACTURER_KTC MANFCODE('K', 'T', 'C')
+#define MANUFACTURER_KYN MANFCODE('K', 'Y', 'N')
 #define MANUFACTURER_KZK MANFCODE('K', 'Z', 'K')
 #define MANUFACTURER_LAC MANFCODE('L', 'A', 'C')
 #define MANUFACTURER_LAI MANFCODE('L', 'A', 'I')
