@@ -12,8 +12,7 @@ namespace wmbus {
       if (t_in.block == 'A') {
         ESP_LOGD(TAG, "Processing C1 A frame");
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
-        std::string telegram = format_hex_pretty(frame);
-        telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
+        std::string telegram = format_wmbus_hex(frame);
         ESP_LOGV(TAG, "Frame: %s [with CRC]", telegram.c_str());
         if (mBusDecodeFormatA(t_in, t_frame)) {
           retVal = true;
@@ -22,8 +21,7 @@ namespace wmbus {
       else if (t_in.block == 'B') {
         ESP_LOGD(TAG, "Processing C1 B frame");
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
-        std::string telegram = format_hex_pretty(frame);
-        telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
+        std::string telegram = format_wmbus_hex(frame);
         ESP_LOGV(TAG, "Frame: %s [with CRC]", telegram.c_str());
         if (mBusDecodeFormatB(t_in, t_frame)) {
           retVal = true;
@@ -33,8 +31,7 @@ namespace wmbus {
     else if (t_in.mode == 'T') {
       ESP_LOGD(TAG, "Processing T1 A frame");
       std::vector<unsigned char> rawFrame(t_in.data, t_in.data + t_in.length);
-      std::string telegram = format_hex_pretty(rawFrame);
-      telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
+      std::string telegram = format_wmbus_hex(rawFrame);
       if (telegram.size() > 400) {  // ToDo: rewrite
         std::string tel_01 = telegram.substr(0,400);
         ESP_LOGV(TAG, "Frame: %s [RAW]", tel_01.c_str());
@@ -47,8 +44,7 @@ namespace wmbus {
 
       if (decode3OutOf6(&t_in, packetSize(t_in.lengthField))) {
         std::vector<unsigned char> frame(t_in.data, t_in.data + t_in.length);
-        std::string telegram = format_hex_pretty(frame);
-        telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
+        std::string telegram = format_wmbus_hex(frame);
         ESP_LOGV(TAG, "Frame: %s [with CRC]", telegram.c_str());
         if (mBusDecodeFormatA(t_in, t_frame)) {
           retVal = true;
@@ -57,8 +53,7 @@ namespace wmbus {
 
     }
     if (retVal) {
-      std::string telegram = format_hex_pretty(t_frame.frame);
-      telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
+      std::string telegram = format_wmbus_hex(t_frame.frame);
       ESP_LOGV(TAG, "Frame: %s [without CRC]", telegram.c_str());
     }
     return retVal;
