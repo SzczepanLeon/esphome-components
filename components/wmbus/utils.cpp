@@ -110,8 +110,7 @@ namespace wmbus {
     ESP_LOGVV(TAG, "(ELL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
                    iv[0], iv[1], iv[2],  iv[3],  iv[4],  iv[5],  iv[6],  iv[7],
                    iv[8], iv[9], iv[10], iv[11], iv[12], iv[13], iv[14], iv[15]);
-    std::string key = format_hex_pretty(aeskey);
-    key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
+    std::string key = format_wmbus_hex(aeskey);
     ESP_LOGVV(TAG, "(ELL) KEY: %s", key.c_str());
 
     std::vector<unsigned char>::iterator pos = frame.begin() + offset;
@@ -119,8 +118,7 @@ namespace wmbus {
     std::vector<unsigned char> decrypted_bytes;
     encrypted_bytes.insert(encrypted_bytes.end(), pos, frame.end());
     
-    std::string en_bytes = format_hex_pretty(encrypted_bytes);
-    en_bytes.erase(std::remove(en_bytes.begin(), en_bytes.end(), '.'), en_bytes.end());
+    std::string en_bytes = format_wmbus_hex(encrypted_bytes);
     ESP_LOGVV(TAG, "(ELL) AES_CTR decrypting: %s", en_bytes.c_str());
 
     int block = 0;
@@ -147,8 +145,7 @@ namespace wmbus {
       incrementIV(iv, sizeof(iv));
     }
 
-      std::string dec_bytes = format_hex_pretty(decrypted_bytes);
-      dec_bytes.erase(std::remove(dec_bytes.begin(), dec_bytes.end(), '.'), dec_bytes.end());
+      std::string dec_bytes = format_wmbus_hex(decrypted_bytes);
       ESP_LOGVV(TAG, "(ELL) AES_CTR  decrypted: %s", dec_bytes.c_str());
 
     // Remove the encrypted bytes.
@@ -224,8 +221,7 @@ namespace wmbus {
     ESP_LOGVV(TAG, "(TPL)  IV: %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
                    iv[0], iv[1], iv[2],  iv[3],  iv[4],  iv[5],  iv[6],  iv[7],
                    iv[8], iv[9], iv[10], iv[11], iv[12], iv[13], iv[14], iv[15]);
-    std::string key = format_hex_pretty(aeskey);
-    key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
+    std::string key = format_wmbus_hex(aeskey);
     ESP_LOGVV(TAG, "(TPL) KEY: %s", key.c_str());
 
     std::vector<unsigned char>::iterator pos = frame.begin() + offset;
@@ -247,8 +243,7 @@ namespace wmbus {
       }
     }
 
-    std::string dec_buffer = format_hex_pretty(buffer);
-    dec_buffer.erase(std::remove(dec_buffer.begin(), dec_buffer.end(), '.'), dec_buffer.end());
+    std::string dec_buffer = format_wmbus_hex(buffer);
     ESP_LOGVV(TAG, "(TPL) AES CBC IV decrypting: %s", dec_buffer.c_str());
 
     // The content should be a multiple of 16 since we are using AES CBC mode.
@@ -277,8 +272,7 @@ namespace wmbus {
     frame.insert(frame.end(), decrypted_data, decrypted_data+num_bytes_to_decrypt);
 
     std::vector<unsigned char> dec_data(decrypted_data, decrypted_data + num_bytes_to_decrypt);
-    std::string dec_bytes = format_hex_pretty(dec_data);
-    dec_bytes.erase(std::remove(dec_bytes.begin(), dec_bytes.end(), '.'), dec_bytes.end());
+    std::string dec_bytes = format_wmbus_hex(dec_data);
     ESP_LOGVV(TAG, "(TPL) AES CBC IV  decrypted: %s", dec_bytes.c_str());
 
     if (num_bytes_to_decrypt < buffer.size()) {

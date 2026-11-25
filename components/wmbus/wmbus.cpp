@@ -66,8 +66,7 @@ namespace wmbus {
       char frameFormat[2]{0};
       frameFormat[0] = mbus_data.block;
       std::vector<unsigned char> frame = mbus_data.frame;
-      std::string telegram = format_hex_pretty(frame);
-      telegram.erase(std::remove(telegram.begin(), telegram.end(), '.'), telegram.end());
+      std::string telegram = format_wmbus_hex(frame);
 
       // ToDo: add manufactures check
       uint32_t meter_id = ((uint32_t)frame[7] << 24) | ((uint32_t)frame[6] << 16) |
@@ -98,9 +97,7 @@ namespace wmbus {
           if (sensor->key.size()) {
             ESP_LOGVV(TAG, "Key defined, trying to decrypt telegram ...");
             if (this->decrypt_telegram(frame, sensor->key)) {
-              std::string decrypted_telegram = format_hex_pretty(frame);
-              decrypted_telegram.erase(std::remove(decrypted_telegram.begin(), decrypted_telegram.end(), '.'),
-                                      decrypted_telegram.end());
+              std::string decrypted_telegram = format_wmbus_hex(frame);
               ESP_LOGD(TAG, "Decrypted T : %s", decrypted_telegram.c_str());
             }
             else {
@@ -140,7 +137,7 @@ namespace wmbus {
                       text_debug->text_sensor_->publish_state(telegramik);
                       start += split;
                     }
-                    std::string decoded_telegramik = format_hex_pretty(frame);
+                    std::string decoded_telegramik = format_wmbus_hex(frame);
                     split = 75;
                     start = 0;
                     part = 1;
@@ -417,7 +414,7 @@ namespace wmbus {
   ///////////////////////////////////////
 
   void WMBusListener::dump_config() {
-    std::string key = format_hex_pretty(this->key);
+    std::string key = format_wmbus_hex(this->key);
     key.erase(std::remove(key.begin(), key.end(), '.'), key.end());
     if (key.size()) {
       key.erase(key.size() - 5);
